@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Lock, User, AlertCircle } from 'lucide-react';
+import { Lock, User, AlertCircle, Mail, CheckCircle } from 'lucide-react';
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [token2fa, setToken2fa] = useState('');
-  const [requires2FA, setRequires2FA] = useState(false);
+  const [emailCode, setEmailCode] = useState('');
+  const [requiresEmailCode, setRequiresEmailCode] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState(null);
 
-  const handleSubmit = async (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -18,12 +19,12 @@ const Login = ({ onLogin }) => {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const res = await axios.post(`${apiUrl}/api/login`, { 
         username, 
-        password, 
-        token2fa: requires2FA ? token2fa : undefined 
-      });
+        password
+      }, { withCredentials: true });
       
-      if (res.data.requires2FA) {
-        setRequires2FA(true);
+      if (res.data.requiresEmailCode) {
+        setRequiresEmailCode(true);
+        setUserId(res.data.userId);
         setLoading(false);
         return;
       }
@@ -33,9 +34,35 @@ const Login = ({ onLogin }) => {
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Usuario o contraseña incorrectos');
-    } finally {
       setLoading(false);
     }
+  };
+
+  const handleEmailCodeSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const res = await axios.post(`${apiUrl}/api/verify-email-code`, { 
+        username, 
+        code: emailCode
+      }, { withCredentials: true });
+      
+      if (res.data.success) {
+        onLogin(res.data.user);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Código inválido o expirado');
+      setLoading(false);
+    }
+  };
+
+  const handleBackToLogin = () => {
+    setRequiresEmailCode(false);
+    setEmailCode('');
+    setError('');
+    setUserId(null);
   };
 
   return (
@@ -49,7 +76,7 @@ const Login = ({ onLogin }) => {
           <p className="text-unt-yellow/70 text-sm font-bold">BINGO - PROMO XXVIII</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+        <form onSubmit={requiresEmailCode ? handleEmailCodeSubmit : handleLoginSubmit} className="p-8 space-y-6">
           {error && (
             <div className="bg-red-50 text-red-600 p-4 rounded-xl flex items-center space-x-2 text-sm font-bold border border-red-100">
               <AlertCircle size={18} />
@@ -58,7 +85,7 @@ const Login = ({ onLogin }) => {
           )}
 
           <div className="space-y-4">
-            {!requires2FA ? (
+            {!requiresEmailCode ? (
               <>
                 <div>
                   <label className="block text-xs font-black text-gray-500 uppercase mb-1 ml-1">Usuario</label>
@@ -69,6 +96,7 @@ const Login = ({ onLogin }) => {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       className="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-unt-blue focus:bg-white rounded-xl outline-none transition-all font-medium"
+                      disabled={loading}
                       required
                     />
                   </div>
@@ -83,31 +111,43 @@ const Login = ({ onLogin }) => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-unt-blue focus:bg-white rounded-xl outline-none transition-all font-medium"
+                      disabled={loading}
                       required
                     />
                   </div>
                 </div>
               </>
             ) : (
-              <div>
-                <label className="block text-xs font-black text-gray-500 uppercase mb-1 ml-1">Código 2FA (Authenticator)</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    type="text"
-                    value={token2fa}
-                    onChange={(e) => setToken2fa(e.target.value)}
-                    placeholder="000000"
-                    maxLength="6"
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-unt-blue focus:bg-white rounded-xl outline-none transition-all font-black text-lg tracking-[0.5em]"
-                    required
-                    autoFocus
-                  />
+              <div className="space-y-4">
+                <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 text-center space-y-3">
+                  <Mail className="mx-auto text-blue-600" size={40} />
+                  <h3 className="text-lg font-black text-unt-blue uppercase">Verifica tu Email</h3>
+                  <p className="text-sm text-gray-600 font-medium">
+                    Hemos enviado un código de 6 dígitos a tu correo. Ingrésalo abajo.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-gray-500 uppercase mb-1 ml-1">Código de Verificación</label>
+                  <div className="relative">
+                    <CheckCircle className="absolute left-3 top-1/2 -translate-y-1/2 text-green-400" size={18} />
+                    <input
+                      type="text"
+                      value={emailCode}
+                      onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="000000"
+                      maxLength="6"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-unt-blue focus:bg-white rounded-xl outline-none transition-all font-black text-lg tracking-[0.5em]"
+                      disabled={loading}
+                      autoFocus
+                      required
+                    />
+                  </div>
                 </div>
                 <button 
                   type="button" 
-                  onClick={() => setRequires2FA(false)}
-                  className="text-[10px] font-bold text-gray-400 mt-2 hover:text-unt-blue"
+                  onClick={handleBackToLogin}
+                  className="text-[10px] font-bold text-gray-400 mt-2 hover:text-unt-blue transition-colors"
                 >
                   ← Volver al inicio de sesión
                 </button>
@@ -117,10 +157,10 @@ const Login = ({ onLogin }) => {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (!requiresEmailCode && (!username || !password)) || (requiresEmailCode && !emailCode)}
             className="w-full bg-unt-blue text-unt-yellow py-4 rounded-xl font-black text-lg shadow-xl shadow-unt-blue/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100"
           >
-            {loading ? 'AUTENTICANDO...' : 'ENTRAR AL PANEL'}
+            {loading ? (requiresEmailCode ? 'VERIFICANDO...' : 'AUTENTICANDO...') : (requiresEmailCode ? 'VERIFICAR CÓDIGO' : 'ENVIAR CÓDIGO')}
           </button>
         </form>
       </div>

@@ -66,6 +66,7 @@ const initDb = async () => {
         id SERIAL PRIMARY KEY,
         username VARCHAR(50) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
+        email VARCHAR(255),
         two_fa_secret TEXT,
         two_fa_enabled BOOLEAN DEFAULT FALSE
       )
@@ -75,6 +76,9 @@ const initDb = async () => {
     await client.query(`
       DO $$ 
       BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='admin_users' AND column_name='email') THEN
+          ALTER TABLE admin_users ADD COLUMN email VARCHAR(255);
+        END IF;
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='admin_users' AND column_name='two_fa_secret') THEN
           ALTER TABLE admin_users ADD COLUMN two_fa_secret TEXT;
         END IF;
@@ -94,6 +98,25 @@ const initDb = async () => {
         success BOOLEAN,
         attempt_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `);
+
+    // Email verification codes for login 2FA
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS email_verification_codes (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) NOT NULL,
+        code VARCHAR(6) NOT NULL,
+        email VARCHAR(255),
+        used BOOLEAN DEFAULT FALSE,
+        expires_at TIMESTAMP NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Clean up expired codes
+    await client.query(`
+      DELETE FROM email_verification_codes 
+      WHERE expires_at < NOW() OR used = TRUE
     `);
 
     await client.query('COMMIT');

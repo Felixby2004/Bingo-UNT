@@ -16,6 +16,8 @@ const qrcode = require('qrcode');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
 const { google } = require('googleapis');
@@ -89,6 +91,61 @@ const storage = new CloudinaryStorage({
 });
 
 const upload = multer({ storage: storage });
+
+// Nodemailer Config for Email 2FA
+const emailTransporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD
+  }
+});
+
+// Function to generate and send email code
+const sendEmailCode = async (email, username) => {
+  try {
+    const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6 dígitos
+    const expiryTime = Date.now() + (parseInt(process.env.EMAIL_VERIFICATION_CODE_EXPIRY) || 600000); // Default 10 min
+    
+    // Save code in DB
+    await query(
+      'INSERT INTO email_verification_codes (username, code, email, expires_at) VALUES ($1, $2, $3, $4)',
+      [username, code, email, new Date(expiryTime)]
+    );
+
+    // Send email
+    await emailTransporter.sendMail({
+      from: `"Bingo Admin" <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: '🔐 Tu Código de Acceso - Bingo UNT',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
+          <h2 style="color: #1F3A93; text-align: center;">🎲 BINGO UNT - ACCESO ADMINISTRADOR</h2>
+          <p style="font-size: 16px; color: #333;">¡Hola <strong>${username}</strong>!</p>
+          <p style="font-size: 14px; color: #666;">Se ha solicitado acceso a la gestión de premios. Usa el siguiente código para verificar tu identidad:</p>
+          
+          <div style="background-color: #f0f0f0; border-left: 4px solid #FFD700; padding: 20px; margin: 20px 0; text-align: center;">
+            <p style="font-size: 12px; color: #999; margin: 0 0 10px 0;">CÓDIGO DE VERIFICACIÓN</p>
+            <p style="font-size: 32px; font-weight: bold; color: #1F3A93; letter-spacing: 5px; margin: 0;">${code}</p>
+            <p style="font-size: 11px; color: #999; margin: 10px 0 0 0;">Válido por 10 minutos</p>
+          </div>
+          
+          <p style="font-size: 13px; color: #666;">Si no solicitaste este acceso, ignora este correo.</p>
+          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+          <p style="font-size: 11px; color: #999; text-align: center;">© 2026 BINGO UNT PROMO XXVIII</p>
+        </div>
+      `
+    });
+
+    logger.info(`Email verification code sent to ${email}`);
+    return code;
+  } catch (err) {
+    logger.error('Error sending email:', err);
+    throw new Error('No se pudo enviar el código por email');
+  }
+};
 
 const io = new Server(server, {
   cors: {
@@ -183,7 +240,7 @@ const verify2FA = async (req, res, next) => {
 // --- AUTH ---
 
 app.post('/api/login', loginLimiter, async (req, res) => {
-  const { username, password, token2fa } = req.body;
+  const { username, password } = req.body;
   const ip = req.ip;
   const ua = req.headers['user-agent'];
 
@@ -192,30 +249,21 @@ app.post('/api/login', loginLimiter, async (req, res) => {
     const result = await query('SELECT * FROM admin_users WHERE LOWER(username) = LOWER($1)', [username]);
     const user = result.rows[0];
 
-    console.log('DEBUG: Query result count:', result.rows.length);
-
     if (!user) {
       await query('INSERT INTO login_attempts (username, ip_address, user_agent, success) VALUES ($1, $2, $3, $4)', [username, ip, ua, false]);
       return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
     }
 
-    // Check password (supports plaintext for transition, but we'll update it)
+    // Check password
     let isMatch = false;
-    console.log('DEBUG: Login attempt for:', username);
-    console.log('DEBUG: User from DB:', user.username);
-    console.log('DEBUG: Password from DB starts with $2b$:', user.password.startsWith('$2b$'));
-
     if (user.password.startsWith('$2b$')) {
       isMatch = await bcrypt.compare(password, user.password);
-      console.log('DEBUG: Bcrypt compare result:', isMatch, 'for password:', password);
     } else {
       isMatch = (password === user.password);
-      console.log('DEBUG: Plaintext compare result:', isMatch, 'expected:', user.password, 'got:', password);
       // Auto-update to hashed if it was plaintext
       if (isMatch) {
         const hashedPassword = await bcrypt.hash(password, 10);
         await query('UPDATE admin_users SET password = $1 WHERE id = $2', [hashedPassword, user.id]);
-        console.log('DEBUG: Password auto-migrated to hash');
       }
     }
 
@@ -224,37 +272,80 @@ app.post('/api/login', loginLimiter, async (req, res) => {
       return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
     }
 
-    // Check 2FA if enabled
-    if (user.two_fa_enabled) {
-      if (!token2fa) {
-        return res.json({ success: true, requires2FA: true });
-      }
-      const verified = speakeasy.totp.verify({
-        secret: user.two_fa_secret,
-        encoding: 'base32',
-        token: token2fa
+    // NEW: Send email code instead of traditional 2FA
+    try {
+      await sendEmailCode(user.email || process.env.ADMIN_EMAIL, user.username);
+      logger.info(`Login attempt - Email code sent to ${user.email || process.env.ADMIN_EMAIL}`);
+      
+      return res.json({ 
+        success: true, 
+        message: 'Código enviado a tu correo. Verifica tu email.',
+        requiresEmailCode: true,
+        userId: user.id
       });
-      if (!verified) {
-        return res.status(401).json({ success: false, message: 'Código 2FA inválido' });
-      }
+    } catch (emailErr) {
+      logger.error('Failed to send email code:', emailErr);
+      return res.status(500).json({ error: 'No se pudo enviar el código por email. Intenta de nuevo.' });
+    }
+  } catch (err) {
+    logger.error('Login error:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// NEW: Verify Email Code
+app.post('/api/verify-email-code', loginLimiter, async (req, res) => {
+  const { username, code } = req.body;
+
+  try {
+    if (!code || !username) {
+      return res.status(400).json({ success: false, message: 'Código y usuario requeridos' });
     }
 
-    // Success
-    await query('INSERT INTO login_attempts (username, ip_address, user_agent, success) VALUES ($1, $2, $3, $4)', [username, ip, ua, true]);
-    
+    // Find valid code
+    const result = await query(
+      'SELECT * FROM email_verification_codes WHERE username = $1 AND code = $2 AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1',
+      [username, code]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ success: false, message: 'Código inválido o expirado' });
+    }
+
+    // Get user info
+    const userResult = await query('SELECT id, username, email, two_fa_enabled FROM admin_users WHERE LOWER(username) = LOWER($1)', [username]);
+    const user = userResult.rows[0];
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Usuario no encontrado' });
+    }
+
+    // Mark code as used
+    await query('UPDATE email_verification_codes SET used = TRUE WHERE id = $1', [result.rows[0].id]);
+
+    // Create JWT token
     const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '2h' });
     
     res.cookie('admin_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax', // Changed from 'strict' to 'lax' for cross-origin
       maxAge: 2 * 60 * 60 * 1000 // 2 hours
     });
 
-    res.json({ success: true, user: { id: user.id, username: user.username, two_fa_enabled: user.two_fa_enabled } });
+    // Log successful login
+    await query('INSERT INTO login_attempts (username, ip_address, user_agent, success) VALUES ($1, $2, $3, $4)', 
+      [username, req.ip, req.headers['user-agent'], true]
+    );
+
+    res.json({ 
+      success: true, 
+      user: { id: user.id, username: user.username, two_fa_enabled: user.two_fa_enabled },
+      message: '✅ Acceso concedido'
+    });
   } catch (err) {
-    logger.error('Login error:', err);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    logger.error('Email code verification error:', err);
+    res.status(500).json({ error: 'Error al verificar el código' });
   }
 });
 
