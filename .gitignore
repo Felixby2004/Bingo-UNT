@@ -1,0 +1,37 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Environment variables (CRITICAL)
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDE and System files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Backend specific (Excluding local DB files if any, but NOT db.js logic)
+# Note: db.js is the logic file, we keep it. We exclude temporary DB data.
+backend/node_modules/
+frontend/node_modules/
+
+# Stress test reports
+artillery-report/
+*.json
