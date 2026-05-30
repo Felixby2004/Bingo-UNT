@@ -428,7 +428,7 @@ app.get('/api/prizes/:id/history', async (req, res) => {
 
 // --- GOOGLE INTEGRATION ---
 
-app.get('/api/winner-verification/:ticketNumber', authenticateToken, async (req, res) => {
+app.get('/api/winner-verification/:ticketNumber', async (req, res) => {
   const { ticketNumber } = req.params;
   
   if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY || !process.env.GOOGLE_SHEET_ID) {
