@@ -4,9 +4,9 @@ services:
     name: bingo-backend
     env: node
     plan: free
-    buildCommand: npm install
-    startCommand: npm start
-    rootDir: backend
+    buildCommand: npm install --prefix backend
+    startCommand: npm start --prefix backend
+    root: backend
     envVars:
       - key: PORT
         value: 10000
@@ -23,9 +23,9 @@ services:
     name: bingo-frontend
     env: static
     plan: free
-    buildCommand: npm install && npm run build
-    publishDir: dist
-    rootDir: frontend
+    buildCommand: npm install --prefix frontend && npm run build --prefix frontend
+    publishDir: frontend/dist
+    root: frontend
     envVars:
       - key: VITE_API_URL
         fromService:
