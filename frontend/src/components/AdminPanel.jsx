@@ -27,36 +27,49 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
 
   const handleSetup2FA = async () => {
     try {
-      const res = await axios.post(`${apiUrl}/api/admin/setup-2fa`);
+      const res = await axios.post(`${apiUrl}/api/admin/setup-2fa`, {}, { withCredentials: true });
       setTwoFAData(res.data);
       setShow2FASetup(true);
     } catch (err) {
-      alert('Error al configurar 2FA');
+      console.error('Setup 2FA error:', err);
+      alert('Error al configurar 2FA: ' + (err.response?.data?.error || err.message));
     }
   };
 
   const handleConfirm2FA = async () => {
     try {
-      await axios.post(`${apiUrl}/api/admin/confirm-2fa`, { token: twoFAToken });
+      await axios.post(`${apiUrl}/api/admin/confirm-2fa`, { token: twoFAToken }, { withCredentials: true });
       alert('2FA Activado correctamente');
       setShow2FASetup(false);
       window.location.reload(); // Refresh to update user state
     } catch (err) {
-      alert('Código inválido');
+      console.error('Confirm 2FA error:', err);
+      alert('Código inválido: ' + (err.response?.data?.message || err.message));
     }
   };
 
   // Wrapper for sensitive operations that require 2FA
   const withRequire2FA = async (operation) => {
     if (!user?.two_fa_enabled) {
-      // No 2FA required, execute directly
-      return await operation(undefined);
+      // 2FA not enabled - show setup requirement
+      alert('⚠️ Debes configurar 2FA primero para realizar esta acción');
+      setShow2FASetup(true);
+      return;
     }
     
-    // 2FA is enabled, need to ask for code
-    setPendingOperation(() => operation);
-    setRequire2FATransaction(true);
-    setTransactionToken2FA('');
+    // 2FA is enabled, execute the operation
+    try {
+      return await operation(undefined);
+    } catch (err) {
+      if (err.response?.status === 401 && err.response?.data?.requires2FA) {
+        // Need 2FA code
+        setPendingOperation(() => operation);
+        setRequire2FATransaction(true);
+        setTransactionToken2FA('');
+      } else {
+        throw err;
+      }
+    }
   };
 
   const handleSubmit2FATransaction = async () => {
@@ -285,8 +298,26 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
         </div>
       )}
 
+      {/* 2FA Required Warning */}
+      {!user?.two_fa_enabled && (
+        <div className="col-span-1 lg:col-span-12 bg-gradient-to-r from-orange-50 to-red-50 border-4 border-orange-300 rounded-3xl p-8 text-center space-y-6 shadow-xl">
+          <div className="space-y-3">
+            <h3 className="text-2xl font-black text-orange-700 uppercase tracking-tight">⚠️ Autenticación de Dos Factores Requerida</h3>
+            <p className="text-orange-600 font-bold text-base">
+              Para acceder a la gestión de premios y realizar operaciones sensibles, debes configurar 2FA (Google Authenticator o Authy)
+            </p>
+          </div>
+          <button
+            onClick={handleSetup2FA}
+            className="bg-orange-500 hover:bg-orange-600 text-white py-4 px-8 rounded-2xl font-black text-lg uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] mx-auto"
+          >
+            🔐 Configurar 2FA Ahora
+          </button>
+        </div>
+      )}
+
       {/* Left Column: Prize Management */}
-      <div className="lg:col-span-4 space-y-6">
+      <div className={`lg:col-span-4 space-y-6 ${!user?.two_fa_enabled ? 'opacity-50 pointer-events-none' : ''}`}>
         <section className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-black text-unt-blue flex items-center space-x-2">
@@ -383,7 +414,7 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
       </div>
 
       {/* Right Column: List and Active Game */}
-      <div className="lg:col-span-8 space-y-6">
+      <div className={`lg:col-span-8 space-y-6 ${!user?.two_fa_enabled ? 'opacity-50 pointer-events-none' : ''}`}>
         <section className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
           <h2 className="text-lg font-black text-unt-blue mb-4 uppercase tracking-widest">Lista de Premios</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2">
