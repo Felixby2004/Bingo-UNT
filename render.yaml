@@ -1,12 +1,10 @@
 services:
-  # Backend service
   - type: web
     name: bingo-backend
     env: node
     plan: free
-    buildCommand: npm install
-    startCommand: npm start
-    rootDir: backend
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
     envVars:
       - key: PORT
         value: 10000
@@ -16,16 +14,19 @@ services:
         fromDatabase:
           name: bingo-db
           property: connectionString
-      - fromGroup: cloudinary-creds
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
 
-  # Frontend service
   - type: web
     name: bingo-frontend
     env: static
     plan: free
-    buildCommand: npm install && npm run build
-    publishDir: dist
-    rootDir: frontend
+    buildCommand: cd frontend && npm install && npm run build
+    publishDir: frontend/dist
     envVars:
       - key: VITE_API_URL
         fromService:
@@ -36,13 +37,3 @@ services:
 databases:
   - name: bingo-db
     plan: free
-
-envVarGroups:
-  - name: cloudinary-creds
-    envVars:
-      - key: CLOUDINARY_CLOUD_NAME
-        sync: false
-      - key: CLOUDINARY_API_KEY
-        sync: false
-      - key: CLOUDINARY_API_SECRET
-        sync: false
