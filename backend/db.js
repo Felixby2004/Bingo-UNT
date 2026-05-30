@@ -96,17 +96,6 @@ const initDb = async () => {
       )
     `);
 
-    // Insert initial admin user
-    const defaultUsername = 'Felixby2004';
-    const hashedPass = '$2b$10$d792Ag8Wu7uSa5Te6LhpP.QD3.pX9uuyosAC977PMxuZWzpRVQuHa';
-    
-    await client.query(`
-      INSERT INTO admin_users (username, password)
-      VALUES ($1, $2)
-      ON CONFLICT (username) 
-      DO UPDATE SET password = EXCLUDED.password
-    `, [defaultUsername, hashedPass]);
-
     await client.query('COMMIT');
   } catch (e) {
     await client.query('ROLLBACK');
