@@ -143,6 +143,43 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Middleware to verify 2FA for sensitive operations
+const verify2FA = async (req, res, next) => {
+  try {
+    // Get user info
+    const result = await query('SELECT two_fa_enabled, two_fa_secret FROM admin_users WHERE id = $1', [req.user.id]);
+    const user = result.rows[0];
+
+    // If 2FA is not enabled, skip verification
+    if (!user.two_fa_enabled) {
+      return next();
+    }
+
+    // Get 2FA token from body or query
+    const token2fa = req.body.token2fa || req.query.token2fa;
+    if (!token2fa) {
+      return res.status(401).json({ message: 'Token 2FA requerido', requires2FA: true });
+    }
+
+    // Verify 2FA token
+    const verified = speakeasy.totp.verify({
+      secret: user.two_fa_secret,
+      encoding: 'base32',
+      token: token2fa,
+      window: 2 // Allow ±2 time windows for clock skew
+    });
+
+    if (!verified) {
+      return res.status(401).json({ message: 'Código 2FA inválido' });
+    }
+
+    next();
+  } catch (err) {
+    logger.error('2FA verification error:', err);
+    res.status(500).json({ error: 'Error al verificar 2FA' });
+  }
+};
+
 // --- AUTH ---
 
 app.post('/api/login', loginLimiter, async (req, res) => {
@@ -275,7 +312,7 @@ app.get('/api/prizes', async (req, res) => {
   }
 });
 
-app.post('/api/prizes', authenticateToken, upload.single('image'), async (req, res) => {
+app.post('/api/prizes', authenticateToken, verify2FA, upload.single('image'), async (req, res) => {
   try {
     const { name, description, winning_pattern } = req.body;
     const image_url = req.file ? req.file.path : null;
@@ -303,7 +340,7 @@ app.post('/api/prizes', authenticateToken, upload.single('image'), async (req, r
   }
 });
 
-app.put('/api/prizes/:id', authenticateToken, upload.single('image'), async (req, res) => {
+app.put('/api/prizes/:id', authenticateToken, verify2FA, upload.single('image'), async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, winning_pattern } = req.body;
@@ -335,7 +372,7 @@ app.put('/api/prizes/:id', authenticateToken, upload.single('image'), async (req
   }
 });
 
-app.delete('/api/prizes/:id', authenticateToken, async (req, res) => {
+app.delete('/api/prizes/:id', authenticateToken, verify2FA, async (req, res) => {
   try {
     await query('DELETE FROM prizes WHERE id = $1', [req.params.id]);
     cache.prizes = null; // Clear cache
@@ -346,7 +383,7 @@ app.delete('/api/prizes/:id', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/api/prizes/start', authenticateToken, async (req, res) => {
+app.post('/api/prizes/start', authenticateToken, verify2FA, async (req, res) => {
   const { prize_id } = req.body;
   try {
     await query("UPDATE prizes SET status = 'pending' WHERE status = 'active'");
@@ -360,7 +397,7 @@ app.post('/api/prizes/start', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/api/prizes/draw', authenticateToken, async (req, res) => {
+app.post('/api/prizes/draw', authenticateToken, verify2FA, async (req, res) => {
   const { prize_id, number } = req.body;
   const letter = getLetter(number);
 
@@ -379,7 +416,7 @@ app.post('/api/prizes/draw', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/api/prizes/finish', authenticateToken, async (req, res) => {
+app.post('/api/prizes/finish', authenticateToken, verify2FA, async (req, res) => {
   const { prize_id, winner_name } = req.body;
   try {
     const result = await query(
