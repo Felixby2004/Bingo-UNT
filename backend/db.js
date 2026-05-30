@@ -98,7 +98,7 @@ const initDb = async () => {
 
     // Insert initial admin user
     const defaultUsername = 'Felixby2004';
-    const hashedPass = '$2b$10$2DLnshl6oZsjiAw0L3fk/.PxzSnPrSoh1RkcChy.m51x6KR2kMm0m'; // Hash of 'UNT_b1ng02026'
+    const hashedPass = '$2b$10$d792Ag8Wu7uSa5Te6LhpP.QD3.pX9uuyosAC977PMxuZWzpRVQuHa';
     
     await client.query(`
       INSERT INTO admin_users (username, password)
