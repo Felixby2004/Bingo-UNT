@@ -436,9 +436,17 @@ app.get('/api/winner-verification/:ticketNumber', async (req, res) => {
   }
 
   try {
+    // Process the private key - handle both escaped (\n) and literal newlines
+    let privateKey = process.env.GOOGLE_PRIVATE_KEY;
+    if (typeof privateKey === 'string') {
+      privateKey = privateKey.trim();
+      // Handle escaped newlines: \\n -> actual newline
+      privateKey = privateKey.replace(/\\n/g, '\n');
+    }
+
     const auth = new JWT({
-      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL.trim(),
+      key: privateKey,
       scopes: [
         'https://www.googleapis.com/auth/spreadsheets.readonly',
         'https://www.googleapis.com/auth/drive.readonly',
