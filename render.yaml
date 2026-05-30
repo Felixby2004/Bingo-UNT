@@ -5,8 +5,8 @@ services:
     env: node
     plan: free
     buildCommand: npm install
-    startCommand: node index.js
-    rootContext: backend
+    startCommand: npm start
+    rootDir: backend
     envVars:
       - key: PORT
         value: 10000
@@ -25,7 +25,7 @@ services:
     plan: free
     buildCommand: npm install && npm run build
     publishDir: dist
-    rootContext: frontend
+    rootDir: frontend
     envVars:
       - key: VITE_API_URL
         fromService:
