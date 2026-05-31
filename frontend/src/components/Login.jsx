@@ -20,7 +20,10 @@ const Login = ({ onLogin }) => {
       const res = await axios.post(`${apiUrl}/api/login`, { 
         username, 
         password
-      }, { withCredentials: true });
+      }, { 
+        withCredentials: true,
+        timeout: 20000 // 20 seconds timeout
+      });
       
       if (res.data.requiresEmailCode) {
         setRequiresEmailCode(true);
@@ -47,7 +50,10 @@ const Login = ({ onLogin }) => {
       const res = await axios.post(`${apiUrl}/api/verify-email-code`, { 
         username, 
         code: emailCode
-      }, { withCredentials: true });
+      }, { 
+        withCredentials: true,
+        timeout: 20000 // 20 seconds timeout
+      });
       
       if (res.data.success) {
         onLogin(res.data.user);

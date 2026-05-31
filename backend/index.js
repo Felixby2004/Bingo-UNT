@@ -105,6 +105,25 @@ const emailTransporter = nodemailer.createTransport({
 
 // Function to generate and send email code
 const sendEmailCode = async (email, username) => {
+  if (!email) {
+    logger.error(`Tentativa de envío de código fallida: No hay email configurado para el usuario ${username}`);
+    throw new Error('El usuario no tiene un correo electrónico configurado.');
+  }
+
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    logger.warn('SMTP Credentials missing. Skipping email send (check logs for code).');
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiryTime = Date.now() + 600000;
+    
+    await query(
+      'INSERT INTO email_verification_codes (username, code, email, expires_at) VALUES ($1, $2, $3, $4)',
+      [username, code, email, new Date(expiryTime)]
+    );
+    
+    logger.info(`[DEV MODE] Código para ${username}: ${code}`);
+    return code;
+  }
+
   try {
     const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6 dígitos
     const expiryTime = Date.now() + (parseInt(process.env.EMAIL_VERIFICATION_CODE_EXPIRY) || 600000); // Default 10 min
@@ -115,8 +134,8 @@ const sendEmailCode = async (email, username) => {
       [username, code, email, new Date(expiryTime)]
     );
 
-    // Send email
-    await emailTransporter.sendMail({
+    // Send email with timeout
+    const sendMailPromise = emailTransporter.sendMail({
       from: `"Bingo Admin" <${process.env.GMAIL_USER}>`,
       to: email,
       subject: '🔐 Tu Código de Acceso - Bingo UNT',
@@ -139,11 +158,18 @@ const sendEmailCode = async (email, username) => {
       `
     });
 
+    // Timeout of 10 seconds for email sending
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Tiempo de espera agotado al enviar el correo')), 15000)
+    );
+
+    await Promise.race([sendMailPromise, timeoutPromise]);
+
     logger.info(`Email verification code sent to ${email}`);
     return code;
   } catch (err) {
     logger.error('Error sending email:', err);
-    throw new Error('No se pudo enviar el código por email');
+    throw new Error(err.message || 'No se pudo enviar el código por email');
   }
 };
 
@@ -244,12 +270,15 @@ app.post('/api/login', loginLimiter, async (req, res) => {
   const ip = req.ip;
   const ua = req.headers['user-agent'];
 
+  logger.info(`Intento de login para usuario: ${username} desde IP: ${ip}`);
+
   try {
     // Search case-insensitive for username
     const result = await query('SELECT * FROM admin_users WHERE LOWER(username) = LOWER($1)', [username]);
     const user = result.rows[0];
 
     if (!user) {
+      logger.warn(`Usuario no encontrado: ${username}`);
       await query('INSERT INTO login_attempts (username, ip_address, user_agent, success) VALUES ($1, $2, $3, $4)', [username, ip, ua, false]);
       return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
     }
@@ -262,15 +291,19 @@ app.post('/api/login', loginLimiter, async (req, res) => {
       isMatch = (password === user.password);
       // Auto-update to hashed if it was plaintext
       if (isMatch) {
+        logger.info(`Actualizando contraseña de texto plano a hash para usuario: ${username}`);
         const hashedPassword = await bcrypt.hash(password, 10);
         await query('UPDATE admin_users SET password = $1 WHERE id = $2', [hashedPassword, user.id]);
       }
     }
 
     if (!isMatch) {
+      logger.warn(`Contraseña incorrecta para usuario: ${username}`);
       await query('INSERT INTO login_attempts (username, ip_address, user_agent, success) VALUES ($1, $2, $3, $4)', [username, ip, ua, false]);
       return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
     }
+
+    logger.info(`Credenciales correctas para ${username}. Enviando código...`);
 
     // NEW: Send email code instead of traditional 2FA
     try {
@@ -285,11 +318,11 @@ app.post('/api/login', loginLimiter, async (req, res) => {
       });
     } catch (emailErr) {
       logger.error('Failed to send email code:', emailErr);
-      return res.status(500).json({ error: 'No se pudo enviar el código por email. Intenta de nuevo.' });
+      return res.status(500).json({ success: false, message: emailErr.message || 'No se pudo enviar el código por email. Intenta de nuevo.' });
     }
   } catch (err) {
     logger.error('Login error:', err);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 });
 
@@ -345,7 +378,7 @@ app.post('/api/verify-email-code', loginLimiter, async (req, res) => {
     });
   } catch (err) {
     logger.error('Email code verification error:', err);
-    res.status(500).json({ error: 'Error al verificar el código' });
+    res.status(500).json({ success: false, message: 'Error al verificar el código' });
   }
 });
 
