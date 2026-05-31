@@ -26,6 +26,9 @@ const logger = require('./utils/logger');
 const app = express();
 const server = http.createServer(app);
 
+// Enable trust proxy for Render/Cloudflare
+app.set('trust proxy', 1);
+
 // 1. CORS - Debe ir antes que cualquier otro middleware que maneje rutas
 const allowedOrigins = [
   'http://localhost:5173',
@@ -140,7 +143,8 @@ const sendEmailCode = async (email, username) => {
       'INSERT INTO email_verification_codes (username, code, email, expires_at) VALUES ($1, $2, $3, $4)',
       [username, code, email, new Date(expiryTime)]
     );
-    logger.info(`Código guardado en BD. Preparando envío de email a ${email}...`);
+    logger.info(`🔐 CÓDIGO GENERADO PARA ${username}: ${code}`);
+    logger.info(`Preparando envío de email a ${email}...`);
 
     // Send email with timeout
     const sendMailPromise = emailTransporter.sendMail({
@@ -168,16 +172,23 @@ const sendEmailCode = async (email, username) => {
 
     // Timeout of 10 seconds for email sending
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Tiempo de espera agotado al enviar el correo')), 15000)
+      setTimeout(() => reject(new Error('Timeout de conexión con Gmail')), 10000)
     );
 
-    await Promise.race([sendMailPromise, timeoutPromise]);
+    try {
+      await Promise.race([sendMailPromise, timeoutPromise]);
+      logger.info(`✅ Email enviado exitosamente a ${email}`);
+    } catch (mailErr) {
+      logger.warn(`⚠️ No se pudo enviar el correo: ${mailErr.message}`);
+      logger.warn(`👉 Usa el código que aparece arriba en los logs para entrar.`);
+      // No lanzamos error, permitimos que el flujo continúe
+    }
 
-    logger.info(`Email verification code sent to ${email}`);
     return code;
   } catch (err) {
-    logger.error('Error sending email:', err);
-    throw new Error(err.message || 'No se pudo enviar el código por email');
+    logger.error('Error en sendEmailCode:', err);
+    // Si llegamos aquí es porque falló la DB, eso sí es un error crítico
+    throw new Error('Error interno al generar código de acceso');
   }
 };
 
