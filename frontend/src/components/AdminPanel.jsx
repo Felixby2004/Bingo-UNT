@@ -18,11 +18,6 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
   const [twoFAData, setTwoFAData] = useState(null);
   const [twoFAToken, setTwoFAToken] = useState('');
 
-  // 2FA for sensitive operations
-  const [require2FATransaction, setRequire2FATransaction] = useState(false);
-  const [transactionToken2FA, setTransactionToken2FA] = useState('');
-  const [pendingOperation, setPendingOperation] = useState(null);
-
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   const handleSetup2FA = async () => {
@@ -54,52 +49,6 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
     }
   };
 
-  // Wrapper for sensitive operations that require 2FA
-  const withRequire2FA = async (operation) => {
-    if (!user?.two_fa_enabled) {
-      // 2FA not enabled - show setup requirement
-      alert('⚠️ Debes configurar 2FA primero para realizar esta acción');
-      setShow2FASetup(true);
-      return;
-    }
-    
-    // 2FA is enabled, execute the operation
-    try {
-      return await operation(undefined);
-    } catch (err) {
-      if (err.response?.status === 401 && err.response?.data?.requires2FA) {
-        // Need 2FA code
-        setPendingOperation(() => operation);
-        setRequire2FATransaction(true);
-        setTransactionToken2FA('');
-      } else {
-        throw err;
-      }
-    }
-  };
-
-  const handleSubmit2FATransaction = async () => {
-    if (!transactionToken2FA.trim()) {
-      alert('Ingrese el código 2FA');
-      return;
-    }
-
-    try {
-      await pendingOperation(transactionToken2FA);
-      setRequire2FATransaction(false);
-      setTransactionToken2FA('');
-      setPendingOperation(null);
-    } catch (err) {
-      console.error('2FA transaction error:', err);
-      if (err.response?.status === 401) {
-        alert('Código 2FA inválido o expirado');
-        setTransactionToken2FA('');
-      } else {
-        alert('Error: ' + (err.response?.data?.error || err.message));
-      }
-    }
-  };
-
   const togglePattern = (index) => {
     const newPattern = [...selectedPattern];
     newPattern[index] = !newPattern[index];
@@ -117,39 +66,37 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
   };
 
   const handleStartGame = async (prizeId) => {
-    await withRequire2FA(async (token2fa) => {
-      const payload = { prize_id: prizeId };
-      if (token2fa) payload.token2fa = token2fa;
-      await axios.post(`${apiUrl}/api/prizes/start`, payload);
+    try {
+      await axios.post(`${apiUrl}/api/prizes/start`, { prize_id: prizeId });
       refreshGame();
-    });
+    } catch (err) {
+      console.error('Error starting game:', err);
+      alert('Error al iniciar el sorteo');
+    }
   };
 
   const handleAddPrize = async (e) => {
     e.preventDefault();
     if (!newPrize.name.trim()) return;
     
-    await withRequire2FA(async (token2fa) => {
-      const formData = new FormData();
-      formData.append('name', newPrize.name);
-      formData.append('description', newPrize.description);
-      formData.append('winning_pattern', JSON.stringify(selectedPattern));
-      if (token2fa) formData.append('token2fa', token2fa);
-      if (imageFile) formData.append('image', imageFile);
+    const formData = new FormData();
+    formData.append('name', newPrize.name);
+    formData.append('description', newPrize.description);
+    formData.append('winning_pattern', JSON.stringify(selectedPattern));
+    if (imageFile) formData.append('image', imageFile);
 
-      try {
-        if (editingPrize) {
-          await axios.put(`${apiUrl}/api/prizes/${editingPrize.id}`, formData);
-        } else {
-          await axios.post(`${apiUrl}/api/prizes`, formData);
-        }
-        resetForm();
-        refreshPrizes();
-      } catch (err) {
-        console.error('Error adding prize:', err);
-        throw err;
+    try {
+      if (editingPrize) {
+        await axios.put(`${apiUrl}/api/prizes/${editingPrize.id}`, formData);
+      } else {
+        await axios.post(`${apiUrl}/api/prizes`, formData);
       }
-    });
+      resetForm();
+      refreshPrizes();
+    } catch (err) {
+      console.error('Error adding prize:', err);
+      alert('Error al guardar el premio');
+    }
   };
 
   const resetForm = () => {
@@ -170,26 +117,28 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
 
   const handleDeletePrize = async (id) => {
     if (!window.confirm('¿Eliminar este premio?')) return;
-    await withRequire2FA(async (token2fa) => {
-      const config = {};
-      if (token2fa) config.params = { token2fa };
-      await axios.delete(`${apiUrl}/api/prizes/${id}`, config);
+    try {
+      await axios.delete(`${apiUrl}/api/prizes/${id}`);
       refreshPrizes();
-    });
+    } catch (err) {
+      console.error('Error deleting prize:', err);
+      alert('Error al eliminar el premio');
+    }
   };
 
   const handleFinishGame = async () => {
     if (!gameState.prize) return;
-    await withRequire2FA(async (token2fa) => {
-      const payload = { 
+    try {
+      await axios.post(`${apiUrl}/api/prizes/finish`, { 
         prize_id: gameState.prize.id,
         winner_name: winnerName 
-      };
-      if (token2fa) payload.token2fa = token2fa;
-      await axios.post(`${apiUrl}/api/prizes/finish`, payload);
+      });
       setWinnerName('');
       refreshGame();
-    });
+    } catch (err) {
+      console.error('Error finishing game:', err);
+      alert('Error al finalizar el sorteo');
+    }
   };
 
   const handleDrawNumber = async (e) => {
@@ -199,15 +148,16 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
     if (isNaN(num) || num < 1 || num > 75) return alert('Número inválido (1-75)');
     if (gameState.drawnNumbers.some(n => n.number === num)) return alert('Número ya sorteado');
 
-    await withRequire2FA(async (token2fa) => {
-      const payload = { 
+    try {
+      await axios.post(`${apiUrl}/api/prizes/draw`, { 
         prize_id: gameState.prize.id,
         number: num
-      };
-      if (token2fa) payload.token2fa = token2fa;
-      await axios.post(`${apiUrl}/api/prizes/draw`, payload);
+      });
       setManualNumber('');
-    });
+    } catch (err) {
+      console.error('Error drawing number:', err);
+      alert('Error al registrar número');
+    }
   };
 
   const handleVerifyWinner = async (e) => {
@@ -307,52 +257,6 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      {/* 2FA Modal for Sensitive Transactions */}
-      {require2FATransaction && (
-        <div className="fixed inset-0 bg-unt-blue/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-200">
-            <div className="bg-unt-blue p-6 text-center">
-              <div className="w-16 h-16 bg-unt-yellow rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg -rotate-3">
-                <Trophy className="text-unt-blue" size={32} />
-              </div>
-              <h3 className="text-xl font-black text-white uppercase tracking-tight">Verificación</h3>
-              <p className="text-unt-yellow/70 text-[10px] font-bold">CONFIRMA TU ACCIÓN</p>
-            </div>
-            
-            <div className="p-8 space-y-6">
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="000 000"
-                  value={transactionToken2FA}
-                  onChange={(e) => setTransactionToken2FA(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="w-full text-center py-4 bg-gray-50 border-2 border-transparent focus:border-unt-blue rounded-2xl outline-none transition-all font-black text-2xl tracking-[0.5em]"
-                  autoFocus
-                />
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => {
-                      setRequire2FATransaction(false);
-                      setTransactionToken2FA('');
-                      setPendingOperation(null);
-                    }}
-                    className="flex-1 bg-gray-100 text-gray-500 py-4 rounded-2xl font-bold hover:bg-gray-200 transition-all"
-                  >
-                    CANCELAR
-                  </button>
-                  <button
-                    onClick={handleSubmit2FATransaction}
-                    className="flex-2 bg-unt-blue text-unt-yellow py-4 px-6 rounded-2xl font-black shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
-                  >
-                    CONFIRMAR
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Left Column: Prize Management */}
       <div className={`lg:col-span-4 space-y-6 ${!user?.two_fa_enabled ? 'opacity-50 pointer-events-none' : ''}`}>
         <section className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">

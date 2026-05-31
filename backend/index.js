@@ -482,7 +482,7 @@ app.get('/api/prizes', async (req, res) => {
   }
 });
 
-app.post('/api/prizes', authenticateToken, upload.single('image'), verify2FA, async (req, res) => {
+app.post('/api/prizes', authenticateToken, upload.single('image'), async (req, res) => {
   try {
     const { name, description, winning_pattern } = req.body;
     const image_url = req.file ? req.file.path : null;
@@ -510,7 +510,7 @@ app.post('/api/prizes', authenticateToken, upload.single('image'), verify2FA, as
   }
 });
 
-app.put('/api/prizes/:id', authenticateToken, upload.single('image'), verify2FA, async (req, res) => {
+app.put('/api/prizes/:id', authenticateToken, upload.single('image'), async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, winning_pattern } = req.body;
@@ -542,7 +542,7 @@ app.put('/api/prizes/:id', authenticateToken, upload.single('image'), verify2FA,
   }
 });
 
-app.delete('/api/prizes/:id', authenticateToken, verify2FA, async (req, res) => {
+app.delete('/api/prizes/:id', authenticateToken, async (req, res) => {
   try {
     await query('DELETE FROM prizes WHERE id = $1', [req.params.id]);
     cache.prizes = null; // Clear cache
@@ -553,7 +553,7 @@ app.delete('/api/prizes/:id', authenticateToken, verify2FA, async (req, res) => 
   }
 });
 
-app.post('/api/prizes/start', authenticateToken, verify2FA, async (req, res) => {
+app.post('/api/prizes/start', authenticateToken, async (req, res) => {
   const { prize_id } = req.body;
   try {
     await query("UPDATE prizes SET status = 'pending' WHERE status = 'active'");
@@ -567,7 +567,7 @@ app.post('/api/prizes/start', authenticateToken, verify2FA, async (req, res) => 
   }
 });
 
-app.post('/api/prizes/draw', authenticateToken, verify2FA, async (req, res) => {
+app.post('/api/prizes/draw', authenticateToken, async (req, res) => {
   const { prize_id, number } = req.body;
   const letter = getLetter(number);
 
@@ -586,7 +586,7 @@ app.post('/api/prizes/draw', authenticateToken, verify2FA, async (req, res) => {
   }
 });
 
-app.post('/api/prizes/finish', authenticateToken, verify2FA, async (req, res) => {
+app.post('/api/prizes/finish', authenticateToken, async (req, res) => {
   const { prize_id, winner_name } = req.body;
   try {
     const result = await query(
