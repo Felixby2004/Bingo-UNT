@@ -16,7 +16,7 @@ const qrcode = require('qrcode');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 const crypto = require('crypto');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
@@ -101,16 +101,13 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage: storage });
 
-// Nodemailer Config for Email 2FA
-const emailTransporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD
-  }
-});
+// SendGrid Config for Email 2FA
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY.trim());
+  logger.info('✅ SendGrid API Key configurada');
+} else {
+  logger.warn('⚠️ SENDGRID_API_KEY no encontrada en las variables de entorno');
+}
 
 // Function to generate and send email code
 const sendEmailCode = async (email, username) => {
@@ -119,8 +116,8 @@ const sendEmailCode = async (email, username) => {
     throw new Error('El usuario no tiene un correo electrónico configurado.');
   }
 
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-    logger.warn('SMTP Credentials missing. Skipping email send (check logs for code).');
+  if (!process.env.SENDGRID_API_KEY) {
+    logger.warn('SENDGRID_API_KEY missing. Skipping email send (check logs for code).');
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiryTime = Date.now() + 600000;
     
@@ -144,50 +141,50 @@ const sendEmailCode = async (email, username) => {
       [username, code, email, new Date(expiryTime)]
     );
     logger.info(`🔐 CÓDIGO GENERADO PARA ${username}: ${code}`);
-    logger.info(`Preparando envío de email a ${email}...`);
+    logger.info(`Preparando envío de email via SendGrid a ${email}...`);
 
-    // Send email with timeout
-    const sendMailPromise = emailTransporter.sendMail({
-      from: `"Bingo Admin" <${process.env.GMAIL_USER}>`,
-      to: email,
-      subject: '🔐 Tu Código de Acceso - Bingo UNT',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
-          <h2 style="color: #1F3A93; text-align: center;">🎲 BINGO UNT - ACCESO ADMINISTRADOR</h2>
-          <p style="font-size: 16px; color: #333;">¡Hola <strong>${username}</strong>!</p>
-          <p style="font-size: 14px; color: #666;">Se ha solicitado acceso a la gestión de premios. Usa el siguiente código para verificar tu identidad:</p>
-          
-          <div style="background-color: #f0f0f0; border-left: 4px solid #FFD700; padding: 20px; margin: 20px 0; text-align: center;">
-            <p style="font-size: 12px; color: #999; margin: 0 0 10px 0;">CÓDIGO DE VERIFICACIÓN</p>
-            <p style="font-size: 32px; font-weight: bold; color: #1F3A93; letter-spacing: 5px; margin: 0;">${code}</p>
-            <p style="font-size: 11px; color: #999; margin: 10px 0 0 0;">Válido por 10 minutos</p>
-          </div>
-          
-          <p style="font-size: 13px; color: #666;">Si no solicitaste este acceso, ignora este correo.</p>
-          <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
-          <p style="font-size: 11px; color: #999; text-align: center;">© 2026 BINGO UNT PROMO XXVIII</p>
-        </div>
-      `
-    });
-
-    // Timeout of 10 seconds for email sending
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout de conexión con Gmail')), 10000)
-    );
-
+    // Send email via SendGrid HTTP API
     try {
-      await Promise.race([sendMailPromise, timeoutPromise]);
-      logger.info(`✅ Email enviado exitosamente a ${email}`);
+      const msg = {
+        to: email,
+        from: {
+          email: process.env.SENDGRID_FROM_EMAIL || 'elpcpatata@gmail.com',
+          name: 'Bingo UNT Admin'
+        },
+        replyTo: process.env.SENDGRID_FROM_EMAIL || 'elpcpatata@gmail.com'
+      };
+
+      // Si hay un Template ID, lo usamos. Si no, usamos el HTML por defecto.
+      if (process.env.SENDGRID_TEMPLATE_ID) {
+        msg.templateId = process.env.SENDGRID_TEMPLATE_ID;
+        msg.dynamicTemplateData = {
+          username: username,
+          code: code
+        };
+      } else {
+        msg.subject = '🔐 Tu Código de Acceso - Bingo UNT';
+        msg.html = `
+          <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
+            <h2 style="color: #1F3A93; text-align: center;">🎲 BINGO UNT - ACCESO ADMINISTRADOR</h2>
+            <p style="font-size: 16px; color: #333;">¡Hola <strong>${username}</strong>!</p>
+            <p style="font-size: 14px; color: #666;">Usa el siguiente código para verificar tu identidad:</p>
+            <div style="background-color: #f0f0f0; border-left: 4px solid #FFD700; padding: 20px; margin: 20px 0; text-align: center;">
+              <p style="font-size: 32px; font-weight: bold; color: #1F3A93; letter-spacing: 5px; margin: 0;">${code}</p>
+            </div>
+          </div>
+        `;
+      }
+      
+      await sgMail.send(msg);
+      logger.info(`✅ Email enviado exitosamente via SendGrid a ${email}`);
     } catch (mailErr) {
-      logger.warn(`⚠️ No se pudo enviar el correo: ${mailErr.message}`);
+      logger.error(`❌ Error REAL al enviar el correo via SendGrid:`, mailErr.response ? mailErr.response.body : mailErr);
       logger.warn(`👉 Usa el código que aparece arriba en los logs para entrar.`);
-      // No lanzamos error, permitimos que el flujo continúe
     }
 
     return code;
   } catch (err) {
     logger.error('Error en sendEmailCode:', err);
-    // Si llegamos aquí es porque falló la DB, eso sí es un error crítico
     throw new Error('Error interno al generar código de acceso');
   }
 };
