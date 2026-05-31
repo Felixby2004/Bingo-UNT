@@ -465,6 +465,45 @@ app.post('/api/verify-totp', loginLimiter, async (req, res) => {
   }
 });
 
+// NEW: Request 2FA Reset via Email (Backup)
+app.post('/api/request-2fa-reset', loginLimiter, async (req, res) => {
+  const { username } = req.body;
+  try {
+    const result = await query('SELECT email, username FROM admin_users WHERE LOWER(username) = LOWER($1)', [username]);
+    const user = result.rows[0];
+    
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+
+    await sendEmailCode(user.email || process.env.ADMIN_EMAIL, user.username);
+    res.json({ success: true, message: 'Código de recuperación enviado al correo' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// NEW: Verify Email and Reset 2FA
+app.post('/api/verify-reset-2fa', loginLimiter, async (req, res) => {
+  const { username, code } = req.body;
+  try {
+    const result = await query(
+      'SELECT * FROM email_verification_codes WHERE LOWER(username) = LOWER($1) AND code = $2 AND used = FALSE ORDER BY created_at DESC LIMIT 1',
+      [username, code]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ success: false, message: 'Código inválido o expirado' });
+    }
+
+    // Mark code as used and DISABLE 2FA for this user so they can login and re-configure
+    await query('UPDATE email_verification_codes SET used = TRUE WHERE id = $1', [result.rows[0].id]);
+    await query('UPDATE admin_users SET two_fa_enabled = FALSE, two_fa_secret = NULL WHERE LOWER(username) = LOWER($1)', [username]);
+
+    res.json({ success: true, message: '2FA desactivado. Ahora puedes entrar con tu contraseña y el código de email.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Setup 2FA
 app.post('/api/admin/setup-2fa', authenticateToken, async (req, res) => {
   try {

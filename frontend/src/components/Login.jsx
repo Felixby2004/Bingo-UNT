@@ -9,6 +9,7 @@ const Login = ({ onLogin }) => {
   const [totpCode, setTotpCode] = useState('');
   const [requiresEmailCode, setRequiresEmailCode] = useState(false);
   const [requiresTOTP, setRequiresTOTP] = useState(false);
+  const [isResetting2FA, setIsResetting2FA] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -100,9 +101,45 @@ const Login = ({ onLogin }) => {
     }
   };
 
+  const handleRequestReset2FA = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      await axios.post(`${apiUrl}/api/request-2fa-reset`, { username });
+      setIsResetting2FA(true);
+      setRequiresTOTP(false);
+      setLoading(false);
+    } catch (err) {
+      setError('Error al solicitar el reset de 2FA');
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyReset2FA = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const res = await axios.post(`${apiUrl}/api/verify-reset-2fa`, { 
+        username, 
+        code: emailCode
+      });
+      if (res.data.success) {
+        alert(res.data.message);
+        window.location.reload(); // Recargar para volver al login normal
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Código inválido');
+      setLoading(false);
+    }
+  };
+
   const handleBackToLogin = () => {
     setRequiresEmailCode(false);
     setRequiresTOTP(false);
+    setIsResetting2FA(false);
     setEmailCode('');
     setTotpCode('');
     setError('');
@@ -121,7 +158,7 @@ const Login = ({ onLogin }) => {
         </div>
 
         <form 
-          onSubmit={requiresTOTP ? handleTOTPSubmit : (requiresEmailCode ? handleEmailCodeSubmit : handleLoginSubmit)} 
+          onSubmit={isResetting2FA ? handleVerifyReset2FA : (requiresTOTP ? handleTOTPSubmit : (requiresEmailCode ? handleEmailCodeSubmit : handleLoginSubmit))} 
           className="p-8 space-y-6"
         >
           {error && (
@@ -132,7 +169,7 @@ const Login = ({ onLogin }) => {
           )}
 
           <div className="space-y-4">
-            {!requiresEmailCode && !requiresTOTP ? (
+            {!requiresEmailCode && !requiresTOTP && !isResetting2FA ? (
               <>
                 <div>
                   <label className="block text-xs font-black text-gray-500 uppercase mb-1 ml-1">Usuario</label>
@@ -172,7 +209,7 @@ const Login = ({ onLogin }) => {
                   </div>
                   <h3 className="text-lg font-black text-unt-blue uppercase">Doble Factor (App)</h3>
                   <p className="text-sm text-gray-600 font-medium">
-                    Ingresa el código de 6 dígitos generado por tu aplicación (Google Authenticator, Authy, etc).
+                    Ingresa el código de 6 dígitos generado por tu aplicación.
                   </p>
                 </div>
 
@@ -193,21 +230,34 @@ const Login = ({ onLogin }) => {
                     />
                   </div>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={handleBackToLogin}
-                  className="text-[10px] font-bold text-gray-400 mt-2 hover:text-unt-blue transition-colors uppercase tracking-widest"
-                >
-                  ← Volver al inicio de sesión
-                </button>
+                <div className="flex flex-col space-y-2">
+                  <button 
+                    type="button" 
+                    onClick={handleRequestReset2FA}
+                    className="text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors uppercase tracking-widest text-left"
+                  >
+                    ¿Perdiste el acceso a tu celular? Resetear 2FA vía Email
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={handleBackToLogin}
+                    className="text-[10px] font-bold text-gray-400 hover:text-unt-blue transition-colors uppercase tracking-widest text-left"
+                  >
+                    ← Volver al inicio de sesión
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 text-center space-y-3">
                   <Mail className="mx-auto text-blue-600" size={40} />
-                  <h3 className="text-lg font-black text-unt-blue uppercase">Verifica tu Email</h3>
+                  <h3 className="text-lg font-black text-unt-blue uppercase">
+                    {isResetting2FA ? 'Recuperación de 2FA' : 'Verifica tu Email'}
+                  </h3>
                   <p className="text-sm text-gray-600 font-medium">
-                    Hemos enviado un código de 6 dígitos a tu correo. Ingrésalo abajo.
+                    {isResetting2FA 
+                      ? 'Para desactivar el 2FA, ingresa el código enviado a tu correo.' 
+                      : 'Hemos enviado un código de 6 dígitos a tu correo. Ingrésalo abajo.'}
                   </p>
                 </div>
 
@@ -241,10 +291,10 @@ const Login = ({ onLogin }) => {
 
           <button
             type="submit"
-            disabled={loading || (!requiresEmailCode && !requiresTOTP && (!username || !password)) || (requiresEmailCode && !emailCode) || (requiresTOTP && !totpCode)}
+            disabled={loading || (!requiresEmailCode && !requiresTOTP && !isResetting2FA && (!username || !password)) || (requiresEmailCode && !emailCode) || (requiresTOTP && !totpCode) || (isResetting2FA && !emailCode)}
             className="w-full bg-unt-blue text-unt-yellow py-4 rounded-xl font-black text-lg shadow-xl shadow-unt-blue/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100"
           >
-            {loading ? 'PROCESANDO...' : (requiresEmailCode || requiresTOTP ? 'VERIFICAR ACCESO' : 'ENVIAR CÓDIGO')}
+            {loading ? 'PROCESANDO...' : (requiresEmailCode || requiresTOTP || isResetting2FA ? 'VERIFICAR ACCESO' : 'ENVIAR CÓDIGO')}
           </button>
         </form>
       </div>
