@@ -18,8 +18,10 @@ function App() {
   const [user, setUser] = useState(null);
   const [gameState, setGameState] = useState({ prize: null, drawnNumbers: [] });
   const [prizes, setPrizes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    checkAuth();
     fetchCurrentGame();
     fetchPrizes();
 
@@ -61,6 +63,25 @@ function App() {
     };
   }, [gameState.prize?.id]);
 
+  const checkAuth = async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const res = await axios.get(`${apiUrl}/api/admin/me`);
+      if (res.data.user) {
+        setUser(res.data.user);
+        // Si el usuario ya estaba en admin o intenta entrar, lo mantenemos
+        const currentPath = window.location.hash || window.location.pathname;
+        if (currentPath.includes('admin')) {
+          setView('admin');
+        }
+      }
+    } catch (err) {
+      // No logueado
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchCurrentGame = async () => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/game/current`);
@@ -79,10 +100,25 @@ function App() {
     }
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    setView('public');
+  const handleLogout = async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      await axios.post(`${apiUrl}/api/logout`);
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setUser(null);
+      setView('public');
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-unt-blue"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">

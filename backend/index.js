@@ -238,10 +238,16 @@ const getLetter = (num) => {
 
 const authenticateToken = (req, res, next) => {
   const token = req.cookies.admin_token;
-  if (!token) return res.status(401).json({ message: 'No autorizado' });
+  if (!token) {
+    logger.warn(`Intento de acceso sin token a ${req.path}`);
+    return res.status(401).json({ message: 'No autorizado' });
+  }
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ message: 'Token inválido o expirado' });
+    if (err) {
+      logger.error(`Error de verificación de token en ${req.path}:`, err.message);
+      return res.status(403).json({ message: 'Token inválido o expirado' });
+    }
     req.user = user;
     next();
   });
@@ -366,10 +372,6 @@ app.post('/api/verify-email-code', loginLimiter, async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      // DEBUG: Ver por qué no se encuentra el código
-      const allCodes = await query('SELECT username, code, used, expires_at, (expires_at > NOW()) as is_valid FROM email_verification_codes WHERE LOWER(username) = LOWER($1) ORDER BY created_at DESC LIMIT 3', [username]);
-      logger.warn(`Código no encontrado o inválido para ${username}. Intentó con: ${code}`);
-      logger.info('Últimos códigos en BD:', allCodes.rows);
       return res.status(401).json({ success: false, message: 'Código inválido o expirado' });
     }
 
@@ -452,8 +454,23 @@ app.post('/api/admin/confirm-2fa', authenticateToken, async (req, res) => {
 });
 
 app.post('/api/logout', (req, res) => {
-  res.clearCookie('admin_token');
+  res.clearCookie('admin_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
+  });
   res.json({ success: true });
+});
+
+app.get('/api/admin/me', authenticateToken, async (req, res) => {
+  try {
+    const result = await query('SELECT id, username, email, two_fa_enabled FROM admin_users WHERE id = $1', [req.user.id]);
+    const user = result.rows[0];
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+    res.json({ user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // --- PRIZES (Main Game Flow) ---
