@@ -14,7 +14,7 @@ const Footer = () => {
           <p className="font-bold text-xs sm:text-sm uppercase tracking-wider sm:tracking-widest">Promo XXVIII - Ingeniería de Sistemas</p>
           <p className="font-medium text-[8px] sm:text-[10px] uppercase text-white/60">Universidad Nacional de Trujillo</p>
         </div>
-        <p className="text-[7px] sm:text-[8px] font-medium uppercase tracking-widest text-white/40">© 2026 Bingo UNT - Todos los derechos reservados</p>
+        <p className="text-[7px] sm:text-[8px] font-medium uppercase tracking-widest text-white/40">© 2026 Bingo UNT - Desarrollado por Felix A. Chávez V.</p>
       </div>
     </footer>
   );
