@@ -146,7 +146,7 @@ const Navbar = ({ view, setView, user, onLogout }) => {
                 }`}
               >
                 <LayoutDashboard size={18} />
-                <span>Acceso Admin</span>
+                <span>Entrar</span>
               </button>
             )}
           </div>
