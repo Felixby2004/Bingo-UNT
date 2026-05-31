@@ -67,31 +67,23 @@ function App() {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const token = localStorage.getItem('admin_token');
-      
-      // Intentar siempre con credenciales (cookies) primero
       const config = { withCredentials: true };
       
-      // Si tenemos token en localStorage, añadirlo como respaldo
       if (token) {
         config.headers = { Authorization: `Bearer ${token}` };
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       }
 
-      console.log('Verificando sesión...');
       const res = await axios.get(`${apiUrl}/api/admin/me`, config);
       
       if (res.data.user) {
-        console.log('Sesión activa para:', res.data.user.username, '2FA:', res.data.user.two_fa_enabled);
         setUser(res.data.user);
-        
-        // Mantener la vista admin si ya estaba ahí
         const currentPath = window.location.hash || window.location.pathname;
         if (currentPath.includes('admin') || view === 'admin') {
           setView('admin');
         }
       }
     } catch (err) {
-      console.log('Sesión no válida o expirada');
       localStorage.removeItem('admin_token');
       delete axios.defaults.headers.common['Authorization'];
     } finally {
@@ -156,6 +148,7 @@ function App() {
               prizes={prizes}
               refreshGame={fetchCurrentGame}
               refreshPrizes={fetchPrizes}
+              user={user}
             />
           ) : (
             <Login onLogin={setUser} />
