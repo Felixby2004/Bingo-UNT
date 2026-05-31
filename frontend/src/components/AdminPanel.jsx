@@ -38,13 +38,16 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
 
   const handleConfirm2FA = async () => {
     try {
-      await axios.post(`${apiUrl}/api/admin/confirm-2fa`, { token: twoFAToken }, { withCredentials: true });
-      alert('2FA Activado correctamente');
-      setShow2FASetup(false);
-      window.location.reload(); // Refresh to update user state
+      const res = await axios.post(`${apiUrl}/api/admin/confirm-2fa`, { token: twoFAToken }, { withCredentials: true });
+      if (res.data.success) {
+        alert('✅ 2FA Activado correctamente. Panel desbloqueado.');
+        setShow2FASetup(false);
+        // Recargar la página para que App.jsx vuelva a verificar el estado del usuario
+        window.location.reload();
+      }
     } catch (err) {
       console.error('Confirm 2FA error:', err);
-      alert('Código inválido: ' + (err.response?.data?.message || err.message));
+      alert('❌ Código inválido: ' + (err.response?.data?.message || err.message));
     }
   };
 

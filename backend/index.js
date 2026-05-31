@@ -426,14 +426,24 @@ app.post('/api/admin/confirm-2fa', authenticateToken, async (req, res) => {
     const verified = speakeasy.totp.verify({
       secret: secret,
       encoding: 'base32',
-      token: token
+      token: token,
+      window: 2 // Ventana de tiempo para mayor compatibilidad
     });
 
     if (verified) {
       await query('UPDATE admin_users SET two_fa_enabled = TRUE WHERE id = $1', [req.user.id]);
-      res.json({ success: true });
+      
+      // Obtener el usuario actualizado
+      const userResult = await query('SELECT id, username, email, two_fa_enabled FROM admin_users WHERE id = $1', [req.user.id]);
+      const user = userResult.rows[0];
+
+      res.json({ 
+        success: true, 
+        message: '2FA activado correctamente',
+        user: user // Enviamos el usuario actualizado
+      });
     } else {
-      res.status(400).json({ success: false, message: 'Código inválido' });
+      res.status(400).json({ success: false, message: 'Código 2FA inválido' });
     }
   } catch (err) {
     res.status(500).json({ error: err.message });
