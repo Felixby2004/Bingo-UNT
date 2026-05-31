@@ -112,12 +112,10 @@ if (process.env.SENDGRID_API_KEY) {
 // Function to generate and send email code
 const sendEmailCode = async (email, username) => {
   if (!email) {
-    logger.error(`Tentativa de envío de código fallida: No hay email configurado para el usuario ${username}`);
     throw new Error('El usuario no tiene un correo electrónico configurado.');
   }
 
   if (!process.env.SENDGRID_API_KEY) {
-    logger.warn('SENDGRID_API_KEY missing. Skipping email send (check logs for code).');
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiryTime = Date.now() + 600000;
     
@@ -126,7 +124,6 @@ const sendEmailCode = async (email, username) => {
       [username, code, email, new Date(expiryTime)]
     );
     
-    logger.info(`[DEV MODE] Código para ${username}: ${code}`);
     return code;
   }
 
@@ -134,14 +131,11 @@ const sendEmailCode = async (email, username) => {
     const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6 dígitos
     const expiryTime = Date.now() + (parseInt(process.env.EMAIL_VERIFICATION_CODE_EXPIRY) || 600000); // Default 10 min
     
-    logger.info(`Guardando código de verificación en BD para ${username}...`);
     // Save code in DB
     await query(
       'INSERT INTO email_verification_codes (username, code, email, expires_at) VALUES ($1, $2, $3, $4)',
       [username, code, email, new Date(expiryTime)]
     );
-    logger.info(`🔐 CÓDIGO GENERADO PARA ${username}: ${code}`);
-    logger.info(`Preparando envío de email via SendGrid a ${email}...`);
 
     // Send email via SendGrid HTTP API
     try {
@@ -176,15 +170,12 @@ const sendEmailCode = async (email, username) => {
       }
       
       await sgMail.send(msg);
-      logger.info(`✅ Email enviado exitosamente via SendGrid a ${email}`);
     } catch (mailErr) {
-      logger.error(`❌ Error REAL al enviar el correo via SendGrid:`, mailErr.response ? mailErr.response.body : mailErr);
-      logger.warn(`👉 Usa el código que aparece arriba en los logs para entrar.`);
+      // Error silencioso
     }
 
     return code;
   } catch (err) {
-    logger.error('Error en sendEmailCode:', err);
     throw new Error('Error interno al generar código de acceso');
   }
 };
@@ -215,10 +206,9 @@ const getCachedPrizes = async () => {
 };
 
 // Initialize DB
-logger.info('Iniciando conexión con la base de datos...');
 initDb()
   .then(() => {
-    logger.info('✅ Base de datos inicializada correctamente');
+    // Éxito silencioso
   })
   .catch(err => {
     logger.error('❌ Error crítico al inicializar la base de datos:', err);
@@ -306,15 +296,12 @@ app.post('/api/login', loginLimiter, async (req, res) => {
   const ip = req.ip;
   const ua = req.headers['user-agent'];
 
-  logger.info(`Intento de login para usuario: ${username} desde IP: ${ip}`);
-
   try {
     // Search case-insensitive for username
     const result = await query('SELECT * FROM admin_users WHERE LOWER(username) = LOWER($1)', [username]);
     const user = result.rows[0];
 
     if (!user) {
-      logger.warn(`Usuario no encontrado: ${username}`);
       await query('INSERT INTO login_attempts (username, ip_address, user_agent, success) VALUES ($1, $2, $3, $4)', [username, ip, ua, false]);
       return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
     }
@@ -327,24 +314,19 @@ app.post('/api/login', loginLimiter, async (req, res) => {
       isMatch = (password === user.password);
       // Auto-update to hashed if it was plaintext
       if (isMatch) {
-        logger.info(`Actualizando contraseña de texto plano a hash para usuario: ${username}`);
         const hashedPassword = await bcrypt.hash(password, 10);
         await query('UPDATE admin_users SET password = $1 WHERE id = $2', [hashedPassword, user.id]);
       }
     }
 
     if (!isMatch) {
-      logger.warn(`Contraseña incorrecta para usuario: ${username}`);
       await query('INSERT INTO login_attempts (username, ip_address, user_agent, success) VALUES ($1, $2, $3, $4)', [username, ip, ua, false]);
       return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
     }
 
-    logger.info(`Credenciales correctas para ${username}. Enviando código...`);
-
     // NEW: Send email code instead of traditional 2FA
     try {
       await sendEmailCode(user.email || process.env.ADMIN_EMAIL, user.username);
-      logger.info(`Login attempt - Email code sent to ${user.email || process.env.ADMIN_EMAIL}`);
       
       return res.json({ 
         success: true, 
@@ -353,11 +335,9 @@ app.post('/api/login', loginLimiter, async (req, res) => {
         userId: user.id
       });
     } catch (emailErr) {
-      logger.error('Failed to send email code:', emailErr);
       return res.status(500).json({ success: false, message: emailErr.message || 'No se pudo enviar el código por email. Intenta de nuevo.' });
     }
   } catch (err) {
-    logger.error('Login error:', err);
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 });
@@ -366,11 +346,8 @@ app.post('/api/login', loginLimiter, async (req, res) => {
 app.post('/api/verify-email-code', loginLimiter, async (req, res) => {
   const { username, code } = req.body;
 
-  logger.info(`Verificando código para usuario: ${username}, código: ${code}`);
-
   try {
     if (!code || !username) {
-      logger.warn('Falta código o usuario en la petición de verificación');
       return res.status(400).json({ success: false, message: 'Código y usuario requeridos' });
     }
 
@@ -389,11 +366,8 @@ app.post('/api/verify-email-code', loginLimiter, async (req, res) => {
     const user = userResult.rows[0];
 
     if (!user) {
-      logger.warn(`Usuario no encontrado durante la verificación: ${username}`);
       return res.status(401).json({ success: false, message: 'Usuario no encontrado' });
     }
-
-    logger.info(`Código verificado con éxito para ${username}. Marcando como usado...`);
 
     // Mark code as used
     await query('UPDATE email_verification_codes SET used = TRUE WHERE id = $1', [result.rows[0].id]);
