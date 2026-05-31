@@ -104,9 +104,6 @@ const upload = multer({ storage: storage });
 // SendGrid Config for Email 2FA
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY.trim());
-  logger.info('✅ SendGrid API Key configurada');
-} else {
-  logger.warn('⚠️ SENDGRID_API_KEY no encontrada en las variables de entorno');
 }
 
 // Function to generate and send email code
@@ -238,7 +235,6 @@ const authenticateToken = (req, res, next) => {
   }
 
   if (!token) {
-    logger.warn(`Intento de acceso sin token a ${req.path}`);
     return res.status(401).json({ message: 'No autorizado' });
   }
 
@@ -260,12 +256,13 @@ const verify2FA = async (req, res, next) => {
     const user = result.rows[0];
 
     // If 2FA is not enabled, skip verification
-    if (!user.two_fa_enabled) {
+    if (!user || !user.two_fa_enabled) {
       return next();
     }
 
-    // Get 2FA token from body or query
-    const token2fa = req.body.token2fa || req.query.token2fa;
+    // Get 2FA token from body, query or headers
+    const token2fa = (req.body && req.body.token2fa) || req.query.token2fa || req.headers['x-2fa-token'];
+    
     if (!token2fa) {
       return res.status(401).json({ message: 'Token 2FA requerido', requires2FA: true });
     }
@@ -275,7 +272,7 @@ const verify2FA = async (req, res, next) => {
       secret: user.two_fa_secret,
       encoding: 'base32',
       token: token2fa,
-      window: 2 // Allow ±2 time windows for clock skew
+      window: 2
     });
 
     if (!verified) {
@@ -453,8 +450,8 @@ app.post('/api/admin/confirm-2fa', authenticateToken, async (req, res) => {
 app.post('/api/logout', (req, res) => {
   res.clearCookie('admin_token', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax'
+    secure: true,
+    sameSite: 'none'
   });
   res.json({ success: true });
 });
@@ -485,7 +482,7 @@ app.get('/api/prizes', async (req, res) => {
   }
 });
 
-app.post('/api/prizes', authenticateToken, verify2FA, upload.single('image'), async (req, res) => {
+app.post('/api/prizes', authenticateToken, upload.single('image'), verify2FA, async (req, res) => {
   try {
     const { name, description, winning_pattern } = req.body;
     const image_url = req.file ? req.file.path : null;
@@ -513,7 +510,7 @@ app.post('/api/prizes', authenticateToken, verify2FA, upload.single('image'), as
   }
 });
 
-app.put('/api/prizes/:id', authenticateToken, verify2FA, upload.single('image'), async (req, res) => {
+app.put('/api/prizes/:id', authenticateToken, upload.single('image'), verify2FA, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, winning_pattern } = req.body;
@@ -827,7 +824,7 @@ app.use((err, req, res, next) => {
 });
 
 server.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
+  // Servidor listo
 });
 
 

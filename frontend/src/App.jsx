@@ -112,14 +112,17 @@ function App() {
   const handleLogout = async () => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      await axios.post(`${apiUrl}/api/logout`);
+      await axios.post(`${apiUrl}/api/logout`, {}, { withCredentials: true });
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
+      // Limpiar TODO rastro local
       localStorage.removeItem('admin_token');
       delete axios.defaults.headers.common['Authorization'];
       setUser(null);
       setView('public');
+      // Forzar recarga para limpiar cualquier estado en memoria
+      window.location.href = '/';
     }
   };
 
