@@ -6,7 +6,9 @@ const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [emailCode, setEmailCode] = useState('');
+  const [totpCode, setTotpCode] = useState('');
   const [requiresEmailCode, setRequiresEmailCode] = useState(false);
+  const [requiresTOTP, setRequiresTOTP] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -25,6 +27,13 @@ const Login = ({ onLogin }) => {
         timeout: 20000 // 20 seconds timeout
       });
       
+      if (res.data.requiresTOTP) {
+        setRequiresTOTP(true);
+        setUserId(res.data.userId);
+        setLoading(false);
+        return;
+      }
+
       if (res.data.requiresEmailCode) {
         setRequiresEmailCode(true);
         setUserId(res.data.userId);
@@ -68,9 +77,34 @@ const Login = ({ onLogin }) => {
     }
   };
 
+  const handleTOTPSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const res = await axios.post(`${apiUrl}/api/verify-totp`, { 
+        username, 
+        code: totpCode
+      }, { 
+        withCredentials: true,
+        timeout: 20000 // 20 seconds timeout
+      });
+      
+      if (res.data.success) {
+        onLogin(res.data.user);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Código de autenticador inválido');
+      setLoading(false);
+    }
+  };
+
   const handleBackToLogin = () => {
     setRequiresEmailCode(false);
+    setRequiresTOTP(false);
     setEmailCode('');
+    setTotpCode('');
     setError('');
     setUserId(null);
   };
@@ -86,7 +120,10 @@ const Login = ({ onLogin }) => {
           <p className="text-unt-yellow/70 text-sm font-bold">BINGO - PROMO XXVIII</p>
         </div>
 
-        <form onSubmit={requiresEmailCode ? handleEmailCodeSubmit : handleLoginSubmit} className="p-8 space-y-6">
+        <form 
+          onSubmit={requiresTOTP ? handleTOTPSubmit : (requiresEmailCode ? handleEmailCodeSubmit : handleLoginSubmit)} 
+          className="p-8 space-y-6"
+        >
           {error && (
             <div className="bg-red-50 text-red-600 p-4 rounded-xl flex items-center space-x-2 text-sm font-bold border border-red-100">
               <AlertCircle size={18} />
@@ -95,7 +132,7 @@ const Login = ({ onLogin }) => {
           )}
 
           <div className="space-y-4">
-            {!requiresEmailCode ? (
+            {!requiresEmailCode && !requiresTOTP ? (
               <>
                 <div>
                   <label className="block text-xs font-black text-gray-500 uppercase mb-1 ml-1">Usuario</label>
@@ -127,6 +164,43 @@ const Login = ({ onLogin }) => {
                   </div>
                 </div>
               </>
+            ) : requiresTOTP ? (
+              <div className="space-y-4">
+                <div className="bg-unt-yellow/10 border-2 border-unt-yellow/20 rounded-2xl p-6 text-center space-y-3">
+                  <div className="w-12 h-12 bg-unt-yellow rounded-xl flex items-center justify-center mx-auto shadow-sm">
+                    <Lock className="text-unt-blue" size={24} />
+                  </div>
+                  <h3 className="text-lg font-black text-unt-blue uppercase">Doble Factor (App)</h3>
+                  <p className="text-sm text-gray-600 font-medium">
+                    Ingresa el código de 6 dígitos generado por tu aplicación (Google Authenticator, Authy, etc).
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-gray-500 uppercase mb-1 ml-1">Código de Seguridad</label>
+                  <div className="relative">
+                    <CheckCircle className="absolute left-3 top-1/2 -translate-y-1/2 text-unt-blue" size={18} />
+                    <input
+                      type="text"
+                      value={totpCode}
+                      onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="000000"
+                      maxLength="6"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-unt-blue focus:bg-white rounded-xl outline-none transition-all font-black text-lg tracking-[0.5em]"
+                      disabled={loading}
+                      autoFocus
+                      required
+                    />
+                  </div>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={handleBackToLogin}
+                  className="text-[10px] font-bold text-gray-400 mt-2 hover:text-unt-blue transition-colors uppercase tracking-widest"
+                >
+                  ← Volver al inicio de sesión
+                </button>
+              </div>
             ) : (
               <div className="space-y-4">
                 <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 text-center space-y-3">
@@ -157,7 +231,7 @@ const Login = ({ onLogin }) => {
                 <button 
                   type="button" 
                   onClick={handleBackToLogin}
-                  className="text-[10px] font-bold text-gray-400 mt-2 hover:text-unt-blue transition-colors"
+                  className="text-[10px] font-bold text-gray-400 mt-2 hover:text-unt-blue transition-colors uppercase tracking-widest"
                 >
                   ← Volver al inicio de sesión
                 </button>
@@ -167,10 +241,10 @@ const Login = ({ onLogin }) => {
 
           <button
             type="submit"
-            disabled={loading || (!requiresEmailCode && (!username || !password)) || (requiresEmailCode && !emailCode)}
+            disabled={loading || (!requiresEmailCode && !requiresTOTP && (!username || !password)) || (requiresEmailCode && !emailCode) || (requiresTOTP && !totpCode)}
             className="w-full bg-unt-blue text-unt-yellow py-4 rounded-xl font-black text-lg shadow-xl shadow-unt-blue/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100"
           >
-            {loading ? (requiresEmailCode ? 'VERIFICANDO...' : 'AUTENTICANDO...') : (requiresEmailCode ? 'VERIFICAR CÓDIGO' : 'ENVIAR CÓDIGO')}
+            {loading ? 'PROCESANDO...' : (requiresEmailCode || requiresTOTP ? 'VERIFICAR ACCESO' : 'ENVIAR CÓDIGO')}
           </button>
         </form>
       </div>

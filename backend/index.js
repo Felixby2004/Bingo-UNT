@@ -321,6 +321,16 @@ app.post('/api/login', loginLimiter, async (req, res) => {
       return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
     }
 
+    // Check if 2FA is enabled
+    if (user.two_fa_enabled) {
+      return res.json({ 
+        success: true, 
+        message: 'Ingrese su código de autenticador',
+        requiresTOTP: true,
+        userId: user.id
+      });
+    }
+
     // NEW: Send email code instead of traditional 2FA
     try {
       await sendEmailCode(user.email || process.env.ADMIN_EMAIL, user.username);
@@ -399,15 +409,80 @@ app.post('/api/verify-email-code', loginLimiter, async (req, res) => {
   }
 });
 
+// NEW: Verify TOTP Code (App) during Login
+app.post('/api/verify-totp', loginLimiter, async (req, res) => {
+  const { username, code } = req.body;
+
+  try {
+    if (!code || !username) {
+      return res.status(400).json({ success: false, message: 'Código y usuario requeridos' });
+    }
+
+    // Get user info
+    const userResult = await query('SELECT id, username, email, two_fa_enabled, two_fa_secret FROM admin_users WHERE LOWER(username) = LOWER($1)', [username]);
+    const user = userResult.rows[0];
+
+    if (!user || !user.two_fa_enabled) {
+      return res.status(401).json({ success: false, message: 'Usuario no encontrado o 2FA no habilitado' });
+    }
+
+    // Verify TOTP code
+    const verified = speakeasy.totp.verify({
+      secret: user.two_fa_secret,
+      encoding: 'base32',
+      token: code,
+      window: 2
+    });
+
+    if (!verified) {
+      return res.status(401).json({ success: false, message: 'Código de autenticador inválido' });
+    }
+
+    // Create JWT token
+    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '2h' });
+    
+    res.cookie('admin_token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 2 * 60 * 60 * 1000
+    });
+
+    // Log successful login
+    await query('INSERT INTO login_attempts (username, ip_address, user_agent, success) VALUES ($1, $2, $3, $4)', 
+      [username, req.ip, req.headers['user-agent'], true]
+    );
+
+    res.json({ 
+      success: true, 
+      user: { id: user.id, username: user.username, two_fa_enabled: user.two_fa_enabled },
+      message: '✅ Acceso concedido',
+      token: token
+    });
+  } catch (err) {
+    logger.error('TOTP verification error:', err);
+    res.status(500).json({ success: false, message: 'Error al verificar el código TOTP' });
+  }
+});
+
 // Setup 2FA
 app.post('/api/admin/setup-2fa', authenticateToken, async (req, res) => {
   try {
-    const secret = speakeasy.generateSecret({ name: `BingoAdmin:${req.user.username}` });
-    const dataUrl = await qrcode.toDataURL(secret.otpauth_url);
+    // Si ya tiene un secreto, lo usamos en lugar de generar uno nuevo
+    // Esto cumple con el requisito de que sea "único" y persistente
+    const userResult = await query('SELECT two_fa_secret, two_fa_enabled FROM admin_users WHERE id = $1', [req.user.id]);
+    let secretBase32 = userResult.rows[0]?.two_fa_secret;
     
-    await query('UPDATE admin_users SET two_fa_secret = $1 WHERE id = $2', [secret.base32, req.user.id]);
+    if (!secretBase32) {
+      const secret = speakeasy.generateSecret({ name: `BingoAdmin:${req.user.username}` });
+      secretBase32 = secret.base32;
+      await query('UPDATE admin_users SET two_fa_secret = $1 WHERE id = $2', [secretBase32, req.user.id]);
+    }
+
+    const otpauth_url = `otpauth://totp/BingoAdmin:${req.user.username}?secret=${secretBase32}&issuer=BingoUNT`;
+    const dataUrl = await qrcode.toDataURL(otpauth_url);
     
-    res.json({ secret: secret.base32, qrCode: dataUrl });
+    res.json({ secret: secretBase32, qrCode: dataUrl });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
