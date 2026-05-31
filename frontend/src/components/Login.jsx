@@ -153,7 +153,7 @@ const Login = ({ onLogin }) => {
           <div className="w-20 h-20 bg-unt-yellow rounded-2xl rotate-3 flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Lock className="text-unt-blue" size={40} />
           </div>
-          <h2 className="text-2xl font-black text-unt-white uppercase tracking-tight">Acceso Administrador</h2>
+          <h2 className="text-2xl font-black text-unt-white uppercase tracking-tight">Inicio de Sesión</h2>
           <p className="text-unt-yellow/70 text-sm font-bold">BINGO - PROMO XXVIII</p>
         </div>
 
