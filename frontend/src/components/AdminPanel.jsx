@@ -229,80 +229,81 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
     }
   };
 
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
-      {/* Overlay de Bloqueo 2FA si no está activado */}
-      {!user?.two_fa_enabled && (
-        <div className="absolute inset-0 bg-white/60 backdrop-blur-md z-[90] flex items-center justify-center p-6 rounded-[2rem] border-2 border-dashed border-unt-blue/20">
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 max-w-md w-full text-center space-y-6">
-            <div className="w-20 h-20 bg-unt-yellow rounded-3xl flex items-center justify-center mx-auto shadow-lg rotate-6">
-              <Settings className="text-unt-blue" size={40} />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-2xl font-black text-unt-blue uppercase tracking-tight">Seguridad Requerida</h3>
-              <p className="text-sm text-gray-500 font-bold leading-relaxed">
-                Para gestionar premios y sorteos, debes activar la verificación en dos pasos (2FA).
-              </p>
-            </div>
-            <button 
-              onClick={handleSetup2FA}
-              className="w-full bg-unt-blue text-unt-yellow py-4 rounded-2xl font-black text-lg shadow-xl shadow-unt-blue/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-            >
-              CONFIGURAR 2FA AHORA
-            </button>
+  if (!user?.two_fa_enabled) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center p-6">
+        <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 max-w-md w-full text-center space-y-6">
+          <div className="w-20 h-20 bg-unt-yellow rounded-3xl flex items-center justify-center mx-auto shadow-lg rotate-6">
+            <Settings className="text-unt-blue" size={40} />
           </div>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-black text-unt-blue uppercase tracking-tight">Seguridad Requerida</h3>
+            <p className="text-sm text-gray-500 font-bold leading-relaxed">
+              Para gestionar premios y sorteos, debes activar la verificación en dos pasos (2FA).
+            </p>
+          </div>
+          <button 
+            onClick={handleSetup2FA}
+            className="w-full bg-unt-blue text-unt-yellow py-4 rounded-2xl font-black text-lg shadow-xl shadow-unt-blue/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+          >
+            CONFIGURAR 2FA AHORA
+          </button>
         </div>
-      )}
 
-      {show2FASetup && (
-        <div className="fixed inset-0 bg-unt-blue/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-200">
-            <div className="bg-unt-blue p-6 text-center relative">
-              <button 
-                onClick={() => setShow2FASetup(false)}
-                className="absolute right-4 top-4 text-white/50 hover:text-white transition-colors"
-              >
-                <X size={20} />
-              </button>
-              <div className="w-16 h-16 bg-unt-yellow rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg rotate-3">
-                <Settings className="text-unt-blue" size={32} />
+        {show2FASetup && (
+          <div className="fixed inset-0 bg-unt-blue/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-200">
+              <div className="bg-unt-blue p-6 text-center relative">
+                <button 
+                  onClick={() => setShow2FASetup(false)}
+                  className="absolute right-4 top-4 text-white/50 hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+                <div className="w-16 h-16 bg-unt-yellow rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg rotate-3">
+                  <Settings className="text-unt-blue" size={32} />
+                </div>
+                <h3 className="text-xl font-black text-white uppercase tracking-tight">Configurar 2FA</h3>
+                <p className="text-unt-yellow/70 text-[10px] font-bold">ESCANE EL CÓDIGO QR</p>
               </div>
-              <h3 className="text-xl font-black text-white uppercase tracking-tight">Configurar 2FA</h3>
-              <p className="text-unt-yellow/70 text-[10px] font-bold">ESCANE EL CÓDIGO QR</p>
-            </div>
-            
-            <div className="p-8 space-y-6">
-              {twoFAData ? (
-                <div className="space-y-6 text-center">
-                  <div className="bg-gray-50 p-4 rounded-3xl border-2 border-dashed border-gray-200 inline-block mx-auto">
-                    <img src={twoFAData.qrCode} alt="QR Code" className="w-40 h-40 mx-auto" />
+              
+              <div className="p-8 space-y-6">
+                {twoFAData ? (
+                  <div className="space-y-6 text-center">
+                    <div className="bg-gray-50 p-4 rounded-3xl border-2 border-dashed border-gray-200 inline-block mx-auto">
+                      <img src={twoFAData.qrCode} alt="QR Code" className="w-40 h-40 mx-auto" />
+                    </div>
+                    <div className="space-y-4 pt-2">
+                      <input
+                        type="text"
+                        placeholder="000 000"
+                        value={twoFAToken}
+                        onChange={(e) => setTwoFAToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        className="w-full text-center py-4 bg-gray-50 border-2 border-transparent focus:border-unt-blue rounded-2xl outline-none transition-all font-black text-2xl tracking-[0.5em]"
+                      />
+                      <button
+                        onClick={handleConfirm2FA}
+                        className="w-full bg-unt-blue text-unt-yellow py-4 rounded-2xl font-black shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
+                      >
+                        ACTIVAR SEGURIDAD
+                      </button>
+                    </div>
                   </div>
-                  <div className="space-y-4 pt-2">
-                    <input
-                      type="text"
-                      placeholder="000 000"
-                      value={twoFAToken}
-                      onChange={(e) => setTwoFAToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      className="w-full text-center py-4 bg-gray-50 border-2 border-transparent focus:border-unt-blue rounded-2xl outline-none transition-all font-black text-2xl tracking-[0.5em]"
-                    />
-                    <button
-                      onClick={handleConfirm2FA}
-                      className="w-full bg-unt-blue text-unt-yellow py-4 rounded-2xl font-black shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
-                    >
-                      ACTIVAR SEGURIDAD
-                    </button>
+                ) : (
+                  <div className="text-center py-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-unt-blue mx-auto"></div>
                   </div>
-                </div>
-              ) : (
-                <div className="text-center py-4">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-unt-blue mx-auto"></div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+    );
+  }
 
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       {/* 2FA Modal for Sensitive Transactions */}
       {require2FATransaction && (
         <div className="fixed inset-0 bg-unt-blue/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
@@ -346,24 +347,6 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
               </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* 2FA Required Warning */}
-      {!user?.two_fa_enabled && (
-        <div className="col-span-1 lg:col-span-12 bg-gradient-to-r from-orange-50 to-red-50 border-4 border-orange-300 rounded-3xl p-8 text-center space-y-6 shadow-xl">
-          <div className="space-y-3">
-            <h3 className="text-2xl font-black text-orange-700 uppercase tracking-tight">⚠️ Autenticación de Dos Factores Requerida</h3>
-            <p className="text-orange-600 font-bold text-base">
-              Para acceder a la gestión de premios y realizar operaciones sensibles, debes configurar 2FA (Google Authenticator o Authy)
-            </p>
-          </div>
-          <button
-            onClick={handleSetup2FA}
-            className="bg-orange-500 hover:bg-orange-600 text-white py-4 px-8 rounded-2xl font-black text-lg uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] mx-auto"
-          >
-            🔐 Configurar 2FA Ahora
-          </button>
         </div>
       )}
 
