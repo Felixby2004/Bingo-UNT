@@ -37,17 +37,20 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
   };
 
   const handleConfirm2FA = async () => {
+    if (!twoFAToken.trim()) return;
     try {
       const res = await axios.post(`${apiUrl}/api/admin/confirm-2fa`, { token: twoFAToken }, { withCredentials: true });
       if (res.data.success) {
         alert('✅ 2FA Activado correctamente. Panel desbloqueado.');
         setShow2FASetup(false);
-        // Recargar la página para que App.jsx vuelva a verificar el estado del usuario
-        window.location.reload();
+        // Pequeña pausa para asegurar que la DB en Neon se actualice antes de recargar
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }
     } catch (err) {
       console.error('Confirm 2FA error:', err);
-      alert('❌ Código inválido: ' + (err.response?.data?.message || err.message));
+      alert('❌ Código inválido o error de servidor: ' + (err.response?.data?.message || err.message));
     }
   };
 

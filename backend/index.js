@@ -464,6 +464,10 @@ app.get('/api/admin/me', authenticateToken, async (req, res) => {
     const result = await query('SELECT id, username, email, two_fa_enabled FROM admin_users WHERE id = $1', [req.user.id]);
     const user = result.rows[0];
     if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+    
+    // Forzar que el valor sea booleano real
+    user.two_fa_enabled = !!user.two_fa_enabled;
+    
     res.json({ user });
   } catch (err) {
     res.status(500).json({ error: err.message });
