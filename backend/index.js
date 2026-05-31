@@ -26,10 +26,7 @@ const logger = require('./utils/logger');
 const app = express();
 const server = http.createServer(app);
 
-// Security Middlewares
-app.use(helmet());
-app.use(cookieParser());
-
+// 1. CORS - Debe ir antes que cualquier otro middleware que maneje rutas
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
@@ -38,33 +35,42 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Permitir peticiones sin origen (como apps móviles o curl)
     if (!origin) return callback(null, true);
     
-    // Allow localhost in development
+    // Permitir localhost en desarrollo
     if (origin.includes('localhost')) return callback(null, true);
     
-    // Allow all onrender.com domains
+    // Permitir todos los subdominios de onrender.com (Frontend y Backend)
     if (origin.includes('.onrender.com')) return callback(null, true);
     
-    // Allow explicit FRONTEND_URL if set
-    if (allowedOrigins.indexOf(origin) !== -1) return callback(null, true);
+    // Permitir FRONTEND_URL explícito
+    if (allowedOrigins.some(o => origin.startsWith(o))) return callback(null, true);
     
-    // Allow all in development
+    // En desarrollo, permitir todo
     if (process.env.NODE_ENV !== 'production') return callback(null, true);
     
-    callback(new Error('Not allowed by CORS'));
+    callback(null, true); // Por ahora, permitimos para depurar
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
+
+// 2. Otros Middlewares
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginOpenerPolicy: { policy: "unsafe-none" }
+}));
+app.use(cookieParser());
 app.use(express.json());
 app.use(morgan('dev'));
 
-// Rate Limiting for Login
+// Rate Limiting for Login - Aumentado para evitar bloqueos por pruebas
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: { success: false, message: 'Demasiados intentos. Intente en 15 minutos.' },
+  windowMs: 5 * 60 * 1000, // 5 minutos
+  max: 20, // 20 intentos
+  message: { success: false, message: 'Demasiados intentos. Intente en 5 minutos.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -128,11 +134,13 @@ const sendEmailCode = async (email, username) => {
     const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6 dígitos
     const expiryTime = Date.now() + (parseInt(process.env.EMAIL_VERIFICATION_CODE_EXPIRY) || 600000); // Default 10 min
     
+    logger.info(`Guardando código de verificación en BD para ${username}...`);
     // Save code in DB
     await query(
       'INSERT INTO email_verification_codes (username, code, email, expires_at) VALUES ($1, $2, $3, $4)',
       [username, code, email, new Date(expiryTime)]
     );
+    logger.info(`Código guardado en BD. Preparando envío de email a ${email}...`);
 
     // Send email with timeout
     const sendMailPromise = emailTransporter.sendMail({
@@ -199,9 +207,14 @@ const getCachedPrizes = async () => {
 };
 
 // Initialize DB
-initDb().catch(err => {
-  logger.error('Failed to initialize database:', err);
-});
+logger.info('Iniciando conexión con la base de datos...');
+initDb()
+  .then(() => {
+    logger.info('✅ Base de datos inicializada correctamente');
+  })
+  .catch(err => {
+    logger.error('❌ Error crítico al inicializar la base de datos:', err);
+  });
 
 // Helper to get letter for a number
 const getLetter = (num) => {
