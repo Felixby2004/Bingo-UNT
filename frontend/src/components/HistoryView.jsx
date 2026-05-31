@@ -116,7 +116,7 @@ const HistoryView = () => {
         ) : (
           <div className="h-full min-h-[500px] flex flex-col items-center justify-center bg-white rounded-[2.5rem] border-2 border-dashed border-gray-100 text-gray-300">
             <History size={64} className="mb-4 opacity-10" />
-            <p className="font-black uppercase tracking-widest text-sm">Selecciona una partida para auditar los resultados</p>
+            <p className="font-black uppercase tracking-widest text-sm">Selecciona una partida para revisar los resultados</p>
           </div>
         )}
       </div>
