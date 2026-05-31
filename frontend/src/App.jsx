@@ -66,17 +66,26 @@ function App() {
   const checkAuth = async () => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const res = await axios.get(`${apiUrl}/api/admin/me`);
+      const token = localStorage.getItem('admin_token');
+      const config = { withCredentials: true };
+      
+      if (token) {
+        config.headers = { Authorization: `Bearer ${token}` };
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await axios.get(`${apiUrl}/api/admin/me`, config);
       if (res.data.user) {
         setUser(res.data.user);
-        // Si el usuario ya estaba en admin o intenta entrar, lo mantenemos
         const currentPath = window.location.hash || window.location.pathname;
         if (currentPath.includes('admin')) {
           setView('admin');
         }
       }
     } catch (err) {
-      // No logueado
+      // No logueado o token expirado
+      localStorage.removeItem('admin_token');
+      delete axios.defaults.headers.common['Authorization'];
     } finally {
       setLoading(false);
     }
@@ -107,6 +116,8 @@ function App() {
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
+      localStorage.removeItem('admin_token');
+      delete axios.defaults.headers.common['Authorization'];
       setUser(null);
       setView('public');
     }

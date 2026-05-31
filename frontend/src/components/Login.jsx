@@ -33,6 +33,10 @@ const Login = ({ onLogin }) => {
       }
 
       if (res.data.success) {
+        if (res.data.token) {
+          localStorage.setItem('admin_token', res.data.token);
+          axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+        }
         onLogin(res.data.user);
       }
     } catch (err) {

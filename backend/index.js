@@ -237,7 +237,16 @@ const getLetter = (num) => {
 // --- MIDDLEWARES ---
 
 const authenticateToken = (req, res, next) => {
-  const token = req.cookies.admin_token;
+  let token = req.cookies.admin_token;
+
+  // Respaldo: Buscar en el header Authorization (Bearer token)
+  if (!token && req.headers.authorization) {
+    const authHeader = req.headers.authorization;
+    if (authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    }
+  }
+
   if (!token) {
     logger.warn(`Intento de acceso sin token a ${req.path}`);
     return res.status(401).json({ message: 'No autorizado' });
@@ -392,23 +401,27 @@ app.post('/api/verify-email-code', loginLimiter, async (req, res) => {
     // Create JWT token
     const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '2h' });
     
+    // Log token details for debug
+    logger.info(`Generando token para ${user.username}. IP: ${req.ip}`);
+
     res.cookie('admin_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', // Changed from 'strict' to 'lax' for cross-origin
-      maxAge: 2 * 60 * 60 * 1000 // 2 hours
-    });
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    maxAge: 2 * 60 * 60 * 1000
+  });
 
-    // Log successful login
-    await query('INSERT INTO login_attempts (username, ip_address, user_agent, success) VALUES ($1, $2, $3, $4)', 
-      [username, req.ip, req.headers['user-agent'], true]
-    );
+  // Log successful login
+  await query('INSERT INTO login_attempts (username, ip_address, user_agent, success) VALUES ($1, $2, $3, $4)', 
+    [username, req.ip, req.headers['user-agent'], true]
+  );
 
-    res.json({ 
-      success: true, 
-      user: { id: user.id, username: user.username, two_fa_enabled: user.two_fa_enabled },
-      message: '✅ Acceso concedido'
-    });
+  res.json({ 
+    success: true, 
+    user: { id: user.id, username: user.username, two_fa_enabled: user.two_fa_enabled },
+    message: '✅ Acceso concedido',
+    token: token // Enviamos el token también por JSON como respaldo
+  });
   } catch (err) {
     logger.error('Email code verification error:', err);
     res.status(500).json({ success: false, message: 'Error al verificar el código' });
