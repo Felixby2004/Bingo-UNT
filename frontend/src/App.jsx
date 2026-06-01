@@ -21,6 +21,34 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [logoUrl, setLogoUrl] = useState('https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268');
 
+  // Lógica para prevenir la salida accidental con el botón de retroceso
+  useEffect(() => {
+    // Insertamos una entrada adicional en el historial
+    window.history.pushState(null, null, window.location.pathname);
+
+    let lastPopTime = 0;
+
+    const handlePopState = (event) => {
+      const now = Date.now();
+      // Si el usuario presiona atrás dos veces en menos de 2 segundos, permitimos la salida
+      if (now - lastPopTime < 2000) {
+        // No hacemos pushState, permitiendo que el siguiente "atrás" salga de la página
+        return;
+      }
+
+      // Bloqueamos la primera salida volviendo a empujar el estado
+      lastPopTime = now;
+      window.history.pushState(null, null, window.location.pathname);
+      // Opcionalmente podrías mostrar un toast silencioso o simplemente mantener al usuario aquí
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
   useEffect(() => {
     checkAuth();
     fetchCurrentGame();
