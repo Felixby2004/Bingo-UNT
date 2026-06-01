@@ -18,7 +18,7 @@ const BingoGrid = ({ drawnNumbers }) => {
       <div className="grid grid-cols-5 gap-2 sm:gap-4">
         {columns.map((col) => (
           <div key={col.letter} className="flex flex-col space-y-2">
-            <div className="w-full h-10 sm:h-14 flex items-center justify-center bg-unt-blue text-unt-yellow rounded-2xl font-black text-2xl sm:text-3xl shadow-lg mb-2 transform -rotate-2">
+            <div className="w-full h-10 sm:h-14 flex items-center justify-center bg-unt-blue text-unt-yellow rounded-2xl font-black text-2xl sm:text-3xl shadow-lg mb-2">
               {col.letter}
             </div>
             <div className="flex flex-col space-y-1 sm:space-y-1.5">
@@ -26,9 +26,9 @@ const BingoGrid = ({ drawnNumbers }) => {
               {Array.from({ length: 15 }, (_, i) => col.range[0] + i).map((num) => (
                 <div
                   key={num}
-                  className={`flex items-center justify-center py-2 sm:py-3 rounded-xl font-black text-xs sm:text-sm transition-all duration-500 border-2 ${
+                  className={`flex items-center justify-center py-2 sm:py-3 rounded-xl font-black text-xs sm:text-sm transition-all duration-300 border-2 ${
                     isDrawn(num) 
-                    ? 'bg-unt-yellow text-unt-blue border-unt-yellow scale-110 shadow-lg z-10 rotate-2' 
+                    ? 'bg-unt-yellow text-unt-blue border-unt-yellow shadow-md z-10' 
                     : 'bg-gray-50 text-gray-300 border-gray-100 hover:border-unt-blue/10 hover:bg-white'
                   }`}
                 >

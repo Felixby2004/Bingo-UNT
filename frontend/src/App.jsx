@@ -59,9 +59,25 @@ function App() {
     });
     socket.on('prize_removed', () => fetchPrizes());
 
+    socket.on('number_updated', (updatedNumber) => {
+      setGameState(prev => ({
+        ...prev,
+        drawnNumbers: prev.drawnNumbers.map(n => n.id === updatedNumber.id ? updatedNumber : n)
+      }));
+    });
+
+    socket.on('number_removed', ({ id }) => {
+      setGameState(prev => ({
+        ...prev,
+        drawnNumbers: prev.drawnNumbers.filter(n => n.id !== id)
+      }));
+    });
+
     return () => {
       socket.off('logo_updated');
       socket.off('number_drawn');
+      socket.off('number_updated');
+      socket.off('number_removed');
       socket.off('game_started');
       socket.off('game_finished');
       socket.off('prize_added');

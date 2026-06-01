@@ -111,9 +111,16 @@ const PublicView = ({ gameState, prizes }) => {
                 <span className="inline-block bg-unt-yellow text-unt-blue text-[10px] sm:text-xs font-bold px-3 py-1 sm:px-4 sm:py-1.5 rounded-full uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-2 sm:mb-4 animate-bounce shadow-lg shadow-unt-yellow/50">¡EN VIVO!</span>
               )}
               <h2 className={`text-2xl sm:text-5xl font-black uppercase tracking-tight mb-1 sm:mb-3 leading-tight drop-shadow-md ${isActivePrize ? 'text-white' : 'text-unt-blue'}`}>{selectedPrize.name}</h2>
-              <div className={`flex items-center justify-start space-x-2 sm:space-x-3 font-bold uppercase text-[10px] sm:text-sm ${isActivePrize ? 'text-unt-yellow' : 'text-gray-400'}`}>
-                <Award size={16} sm:size={20} />
-                <span className="line-clamp-1">{selectedPrize.status === 'finished' ? `¡GANADOR: ${selectedPrize.winner_name}!` : 'Sorteo en curso'}</span>
+              <div className={`flex flex-col space-y-2 ${isActivePrize ? 'text-unt-yellow' : 'text-gray-400'}`}>
+                <div className="flex items-center justify-start space-x-2 sm:space-x-3 font-bold uppercase text-[10px] sm:text-sm">
+                  <Award size={16} sm:size={20} />
+                  <span className="line-clamp-1">{selectedPrize.status === 'finished' ? `¡GANADOR: ${selectedPrize.winner_name}!` : 'Sorteo en curso'}</span>
+                </div>
+                {selectedPrize.description && (
+                  <p className={`text-[10px] sm:text-xs font-medium leading-relaxed max-w-md ${isActivePrize ? 'text-white/80' : 'text-gray-500'}`}>
+                    {selectedPrize.description}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -174,10 +181,6 @@ const PublicView = ({ gameState, prizes }) => {
           ) : activeTab === 'card' ? (
             <div className="space-y-6">
               <BingoCard drawnNumbers={isActivePrize ? gameState.drawnNumbers : []} activePrize={selectedPrize} />
-              <div className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
-                <h4 className="text-unt-blue font-black uppercase text-sm mb-2">Descripción del Sorteo</h4>
-                <p className="text-gray-400 text-xs leading-relaxed">{selectedPrize.description || "Sin descripción adicional."}</p>
-              </div>
             </div>
           ) : (
             <ChronologicalList drawnNumbers={isActivePrize ? gameState.drawnNumbers : []} />

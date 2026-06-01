@@ -107,10 +107,6 @@ const HistoryView = () => {
                 ))}
               </div>
             </div>
-
-            <div className="bg-gray-50 rounded-2xl p-6 text-center">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">Sistema de Auditoría Bingo UNT</p>
-            </div>
           </div>
         ) : (
           <div className="h-full min-h-[500px] flex flex-col items-center justify-center bg-white rounded-[2.5rem] border-2 border-dashed border-gray-100 text-gray-300">
