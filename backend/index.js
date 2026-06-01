@@ -133,10 +133,10 @@ const sendEmailCode = async (email, username) => {
     const msg = {
       to: email,
       from: {
-        email: process.env.SENDGRID_FROM_EMAIL || process.env.ADMIN_EMAIL,
+        email: process.env.SENDGRID_FROM_EMAIL,
         name: 'Bingo UNT Admin'
       },
-      replyTo: process.env.SENDGRID_FROM_EMAIL || process.env.ADMIN_EMAIL
+      replyTo: process.env.SENDGRID_FROM_EMAIL
     };
 
     if (process.env.SENDGRID_TEMPLATE_ID) {
@@ -323,11 +323,15 @@ app.post('/api/login', loginLimiter, async (req, res) => {
 
     // NEW: Send email code instead of traditional 2FA
     try {
-      await sendEmailCode(user.email || process.env.ADMIN_EMAIL, user.username);
+      if (!user.email) {
+        return res.status(400).json({ success: false, message: 'El usuario no tiene un correo configurado para el código 2FA.' });
+      }
+      
+      await sendEmailCode(user.email, user.username);
       
       return res.json({ 
         success: true, 
-        message: 'Código enviado a tu correo. Verifica tu email.',
+        message: `Código enviado a ${user.email.split('@')[0].slice(0,3)}***@${user.email.split('@')[1]}. Verifica tu email.`,
         requiresEmailCode: true,
         userId: user.id
       });
@@ -462,10 +466,10 @@ app.post('/api/request-2fa-reset', loginLimiter, async (req, res) => {
     const result = await query('SELECT email, username FROM admin_users WHERE LOWER(username) = LOWER($1)', [username]);
     const user = result.rows[0];
     
-    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+    if (!user.email) return res.status(404).json({ message: 'El usuario no tiene un correo configurado para recuperación.' });
 
-    await sendEmailCode(user.email || process.env.ADMIN_EMAIL, user.username);
-    res.json({ success: true, message: 'Código de recuperación enviado al correo' });
+    await sendEmailCode(user.email, user.username);
+    res.json({ success: true, message: `Código de recuperación enviado a ${user.email.split('@')[0].slice(0,3)}***@${user.email.split('@')[1]}` });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
