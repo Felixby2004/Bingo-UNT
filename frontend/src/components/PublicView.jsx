@@ -212,8 +212,15 @@ const PublicView = ({ gameState, prizes }) => {
             </div>
             {selectedPrize.description && (
               <div className={`${isActuallyPlaying ? 'bg-white/5' : 'bg-gray-50'} p-4 sm:p-6 rounded-2xl border ${isActuallyPlaying ? 'border-white/10' : 'border-gray-100'} text-center lg:text-right`}>
-                <p className={`${isActuallyPlaying ? 'text-white/40' : 'text-gray-400'} text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-2`}>Descripción del Sorteo</p>
-                <p className={`text-[10px] sm:text-xs font-medium leading-relaxed max-w-[250px] ${isActuallyPlaying ? 'text-white/80' : 'text-gray-600'}`}>
+                <p className={`${isActuallyPlaying ? 'text-white/40' : 'text-gray-400'} text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-2`}>
+                  Descripción del Sorteo
+                </p>
+
+                <p
+                  className={`text-[10px] sm:text-xs font-medium leading-relaxed max-w-[250px] text-justify ${
+                    isActuallyPlaying ? 'text-white/80' : 'text-gray-600'
+                  }`}
+                >
                   {selectedPrize.description}
                 </p>
               </div>
