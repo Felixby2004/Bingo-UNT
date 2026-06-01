@@ -5,9 +5,8 @@ import BingoCard from './BingoCard';
 import axios from 'axios';
 import { List, Grid, Trophy, Clock, Award, CreditCard, Instagram, Music2, ChevronLeft } from 'lucide-react';
 
-const PublicView = ({ gameState, prizes }) => {
+const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
   const [activeTab, setActiveTab] = useState('grid');
-  const [selectedPrize, setSelectedPrize] = useState(null);
   const [selectedPrizeNumbers, setSelectedPrizeNumbers] = useState([]);
   const [loadingNumbers, setLoadingNumbers] = useState(false);
 

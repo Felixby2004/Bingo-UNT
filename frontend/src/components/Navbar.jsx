@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LayoutDashboard, Users, Trophy, History, LogOut, Menu, X } from 'lucide-react';
 
-const Navbar = ({ view, setView, user, onLogout, logoUrl }) => {
+const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
@@ -10,6 +10,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl }) => {
 
   const handleNavClick = (id) => {
     setView(id);
+    if (id === 'public') setSelectedPrize(null);
     setIsOpen(false);
   };
 
@@ -18,7 +19,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl }) => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo y Título */}
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setSelectedPrize(null)}>
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => { setView('public'); setSelectedPrize(null); }}>
             <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center shrink-0 overflow-hidden">
               <img 
                 src={logoUrl || "https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268"} 

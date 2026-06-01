@@ -14,40 +14,51 @@ import Footer from './components/Footer';
 const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:3001');
 
 function App() {
-  const [view, setView] = useState('public'); // 'public', 'admin', 'history'
+  const [view, setView] = useState('public'); // 'public', 'admin'
+  const [selectedPrize, setSelectedPrize] = useState(null);
   const [user, setUser] = useState(null);
   const [gameState, setGameState] = useState({ prize: null, drawnNumbers: [] });
   const [prizes, setPrizes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [logoUrl, setLogoUrl] = useState('https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268');
 
-  // Lógica para prevenir la salida accidental con el botón de retroceso
+  // Lógica para navegación interna y prevención de salida accidental
   useEffect(() => {
-    // Insertamos una entrada adicional en el historial
-    window.history.pushState(null, null, window.location.pathname);
-
-    let lastPopTime = 0;
-
     const handlePopState = (event) => {
-      const now = Date.now();
-      // Si el usuario presiona atrás dos veces en menos de 2 segundos, permitimos la salida
-      if (now - lastPopTime < 2000) {
-        // No hacemos pushState, permitiendo que el siguiente "atrás" salga de la página
-        return;
+      const state = event.state;
+      if (state) {
+        // Sincronizamos los estados de la aplicación con el historial
+        if (state.view) setView(state.view);
+        setSelectedPrize(state.selectedPrize || null);
+      } else {
+        // Si intentan ir más atrás del inicio, los mantenemos en la vista pública
+        setView('public');
+        setSelectedPrize(null);
+        window.history.pushState({ view: 'public', selectedPrize: null }, '', window.location.pathname);
       }
-
-      // Bloqueamos la primera salida volviendo a empujar el estado
-      lastPopTime = now;
-      window.history.pushState(null, null, window.location.pathname);
-      // Opcionalmente podrías mostrar un toast silencioso o simplemente mantener al usuario aquí
     };
 
     window.addEventListener('popstate', handlePopState);
 
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
+    // Estado inicial
+    if (!window.history.state) {
+      window.history.replaceState({ view: 'public', selectedPrize: null }, '', window.location.pathname);
+    }
+
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // Actualizar historial cuando cambian los estados manualmente
+  useEffect(() => {
+    const currentState = window.history.state;
+    const hasChanged = !currentState || 
+                      currentState.view !== view || 
+                      (currentState.selectedPrize?.id !== selectedPrize?.id);
+
+    if (hasChanged) {
+      window.history.pushState({ view, selectedPrize }, '', window.location.pathname);
+    }
+  }, [view, selectedPrize]);
 
   useEffect(() => {
     checkAuth();
@@ -206,6 +217,7 @@ function App() {
         user={user} 
         onLogout={handleLogout} 
         logoUrl={logoUrl}
+        setSelectedPrize={setSelectedPrize}
       />
       
       <main className="flex-grow container mx-auto px-4 py-8">
@@ -225,6 +237,8 @@ function App() {
             <PublicView 
               gameState={gameState} 
               prizes={prizes}
+              selectedPrize={selectedPrize}
+              setSelectedPrize={setSelectedPrize}
             />
           )}
         </main>
