@@ -756,6 +756,23 @@ app.put('/api/drawn-numbers/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// NEW: Delete a drawn number
+app.delete('/api/drawn-numbers/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await query('DELETE FROM drawn_numbers WHERE id = $1 RETURNING prize_id', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Número no encontrado' });
+    }
+    
+    cache.currentGame = null; // Clear cache
+    io.emit('number_removed', { id, prize_id: result.rows[0].prize_id });
+    res.sendStatus(204);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/prizes/finish', authenticateToken, async (req, res) => {
   const { prize_id, winner_name } = req.body;
   try {

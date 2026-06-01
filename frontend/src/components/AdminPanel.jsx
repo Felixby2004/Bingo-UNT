@@ -20,6 +20,7 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
   const [twoFAToken, setTwoFAToken] = useState('');
 
   const [editingNumber, setEditingNumber] = useState(null);
+  const [editValue, setEditValue] = useState('');
   const [hourOffset, setHourOffset] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -207,10 +208,32 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
     try {
       await axios.put(`${apiUrl}/api/drawn-numbers/${id}`, { number: parseInt(newNum) });
       setEditingNumber(null);
+      setEditValue('');
       refreshGame();
     } catch (err) {
       console.error('Error editing number:', err);
       alert('Error al editar el número');
+    }
+  };
+
+  const startEditing = (n) => {
+    setEditingNumber(n.id);
+    setEditValue(n.number.toString());
+  };
+
+  const cancelEditing = () => {
+    setEditingNumber(null);
+    setEditValue('');
+  };
+
+  const handleDeleteNumber = async (id) => {
+    if (!window.confirm('¿Eliminar este número del sorteo?')) return;
+    try {
+      await axios.delete(`${apiUrl}/api/drawn-numbers/${id}`);
+      refreshGame();
+    } catch (err) {
+      console.error('Error deleting number:', err);
+      alert('Error al eliminar el número');
     }
   };
 
@@ -434,26 +457,53 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
                   {gameState.drawnNumbers.slice(0, 12).map((n, idx) => (
                     <div 
-                      key={idx} 
+                      key={n.id || idx} 
                       className={`group relative aspect-square flex flex-col items-center justify-center rounded-2xl border-2 transition-all ${idx === 0 ? 'bg-unt-yellow border-unt-yellow shadow-lg scale-110' : 'bg-gray-50 border-gray-100'}`}
                     >
                       {editingNumber === n.id ? (
-                        <input 
-                          autoFocus
-                          type="number"
-                          defaultValue={n.number}
-                          onBlur={(e) => handleEditNumber(n.id, e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleEditNumber(n.id, e.target.value)}
-                          className="w-full h-full text-center bg-white rounded-2xl font-black text-xl outline-none border-2 border-unt-blue"
-                        />
+                        <div className="absolute inset-0 z-20 bg-white rounded-2xl flex flex-col p-1 shadow-2xl border-2 border-unt-blue">
+                          <input 
+                            autoFocus 
+                            type="number" 
+                            value={editValue} 
+                            onChange={(e) => setEditValue(e.target.value)}
+                            className="w-full flex-grow text-center font-black text-xl outline-none"
+                          />
+                          <div className="flex space-x-1 mt-1">
+                            <button 
+                              onClick={() => handleEditNumber(n.id, editValue)}
+                              className="flex-1 bg-green-500 text-white p-1 rounded-lg hover:bg-green-600 transition-colors"
+                              title="Actualizar"
+                            >
+                              <Save size={12} className="mx-auto" />
+                            </button>
+                            <button 
+                              onClick={cancelEditing}
+                              className="flex-1 bg-gray-200 text-gray-500 p-1 rounded-lg hover:bg-gray-300 transition-colors"
+                              title="Cancelar"
+                            >
+                              <X size={12} className="mx-auto" />
+                            </button>
+                          </div>
+                        </div>
                       ) : (
                         <>
-                          <button 
-                            onClick={() => setEditingNumber(n.id)}
-                            className="absolute top-1 right-1 p-1 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-unt-blue"
-                          >
-                            <Edit2 size={10} />
-                          </button>
+                          <div className="absolute top-1 right-1 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button 
+                              onClick={() => startEditing(n)} 
+                              className="p-1 bg-white/80 rounded-md text-unt-blue hover:text-unt-blue/70 shadow-sm"
+                              title="Editar"
+                            >
+                              <Edit2 size={8} />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteNumber(n.id)} 
+                              className="p-1 bg-white/80 rounded-md text-red-500 hover:text-red-600 shadow-sm"
+                              title="Eliminar"
+                            >
+                              <Trash2 size={8} />
+                            </button>
+                          </div>
                           <span className={`text-[8px] font-black ${idx === 0 ? 'text-unt-blue/60' : 'text-gray-400'}`}>{n.letter}</span>
                           <span className={`text-xl font-black ${idx === 0 ? 'text-unt-blue' : 'text-gray-700'}`}>{n.number}</span>
                         </>
