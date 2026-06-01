@@ -20,8 +20,12 @@ const Navbar = ({ view, setView, user, onLogout }) => {
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo y Título */}
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => handleNavClick('public')}>
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-unt-yellow rounded-xl rotate-3 flex items-center justify-center shadow-lg transform hover:rotate-0 transition-transform shrink-0">
-              <span className="text-unt-blue font-black text-xl sm:text-2xl">B</span>
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-unt-yellow rounded-xl rotate-3 flex items-center justify-center shadow-lg transform hover:rotate-0 transition-transform shrink-0 overflow-hidden">
+              <img 
+                src="https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268" 
+                alt="Logo PROM 28" 
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="flex flex-col">
               <span className="font-black text-sm sm:text-lg tracking-tight block leading-none uppercase">Bingo Sistemas</span>

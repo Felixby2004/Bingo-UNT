@@ -148,6 +148,10 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
       setTicketToVerify('');
       refreshGame();
       refreshPrizes();
+      // Forzar recarga suave o reset de estados críticos para asegurar visibilidad
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (err) {
       console.error('Error finishing game:', err);
       alert('Error al finalizar el sorteo');
@@ -377,17 +381,73 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
             <input type="text" placeholder="Nro Cartilla" value={ticketToVerify} onChange={(e) => setTicketToVerify(e.target.value)} className="flex-grow p-3 bg-gray-50 rounded-xl outline-none font-bold" />
             <button type="submit" disabled={isVerifying} className="bg-unt-blue text-unt-yellow px-6 rounded-xl font-black uppercase text-xs">{isVerifying ? '...' : 'Verificar'}</button>
           </form>
-          {verificationResult && (
-            <div className="space-y-4">
-              <div className="bg-gray-50 p-4 rounded-2xl grid grid-cols-2 gap-4">
-                <div><p className="text-[8px] text-gray-400 uppercase font-black">Vendedor</p><p className="font-black text-unt-blue">{verificationResult.seller}</p></div>
-                <div><p className="text-[8px] text-gray-400 uppercase font-black">Comprador</p><p className="font-black text-unt-blue">{verificationResult.buyer}</p></div>
-              </div>
-              {isVerified && (
-                <button onClick={handleFinishGame} className="w-full bg-red-500 text-white py-4 rounded-2xl font-black text-lg shadow-xl shadow-red-500/20">FINALIZAR Y GUARDAR GANADOR</button>
+              {verificationResult && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="bg-gray-50 rounded-[2rem] p-6 border-2 border-gray-100">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-4">
+                        <div className="bg-white p-4 rounded-2xl border border-gray-100">
+                          <p className="text-[10px] text-gray-400 font-black uppercase mb-1">Vendedor</p>
+                          <p className="text-xl font-black text-unt-blue">{verificationResult.seller}</p>
+                        </div>
+                        <div className="bg-white p-4 rounded-2xl border border-gray-100">
+                          <p className="text-[10px] text-gray-400 font-black uppercase mb-1">Comprador</p>
+                          <p className="text-xl font-black text-unt-blue">{verificationResult.buyer}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col items-center justify-center bg-white rounded-2xl p-4 border border-gray-100 min-h-[400px]">
+                        {verificationResult.file ? (
+                          <div className="text-center space-y-4 w-full h-full flex flex-col">
+                            <p className="text-[10px] text-gray-400 font-black uppercase">Archivo de la Cartilla</p>
+                            
+                            <div className="flex-grow w-full h-[350px] rounded-xl overflow-hidden border-2 border-gray-50 shadow-inner">
+                              <iframe 
+                                src={verificationResult.file.viewLink.replace('/view', '/preview')} 
+                                className="w-full h-full"
+                                title="Vista previa de cartilla"
+                                allow="autoplay"
+                              ></iframe>
+                            </div>
+
+                            <div className="flex justify-center space-x-4">
+                              <a 
+                                href={verificationResult.file.viewLink} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="inline-block text-xs font-black text-unt-blue underline uppercase bg-gray-50 px-4 py-2 rounded-lg hover:bg-unt-yellow transition-colors"
+                              >
+                                Abrir en Drive
+                              </a>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center p-8">
+                            <X size={48} className="text-red-300 mx-auto mb-2" />
+                            <p className="text-xs font-bold text-gray-400 uppercase">Foto no encontrada en Drive</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Botón Finalizar reubicado y condicional */}
+                  {isVerified && gameState.prize && gameState.prize.status === 'active' && (
+                    <div className="flex flex-col items-center space-y-4 pt-4">
+                      <div className="text-center">
+                        <p className="text-xs font-black text-green-600 uppercase mb-2">¡GANADOR VERIFICADO!</p>
+                        <p className="text-sm font-bold text-gray-500">Se registrará a: <span className="text-unt-blue">{winnerName}</span></p>
+                      </div>
+                      <button 
+                        onClick={handleFinishGame}
+                        className="w-full max-w-md bg-red-500 text-white py-4 rounded-2xl font-black text-lg hover:bg-red-600 transition-all shadow-xl shadow-red-500/20 hover:scale-[1.02] active:scale-[0.98]"
+                      >
+                        FINALIZAR SORTEO Y GUARDAR GANADOR
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
-            </div>
-          )}
         </section>
       </div>
     </div>

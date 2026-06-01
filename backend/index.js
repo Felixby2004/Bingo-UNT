@@ -688,7 +688,7 @@ app.post('/api/prizes/draw', authenticateToken, async (req, res) => {
   try {
     const result = await query(
       'INSERT INTO drawn_numbers (prize_id, number, letter, drawn_at) VALUES ($1, $2, $3, $4) RETURNING *',
-      [prize_id, number, letter, drawn_at || new Date()]
+      [prize_id, number, letter, drawn_at || moment().tz(TIMEZONE).toDate()]
     );
     const drawnNumber = result.rows[0];
     drawnNumber.formatted_time = moment(drawnNumber.drawn_at).tz(TIMEZONE).format('HH:mm:ss');

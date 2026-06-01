@@ -53,7 +53,7 @@ const HistoryView = () => {
                   <h4 className="font-black text-unt-blue text-sm uppercase group-hover:text-unt-blue/80 transition-colors">{p.name}</h4>
                   <div className="flex items-center space-x-2 mt-1">
                     <Calendar size={10} className="text-gray-400" />
-                    <span className="text-[10px] text-gray-400 font-bold">{moment(p.finished_at).format('DD/MM/YYYY')}</span>
+                    <span className="text-[10px] text-gray-400 font-bold">{moment(p.finished_at).tz('America/Lima').format('DD/MM/YYYY')}</span>
                   </div>
                 </div>
                 <ChevronRight size={16} className={`text-gray-200 group-hover:text-unt-yellow transition-all ${selectedPrize?.prize.id === p.id ? 'translate-x-1 text-unt-yellow' : ''}`} />
@@ -78,7 +78,7 @@ const HistoryView = () => {
                   </div>
                   <div className="w-1 h-1 bg-gray-200 rounded-full"></div>
                   <div className="text-[10px] text-gray-400 font-bold uppercase">
-                    Finalizada: {moment(selectedPrize.prize.finished_at).format('HH:mm:ss')}
+                    Finalizada: {moment(selectedPrize.prize.finished_at).tz('America/Lima').format('HH:mm:ss')}
                   </div>
                 </div>
               </div>
@@ -103,7 +103,7 @@ const HistoryView = () => {
                   <div key={idx} className="aspect-square flex flex-col items-center justify-center bg-gray-50 border border-gray-100 rounded-2xl p-2 hover:bg-white hover:shadow-md transition-all cursor-default group">
                     <span className="text-[8px] font-black text-gray-300 group-hover:text-unt-blue/40 transition-colors leading-none">{n.letter}</span>
                     <span className="text-xl font-black text-unt-blue leading-tight">{n.number}</span>
-                    <span className="text-[8px] text-gray-300 font-bold mt-1">{moment(n.drawn_at).format('HH:mm')}</span>
+                    <span className="text-[8px] text-gray-300 font-bold mt-1">{moment(n.drawn_at).tz('America/Lima').format('HH:mm')}</span>
                   </div>
                 ))}
               </div>
