@@ -45,7 +45,7 @@ const BingoCard = ({ drawnNumbers, activePrize }) => {
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 bg-gray-50 border border-gray-100 rounded-md"></div>
-          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No válido</span>
+          <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">No válido</span>
         </div>
       </div>
     </div>

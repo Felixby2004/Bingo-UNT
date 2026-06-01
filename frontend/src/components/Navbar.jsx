@@ -91,6 +91,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl }) => {
           <button 
             className="md:hidden p-2 rounded-xl bg-white/5 text-unt-white"
             onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>

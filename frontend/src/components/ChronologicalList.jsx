@@ -5,7 +5,7 @@ import { Clock } from 'lucide-react';
 const ChronologicalList = ({ drawnNumbers }) => {
   if (drawnNumbers.length === 0) {
     return (
-      <div className="bg-white p-8 rounded-xl border-2 border-dashed border-gray-200 text-center text-gray-400">
+      <div className="bg-white p-8 rounded-xl border-2 border-dashed border-gray-200 text-center text-gray-600 font-bold">
         Esperando el primer número...
       </div>
     );

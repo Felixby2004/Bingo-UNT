@@ -81,14 +81,14 @@ const PublicView = ({ gameState, prizes }) => {
             <Trophy size={40} className="text-unt-yellow animate-bounce" />
           </div>
           <h2 className="text-4xl font-black text-unt-blue uppercase tracking-tight drop-shadow-sm">¡Premios!</h2>
-          <p className="text-gray-500 font-semibold uppercase tracking-widest text-sm">¡Elige un premio y mira el sorteo!</p>
+          <p className="text-gray-600 font-semibold uppercase tracking-widest text-sm">¡Elige un premio y mira el sorteo!</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-10">
           {sortedPrizes.length === 0 ? (
             <div className="col-span-full py-20 text-center bg-white rounded-[3rem] border-4 border-dashed border-gray-100 shadow-inner">
               <Clock size={64} className="mx-auto mb-6 text-gray-200" />
-              <p className="text-gray-400 font-bold uppercase tracking-widest text-xl">Pronto tendremos más premios...</p>
+              <p className="text-gray-500 font-bold uppercase tracking-widest text-xl">Pronto tendremos más premios...</p>
             </div>
           ) : (
             sortedPrizes.map(p => (
@@ -99,9 +99,14 @@ const PublicView = ({ gameState, prizes }) => {
               >
                 <div className="aspect-square relative overflow-hidden bg-gray-50">
                   {p.image_url ? (
-                    <img src={p.image_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <img 
+                      src={p.image_url} 
+                      alt={`Imagen del premio: ${p.name}`} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      loading="lazy"
+                    />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-200">
+                    <div className="w-full h-full flex items-center justify-center text-gray-300">
                       <Trophy size={60} className="sm:size-[120px]" />
                     </div>
                   )}
@@ -117,7 +122,7 @@ const PublicView = ({ gameState, prizes }) => {
                 </div>
                 <div className="p-4 sm:p-10 text-center">
                   <h3 className="text-sm sm:text-2xl font-black text-unt-blue uppercase mb-1 sm:mb-3 group-hover:text-unt-yellow transition-colors leading-tight line-clamp-1">{p.name}</h3>
-                  <p className="hidden sm:block text-gray-500 text-sm font-medium line-clamp-2 mb-8 h-10">{p.description}</p>
+                  <p className="hidden sm:block text-gray-600 text-sm font-medium line-clamp-2 mb-8 h-10">{p.description}</p>
                   
                   {p.status === 'finished' ? (
                     <div className="bg-green-50 p-2 sm:p-6 rounded-xl sm:rounded-3xl flex flex-col items-center space-y-1 sm:space-y-2 border-2 border-green-100">
@@ -181,13 +186,24 @@ const PublicView = ({ gameState, prizes }) => {
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-12 items-center">
           <div className="flex items-center space-x-4 sm:space-x-8">
             {selectedPrize.image_url && (
-              <img src={selectedPrize.image_url} className={`w-24 h-24 sm:w-48 sm:h-48 rounded-[1.5rem] sm:rounded-[2.5rem] object-cover border-4 sm:border-8 shadow-2xl transform -rotate-2 sm:-rotate-3 transition-transform hover:rotate-0 duration-500 ${isActuallyPlaying ? 'border-unt-yellow' : 'border-gray-100'}`} alt={selectedPrize.name} />
+              <img 
+                src={selectedPrize.image_url} 
+                className={`w-24 h-24 sm:w-48 sm:h-48 rounded-[1.5rem] sm:rounded-[2.5rem] object-cover border-4 sm:border-8 shadow-2xl transform -rotate-2 sm:-rotate-3 transition-transform hover:rotate-0 duration-500 ${isActuallyPlaying ? 'border-unt-yellow' : 'border-gray-100'}`} 
+                alt={`Imagen detallada del premio: ${selectedPrize.name}`}
+                loading="lazy"
+              />
             )}
             <div className="text-left">
               {isActuallyPlaying && (
                 <span className="inline-block bg-unt-yellow text-unt-blue text-[10px] sm:text-xs font-bold px-3 py-1 sm:px-4 sm:py-1.5 rounded-full uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-2 sm:mb-4 animate-bounce shadow-lg shadow-unt-yellow/50">¡EN VIVO!</span>
               )}
               <h2 className={`text-xl sm:text-3xl font-black uppercase tracking-tight mb-1 sm:mb-3 leading-tight drop-shadow-md ${isActuallyPlaying ? 'text-white' : 'text-unt-blue'}`}>{selectedPrize.name}</h2>
+              <div className={`flex flex-col space-y-2 ${isActuallyPlaying ? 'text-unt-yellow' : 'text-gray-600'}`}>
+                <div className="flex items-center justify-start space-x-2 sm:space-x-3 font-bold uppercase text-[10px] sm:text-sm">
+                  <Award size={16} sm:size={20} />
+                  <span className="line-clamp-1">{selectedPrize.status === 'finished' ? `¡GANADOR: ${selectedPrize.winner_name}!` : 'Sorteo en curso'}</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -196,23 +212,23 @@ const PublicView = ({ gameState, prizes }) => {
               <span className="text-unt-blue/40 font-bold text-xl sm:text-3xl leading-none">{(isActuallyPlaying || selectedPrize.status === 'finished') ? (lastNumber?.letter || '!') : '!'}</span>
               <span className="text-5xl sm:text-9xl font-black text-unt-blue leading-tight tracking-tighter">{(isActuallyPlaying || selectedPrize.status === 'finished') ? (lastNumber?.number || '??') : '??'}</span>
             </div>
-            <p className={`mt-3 sm:mt-6 text-[8px] sm:text-xs font-bold uppercase tracking-[0.3em] sm:tracking-[0.4em] ${isActuallyPlaying ? 'text-white/60' : 'text-gray-300'}`}>Último Cantado</p>
+            <p className={`mt-3 sm:mt-6 text-[8px] sm:text-xs font-bold uppercase tracking-[0.3em] sm:tracking-[0.4em] ${isActuallyPlaying ? 'text-white/70' : 'text-gray-500'}`}>Último Cantado</p>
           </div>
 
           <div className="flex flex-col items-center lg:items-end space-y-4 sm:space-y-6">
             <div className={`${isActuallyPlaying ? 'bg-white/10' : 'bg-gray-100'} backdrop-blur-md px-6 py-4 sm:px-10 sm:py-6 rounded-[1.5rem] sm:rounded-[2.5rem] border-2 sm:border-4 ${isActuallyPlaying ? 'border-white/20' : 'border-gray-100'} text-center lg:text-right shadow-xl`}>
-              <p className={`${isActuallyPlaying ? 'text-white/60' : 'text-gray-500'} text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1 sm:mb-2`}>Total Cantados</p>
+              <p className={`${isActuallyPlaying ? 'text-white/70' : 'text-gray-600'} text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1 sm:mb-2`}>Total Cantados</p>
               <p className={`text-3xl sm:text-5xl font-black ${isActuallyPlaying ? 'text-unt-yellow' : 'text-unt-blue'}`}>{selectedPrizeNumbers.length}</p>
             </div>
             {selectedPrize.description && (
               <div className={`${isActuallyPlaying ? 'bg-white/5' : 'bg-gray-50'} p-4 sm:p-6 rounded-2xl border ${isActuallyPlaying ? 'border-white/10' : 'border-gray-100'} text-center lg:text-right`}>
-                <p className={`${isActuallyPlaying ? 'text-white/40' : 'text-gray-400'} text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-2`}>
+                <p className={`${isActuallyPlaying ? 'text-white/60' : 'text-gray-500'} text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-2`}>
                   Descripción del Sorteo
                 </p>
 
                 <p
                   className={`text-[10px] sm:text-xs font-medium leading-relaxed max-w-[250px] text-justify ${
-                    isActuallyPlaying ? 'text-white/80' : 'text-gray-600'
+                    isActuallyPlaying ? 'text-white/90' : 'text-gray-700'
                   }`}
                 >
                   {selectedPrize.description}

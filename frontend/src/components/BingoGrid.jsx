@@ -29,7 +29,7 @@ const BingoGrid = ({ drawnNumbers }) => {
                   className={`flex items-center justify-center py-2 sm:py-3 rounded-xl font-black text-xs sm:text-sm transition-all duration-300 border-2 ${
                     isDrawn(num) 
                     ? 'bg-unt-yellow text-unt-blue border-unt-yellow shadow-md z-10' 
-                    : 'bg-gray-50 text-gray-300 border-gray-100 hover:border-unt-blue/10 hover:bg-white'
+                    : 'bg-gray-50 text-gray-500 border-gray-100 hover:border-unt-blue/10 hover:bg-white'
                   }`}
                 >
                   {num}

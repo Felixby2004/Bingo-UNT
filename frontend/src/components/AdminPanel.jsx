@@ -401,14 +401,27 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
                     </div>
                   </div>
                   <div className="flex space-x-2">
-                    <button onClick={() => handleEditPrize(p)} className="text-gray-300 hover:text-unt-blue"><Edit2 size={14}/></button>
-                    <button onClick={() => handleDeletePrize(p.id)} className="text-gray-300 hover:text-red-500"><Trash2 size={14}/></button>
+                    <button 
+                      onClick={() => handleEditPrize(p)} 
+                      className="text-gray-400 hover:text-unt-blue"
+                      aria-label={`Editar premio ${p.name}`}
+                    >
+                      <Edit2 size={14}/>
+                    </button>
+                    <button 
+                      onClick={() => handleDeletePrize(p.id)} 
+                      className="text-gray-400 hover:text-red-500"
+                      aria-label={`Eliminar premio ${p.name}`}
+                    >
+                      <Trash2 size={14}/>
+                    </button>
                   </div>
                 </div>
                 {p.status !== 'finished' && p.status !== 'active' && (
                   <button 
                     onClick={() => handleStartGame(p.id)} 
                     className="w-full mt-3 bg-white border-2 border-unt-blue text-unt-blue text-[10px] font-black py-2 rounded-lg uppercase hover:bg-unt-blue hover:text-unt-yellow transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-unt-blue/20"
+                    aria-label={`Iniciar sorteo para ${p.name}`}
                   >
                     Iniciar
                   </button>
@@ -497,6 +510,7 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
                             <button 
                               onClick={() => startEditing(n)} 
                               className="p-1 bg-white/80 rounded-md text-unt-blue hover:text-unt-blue/70 shadow-sm"
+                              aria-label={`Editar número ${n.number}`}
                               title="Editar"
                             >
                               <Edit2 size={8} />
@@ -504,12 +518,13 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
                             <button 
                               onClick={() => handleDeleteNumber(n.id)} 
                               className="p-1 bg-white/80 rounded-md text-red-500 hover:text-red-600 shadow-sm"
+                              aria-label={`Eliminar número ${n.number}`}
                               title="Eliminar"
                             >
                               <Trash2 size={8} />
                             </button>
                           </div>
-                          <span className={`text-[8px] font-black ${idx === 0 ? 'text-unt-blue/60' : 'text-gray-400'}`}>{n.letter}</span>
+                          <span className={`text-[8px] font-black ${idx === 0 ? 'text-unt-blue/70' : 'text-gray-500'}`}>{n.letter}</span>
                           <span className={`text-xl font-black ${idx === 0 ? 'text-unt-blue' : 'text-gray-700'}`}>{n.number}</span>
                         </>
                       )}
@@ -525,7 +540,14 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
         <section className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
           <h2 className="text-lg font-black text-unt-blue uppercase mb-4">Verificador</h2>
           <form onSubmit={handleVerifyWinner} className="flex space-x-2 mb-4">
-            <input type="text" placeholder="Nro Cartilla" value={ticketToVerify} onChange={(e) => setTicketToVerify(e.target.value)} className="flex-grow p-3 bg-gray-50 rounded-xl outline-none font-bold" />
+            <input 
+              type="text" 
+              placeholder="Nro Cartilla" 
+              value={ticketToVerify} 
+              onChange={(e) => setTicketToVerify(e.target.value)} 
+              className="flex-grow p-3 bg-gray-50 rounded-xl outline-none font-bold" 
+              aria-label="Número de Cartilla a verificar"
+            />
             <button type="submit" disabled={isVerifying} className="bg-unt-blue text-unt-yellow px-6 rounded-xl font-black uppercase text-xs">{isVerifying ? '...' : 'Verificar'}</button>
           </form>
               {verificationResult && (
@@ -534,11 +556,11 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-4">
                         <div className="bg-white p-4 rounded-2xl border border-gray-100">
-                          <p className="text-[10px] text-gray-400 font-black uppercase mb-1">Vendedor</p>
+                          <p className="text-[10px] text-gray-500 font-black uppercase mb-1">Vendedor</p>
                           <p className="text-xl font-black text-unt-blue">{verificationResult.seller}</p>
                         </div>
                         <div className="bg-white p-4 rounded-2xl border border-gray-100">
-                          <p className="text-[10px] text-gray-400 font-black uppercase mb-1">Comprador</p>
+                          <p className="text-[10px] text-gray-500 font-black uppercase mb-1">Comprador</p>
                           <p className="text-xl font-black text-unt-blue">{verificationResult.buyer}</p>
                         </div>
                       </div>
@@ -546,7 +568,7 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
                       <div className="flex flex-col items-center justify-center bg-white rounded-2xl p-4 border border-gray-100 min-h-[400px]">
                         {verificationResult.file ? (
                           <div className="text-center space-y-4 w-full h-full flex flex-col">
-                            <p className="text-[10px] text-gray-400 font-black uppercase">Archivo de la Cartilla</p>
+                            <p className="text-[10px] text-gray-500 font-black uppercase">Archivo de la Cartilla</p>
                             
                             <div className="flex-grow w-full h-[350px] rounded-xl overflow-hidden border-2 border-gray-50 shadow-inner">
                               <iframe 
@@ -561,7 +583,7 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
                               <a 
                                 href={verificationResult.file.viewLink} 
                                 target="_blank" 
-                                rel="noreferrer"
+                                rel="noopener noreferrer"
                                 className="inline-block text-xs font-black text-unt-blue underline uppercase bg-gray-50 px-4 py-2 rounded-lg hover:bg-unt-yellow transition-colors"
                               >
                                 Abrir en Drive
@@ -571,7 +593,7 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
                         ) : (
                           <div className="text-center p-8">
                             <X size={48} className="text-red-300 mx-auto mb-2" />
-                            <p className="text-xs font-bold text-gray-400 uppercase">Foto no encontrada en Drive</p>
+                            <p className="text-xs font-bold text-gray-500 uppercase">Foto no encontrada en Drive</p>
                           </div>
                         )}
                       </div>

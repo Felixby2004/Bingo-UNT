@@ -172,9 +172,9 @@ const Login = ({ onLogin }) => {
             {!requiresEmailCode && !requiresTOTP && !isResetting2FA ? (
               <>
                 <div>
-                  <label className="block text-xs font-black text-gray-500 uppercase mb-1 ml-1">Usuario</label>
+                  <label className="block text-xs font-black text-gray-700 uppercase mb-1 ml-1">Usuario</label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
                     <input
                       type="text"
                       value={username}
@@ -182,14 +182,15 @@ const Login = ({ onLogin }) => {
                       className="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-unt-blue focus:bg-white rounded-xl outline-none transition-all font-medium"
                       disabled={loading}
                       required
+                      aria-label="Nombre de usuario"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black text-gray-500 uppercase mb-1 ml-1">Contraseña</label>
+                  <label className="block text-xs font-black text-gray-700 uppercase mb-1 ml-1">Contraseña</label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
                     <input
                       type="password"
                       value={password}
@@ -197,6 +198,7 @@ const Login = ({ onLogin }) => {
                       className="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-transparent focus:border-unt-blue focus:bg-white rounded-xl outline-none transition-all font-medium"
                       disabled={loading}
                       required
+                      aria-label="Contraseña"
                     />
                   </div>
                 </div>
