@@ -108,25 +108,16 @@ if (process.env.SENDGRID_API_KEY) {
 
 // Function to generate and send email code
 const sendEmailCode = async (email, username) => {
+  logger.log(`📧 Intentando enviar código 2FA a: ${email} (Usuario: ${username})`);
+  
   if (!email) {
+    logger.error(`❌ Error: El usuario ${username} no tiene un correo electrónico configurado.`);
     throw new Error('El usuario no tiene un correo electrónico configurado.');
-  }
-
-  if (!process.env.SENDGRID_API_KEY) {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiryTime = Date.now() + 600000;
-    
-    await query(
-      'INSERT INTO email_verification_codes (username, code, email, expires_at) VALUES ($1, $2, $3, $4)',
-      [username, code, email, new Date(expiryTime)]
-    );
-    
-    return code;
   }
 
   try {
     const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6 dígitos
-    const expiryTime = Date.now() + (parseInt(process.env.EMAIL_VERIFICATION_CODE_EXPIRY) || 600000); // Default 10 min
+    const expiryTime = Date.now() + (parseInt(process.env.EMAIL_VERIFICATION_CODE_EXPIRY) || 600000);
     
     // Save code in DB
     await query(
@@ -134,45 +125,44 @@ const sendEmailCode = async (email, username) => {
       [username, code, email, new Date(expiryTime)]
     );
 
-    // Send email via SendGrid HTTP API
-    try {
-      const msg = {
-        to: email,
-        from: {
-          email: process.env.SENDGRID_FROM_EMAIL,
-          name: 'Bingo UNT Admin'
-        },
-        replyTo: process.env.SENDGRID_FROM_EMAIL
-      };
-
-      // Si hay un Template ID, lo usamos. Si no, usamos el HTML por defecto.
-      if (process.env.SENDGRID_TEMPLATE_ID) {
-        msg.templateId = process.env.SENDGRID_TEMPLATE_ID;
-        msg.dynamicTemplateData = {
-          username: username,
-          code: code
-        };
-      } else {
-        msg.subject = '🔐 Tu Código de Acceso - Bingo UNT';
-        msg.html = `
-          <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
-            <h2 style="color: #1F3A93; text-align: center;">🎲 BINGO UNT - ACCESO ADMINISTRADOR</h2>
-            <p style="font-size: 16px; color: #333;">¡Hola <strong>${username}</strong>!</p>
-            <p style="font-size: 14px; color: #666;">Usa el siguiente código para verificar tu identidad:</p>
-            <div style="background-color: #f0f0f0; border-left: 4px solid #FFD700; padding: 20px; margin: 20px 0; text-align: center;">
-              <p style="font-size: 32px; font-weight: bold; color: #1F3A93; letter-spacing: 5px; margin: 0;">${code}</p>
-            </div>
-          </div>
-        `;
-      }
-      
-      await sgMail.send(msg);
-    } catch (mailErr) {
-      // Error silencioso
+    if (!process.env.SENDGRID_API_KEY) {
+      logger.warn('⚠️ SENDGRID_API_KEY no configurada. Código generado solo en DB.');
+      return code;
     }
 
+    const msg = {
+      to: email,
+      from: {
+        email: process.env.SENDGRID_FROM_EMAIL || process.env.ADMIN_EMAIL,
+        name: 'Bingo UNT Admin'
+      },
+      replyTo: process.env.SENDGRID_FROM_EMAIL || process.env.ADMIN_EMAIL
+    };
+
+    if (process.env.SENDGRID_TEMPLATE_ID) {
+      msg.templateId = process.env.SENDGRID_TEMPLATE_ID;
+      msg.dynamicTemplateData = { username, code };
+    } else {
+      msg.subject = '🔐 Tu Código de Acceso - Bingo UNT';
+      msg.html = `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px; padding: 20px;">
+          <h2 style="color: #1F3A93; text-align: center;">🎲 BINGO UNT - ACCESO ADMINISTRADOR</h2>
+          <p style="font-size: 16px; color: #333;">¡Hola <strong>${username}</strong>!</p>
+          <p style="font-size: 14px; color: #666;">Usa el siguiente código para verificar tu identidad:</p>
+          <div style="background-color: #f0f0f0; border-left: 4px solid #FFD700; padding: 20px; margin: 20px 0; text-align: center;">
+            <p style="font-size: 32px; font-weight: bold; color: #1F3A93; letter-spacing: 5px; margin: 0;">${code}</p>
+          </div>
+          <p style="font-size: 12px; color: #999; text-align: center;">Este código expirará en 10 minutos.</p>
+        </div>
+      `;
+    }
+    
+    await sgMail.send(msg);
+    logger.log(`✅ Código 2FA enviado exitosamente a: ${email}`);
     return code;
   } catch (err) {
+    logger.error(`❌ Error al enviar correo 2FA a ${email}:`, err.message);
+    if (err.response) logger.error('SendGrid Error Body:', err.response.body);
     throw new Error('Error interno al generar código de acceso');
   }
 };
