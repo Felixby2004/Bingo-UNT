@@ -682,19 +682,46 @@ app.post('/api/prizes/start', authenticateToken, async (req, res) => {
 });
 
 app.post('/api/prizes/draw', authenticateToken, async (req, res) => {
-  const { prize_id, number } = req.body;
+  const { prize_id, number, drawn_at } = req.body;
   const letter = getLetter(number);
 
   try {
     const result = await query(
-      'INSERT INTO drawn_numbers (prize_id, number, letter) VALUES ($1, $2, $3) RETURNING *',
-      [prize_id, number, letter]
+      'INSERT INTO drawn_numbers (prize_id, number, letter, drawn_at) VALUES ($1, $2, $3, $4) RETURNING *',
+      [prize_id, number, letter, drawn_at || new Date()]
     );
     const drawnNumber = result.rows[0];
     drawnNumber.formatted_time = moment(drawnNumber.drawn_at).tz(TIMEZONE).format('HH:mm:ss');
     cache.currentGame = null; // Clear cache
     io.emit('number_drawn', drawnNumber);
     res.json(drawnNumber);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// NEW: Edit a drawn number
+app.put('/api/drawn-numbers/:id', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { number } = req.body;
+  const letter = getLetter(number);
+
+  try {
+    const result = await query(
+      'UPDATE drawn_numbers SET number = $1, letter = $2 WHERE id = $3 RETURNING *',
+      [number, letter, id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Número no encontrado' });
+    }
+
+    const updatedNumber = result.rows[0];
+    updatedNumber.formatted_time = moment(updatedNumber.drawn_at).tz(TIMEZONE).format('HH:mm:ss');
+    
+    cache.currentGame = null; // Clear cache
+    io.emit('number_updated', updatedNumber);
+    res.json(updatedNumber);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -800,9 +827,9 @@ app.get('/api/winner-verification/:ticketNumber', async (req, res) => {
         // Different sheets might have different column structures
         let possibleIndices = [4, 3, 5]; // Default: E, D, F
         
-        // Specific mapping for "EXTRA" sheet based on image
+        // Specific mapping for "EXTRA" sheet
         if (sheet.title.toUpperCase().includes('EXTRA')) {
-          possibleIndices = [3, 2, 4]; // In EXTRA, Código seems to be in D (index 3)
+          possibleIndices = [3]; // En EXTRA, el Código de cartilla está en la columna D (índice 3)
         }
 
         const foundMatch = possibleIndices.some(idx => {
