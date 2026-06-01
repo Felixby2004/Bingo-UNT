@@ -539,16 +539,22 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
         {/* Verification */}
         <section className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
           <h2 className="text-lg font-black text-unt-blue uppercase mb-4">Verificador</h2>
-          <form onSubmit={handleVerifyWinner} className="flex space-x-2 mb-4">
+          <form onSubmit={handleVerifyWinner} className="flex flex-col sm:flex-row gap-3 mb-4">
             <input 
               type="text" 
               placeholder="Nro Cartilla" 
               value={ticketToVerify} 
               onChange={(e) => setTicketToVerify(e.target.value)} 
-              className="flex-grow p-3 bg-gray-50 rounded-xl outline-none font-bold" 
+              className="flex-grow p-3 bg-gray-50 rounded-xl outline-none font-bold border-2 border-transparent focus:border-unt-blue transition-all" 
               aria-label="Número de Cartilla a verificar"
             />
-            <button type="submit" disabled={isVerifying} className="bg-unt-blue text-unt-yellow px-6 rounded-xl font-black uppercase text-xs">{isVerifying ? '...' : 'Verificar'}</button>
+            <button 
+              type="submit" 
+              disabled={isVerifying} 
+              className="bg-unt-blue text-unt-yellow px-8 py-3 sm:py-0 rounded-xl font-black uppercase text-xs hover:bg-unt-blue/90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-unt-blue/20 disabled:opacity-50"
+            >
+              {isVerifying ? 'VERIFICANDO...' : 'Verificar'}
+            </button>
           </form>
               {verificationResult && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
