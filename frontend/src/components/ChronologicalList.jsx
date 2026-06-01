@@ -31,9 +31,6 @@ const ChronologicalList = ({ drawnNumbers }) => {
               </div>
               <div>
                 <div className="font-bold text-unt-blue">Letra {item.letter}</div>
-                <div className="text-xs text-gray-500">
-                  {moment(item.drawn_at).tz('America/Lima').format('HH:mm:ss')}
-                </div>
               </div>
             </div>
             {index === 0 && (

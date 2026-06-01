@@ -78,7 +78,7 @@ const HistoryView = () => {
                   </div>
                   <div className="w-1 h-1 bg-gray-200 rounded-full"></div>
                   <div className="text-[10px] text-gray-400 font-bold uppercase">
-                    Finalizada: {moment(selectedPrize.prize.finished_at).tz('America/Lima').format('HH:mm:ss')}
+                    Finalizada el: {moment(selectedPrize.prize.finished_at).tz('America/Lima').format('DD/MM/YYYY')}
                   </div>
                 </div>
               </div>
@@ -101,9 +101,8 @@ const HistoryView = () => {
               <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
                 {selectedPrize.drawnNumbers.map((n, idx) => (
                   <div key={idx} className="aspect-square flex flex-col items-center justify-center bg-gray-50 border border-gray-100 rounded-2xl p-2 hover:bg-white hover:shadow-md transition-all cursor-default group">
-                    <span className="text-[8px] font-black text-gray-300 group-hover:text-unt-blue/40 transition-colors leading-none">{n.letter}</span>
+                    <span className={`text-[8px] font-black text-gray-300 group-hover:text-unt-blue/40 transition-colors leading-none`}>{n.letter}</span>
                     <span className="text-xl font-black text-unt-blue leading-tight">{n.number}</span>
-                    <span className="text-[8px] text-gray-300 font-bold mt-1">{moment(n.drawn_at).tz('America/Lima').format('HH:mm')}</span>
                   </div>
                 ))}
               </div>

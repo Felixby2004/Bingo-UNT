@@ -6,11 +6,11 @@ const Footer = ({ logoUrl }) => {
     <footer className="bg-unt-blue text-unt-white mt-12 sm:mt-20 border-t border-white/5 pt-8 sm:pt-10 pb-8 sm:pb-10 text-center">
       <div className="flex flex-col items-center space-y-4 sm:space-y-6 px-4">
         <div className="flex items-center space-x-6">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-unt-yellow rounded-2xl rotate-3 flex items-center justify-center shadow-lg overflow-hidden shrink-0">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center overflow-hidden shrink-0">
             <img 
               src={logoUrl || "https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268"} 
               alt="Logo PROM 28" 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
           <a href="https://www.instagram.com/sistemas28_unt?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noreferrer" className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl sm:rounded-2xl shadow-lg flex items-center justify-center text-pink-500 hover:scale-110 transition-transform">

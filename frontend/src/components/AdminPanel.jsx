@@ -411,19 +411,49 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
               <div className="md:col-span-4 text-center">
                 <form onSubmit={handleDrawNumber} className="space-y-4">
-                  <input type="number" min="1" max="75" value={manualNumber} onChange={(e) => setManualNumber(e.target.value)} placeholder="00" className="w-32 h-32 text-4xl font-black text-center bg-gray-50 border-4 border-dashed rounded-full outline-none text-unt-blue" />
-                  <button type="submit" className="w-full bg-unt-yellow text-unt-blue py-3 rounded-2xl font-black shadow-lg">REGISTRAR</button>
+                  <div className="relative mx-auto w-32 h-32 sm:w-40 sm:h-40">
+                    <input 
+                      type="number" 
+                      min="1" 
+                      max="75"
+                      value={manualNumber}
+                      onChange={(e) => setManualNumber(e.target.value)}
+                      placeholder="00"
+                      className="w-full h-full text-4xl sm:text-6xl font-black text-center bg-gray-50 border-4 border-dashed border-gray-100 focus:border-unt-yellow focus:bg-unt-yellow/5 rounded-full outline-none transition-all text-unt-blue"
+                    />
+                  </div>
+                  <button 
+                    type="submit"
+                    className="w-full bg-unt-yellow text-unt-blue py-3 sm:py-4 rounded-2xl font-black text-base sm:text-lg shadow-xl shadow-unt-yellow/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  >
+                    REGISTRAR NRO
+                  </button>
                 </form>
               </div>
               <div className="md:col-span-8">
                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
                   {gameState.drawnNumbers.slice(0, 12).map((n, idx) => (
-                    <div key={idx} className={`group relative aspect-square flex flex-col items-center justify-center rounded-2xl border-2 ${idx === 0 ? 'bg-unt-yellow border-unt-yellow shadow-lg scale-110' : 'bg-gray-50 border-gray-100'}`}>
+                    <div 
+                      key={idx} 
+                      className={`group relative aspect-square flex flex-col items-center justify-center rounded-2xl border-2 transition-all ${idx === 0 ? 'bg-unt-yellow border-unt-yellow shadow-lg scale-110' : 'bg-gray-50 border-gray-100'}`}
+                    >
                       {editingNumber === n.id ? (
-                        <input autoFocus type="number" defaultValue={n.number} onBlur={(e) => handleEditNumber(n.id, e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleEditNumber(n.id, e.target.value)} className="w-full h-full text-center bg-white rounded-2xl font-black text-xl outline-none" />
+                        <input 
+                          autoFocus
+                          type="number"
+                          defaultValue={n.number}
+                          onBlur={(e) => handleEditNumber(n.id, e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleEditNumber(n.id, e.target.value)}
+                          className="w-full h-full text-center bg-white rounded-2xl font-black text-xl outline-none border-2 border-unt-blue"
+                        />
                       ) : (
                         <>
-                          <button onClick={() => setEditingNumber(n.id)} className="absolute top-1 right-1 p-0.5 opacity-0 group-hover:opacity-100 text-gray-400"><Edit2 size={8} /></button>
+                          <button 
+                            onClick={() => setEditingNumber(n.id)}
+                            className="absolute top-1 right-1 p-1 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-unt-blue"
+                          >
+                            <Edit2 size={10} />
+                          </button>
                           <span className={`text-[8px] font-black ${idx === 0 ? 'text-unt-blue/60' : 'text-gray-400'}`}>{n.letter}</span>
                           <span className={`text-xl font-black ${idx === 0 ? 'text-unt-blue' : 'text-gray-700'}`}>{n.number}</span>
                         </>
