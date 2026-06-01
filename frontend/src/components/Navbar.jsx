@@ -18,7 +18,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl }) => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo y Título */}
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => handleNavClick('public')}>
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setSelectedPrize(null)}>
             <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center shrink-0 overflow-hidden">
               <img 
                 src={logoUrl || "https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268"} 

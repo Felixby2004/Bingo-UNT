@@ -188,12 +188,6 @@ const PublicView = ({ gameState, prizes }) => {
                 <span className="inline-block bg-unt-yellow text-unt-blue text-[10px] sm:text-xs font-bold px-3 py-1 sm:px-4 sm:py-1.5 rounded-full uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-2 sm:mb-4 animate-bounce shadow-lg shadow-unt-yellow/50">¡EN VIVO!</span>
               )}
               <h2 className={`text-xl sm:text-3xl font-black uppercase tracking-tight mb-1 sm:mb-3 leading-tight drop-shadow-md ${isActuallyPlaying ? 'text-white' : 'text-unt-blue'}`}>{selectedPrize.name}</h2>
-              <div className={`flex flex-col space-y-2 ${isActuallyPlaying ? 'text-unt-yellow' : 'text-gray-400'}`}>
-                <div className="flex items-center justify-start space-x-2 sm:space-x-3 font-bold uppercase text-[10px] sm:text-sm">
-                  <Award size={16} sm:size={20} />
-                  <span className="line-clamp-1">{selectedPrize.status === 'finished' ? `¡GANADOR: ${selectedPrize.winner_name}!` : 'Sorteo en curso'}</span>
-                </div>
-              </div>
             </div>
           </div>
 

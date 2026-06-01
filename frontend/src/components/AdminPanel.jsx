@@ -340,7 +340,7 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
             </div>
             <button className="w-full bg-unt-blue text-unt-yellow py-3 rounded-xl font-black flex items-center justify-center space-x-2 hover:bg-unt-blue/90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-unt-blue/20">
               {editingPrize ? <Save size={18} /> : <Plus size={18} />}
-              <span>{editingPrize ? 'GUARDAR' : 'AÑADIR'}</span>
+              <span>{editingPrize ? 'GUARDAR' : 'AÑADIR PREMIO'}</span>
             </button>
           </form>
         </section>
