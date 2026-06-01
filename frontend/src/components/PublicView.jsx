@@ -15,7 +15,28 @@ const PublicView = ({ gameState, prizes }) => {
     }
   }, [gameState.prize]);
 
+  // Sync with gameState updates if the selected prize is the one being played/finished
+  useEffect(() => {
+    if (gameState.prize && selectedPrize && gameState.prize.id === selectedPrize.id) {
+      setSelectedPrize(gameState.prize);
+    }
+  }, [gameState.prize]);
+
   const lastNumber = gameState.drawnNumbers[0];
+
+  const sortedPrizes = [...prizes].sort((a, b) => {
+    // Si ambos están finalizados, por fecha de fin desc
+    if (a.status === 'finished' && b.status === 'finished') {
+      return new Date(b.finished_at) - new Date(a.finished_at);
+    }
+    // Si uno está activo, va primero
+    if (a.status === 'active') return -1;
+    if (b.status === 'active') return 1;
+    // Si uno está finalizado, va después del activo pero antes que espera? 
+    // O mejor: active > pending > finished
+    const order = { 'active': 0, 'pending': 1, 'finished': 2 };
+    return order[a.status] - order[b.status];
+  });
 
   // If no prize is selected, show the prize selection screen
   if (!selectedPrize) {
@@ -30,13 +51,13 @@ const PublicView = ({ gameState, prizes }) => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-10">
-          {prizes.length === 0 ? (
+          {sortedPrizes.length === 0 ? (
             <div className="col-span-full py-20 text-center bg-white rounded-[3rem] border-4 border-dashed border-gray-100 shadow-inner">
               <Clock size={64} className="mx-auto mb-6 text-gray-200" />
               <p className="text-gray-400 font-bold uppercase tracking-widest text-xl">Pronto tendremos más premios...</p>
             </div>
           ) : (
-            prizes.map(p => (
+            sortedPrizes.map(p => (
               <div 
                 key={p.id} 
                 onClick={() => setSelectedPrize(p)}
@@ -98,6 +119,28 @@ const PublicView = ({ gameState, prizes }) => {
         <span>Volver a Premios</span>
       </button>
 
+      {/* Winner Banner if Finished */}
+      {selectedPrize.status === 'finished' && (
+        <div className="bg-white border-2 border-green-500/30 rounded-[2rem] p-6 shadow-xl animate-in fade-in slide-in-from-top-4 duration-700 overflow-hidden relative group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+            <div className="flex items-center space-x-6">
+              <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-green-500/20 rotate-3 group-hover:rotate-0 transition-transform">
+                <Trophy size={32} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-green-600 uppercase tracking-[0.2em] mb-1">Sorteo Finalizado</p>
+                <h3 className="text-2xl font-black text-unt-blue uppercase tracking-tight">¡Felicidades al Ganador!</h3>
+              </div>
+            </div>
+            <div className="bg-green-500 text-white px-10 py-4 rounded-2xl shadow-xl shadow-green-500/20 transform hover:scale-[1.02] transition-all">
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1 text-center">Nombre del Ganador</p>
+              <p className="text-2xl font-black uppercase text-center">{selectedPrize.winner_name}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Real-time Game Banner or Static Prize Info */}
       <div className={`rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 shadow-2xl relative overflow-hidden ${isActivePrize ? 'bg-gradient-to-br from-unt-blue to-night-blue' : 'bg-white border-2 sm:border-4 border-gray-100'}`}>
         <div className="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-unt-yellow/20 rounded-full -mr-32 -mt-32 sm:-mr-48 sm:-mt-48 blur-3xl animate-pulse"></div>
@@ -110,17 +153,12 @@ const PublicView = ({ gameState, prizes }) => {
               {isActivePrize && (
                 <span className="inline-block bg-unt-yellow text-unt-blue text-[10px] sm:text-xs font-bold px-3 py-1 sm:px-4 sm:py-1.5 rounded-full uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-2 sm:mb-4 animate-bounce shadow-lg shadow-unt-yellow/50">¡EN VIVO!</span>
               )}
-              <h2 className={`text-2xl sm:text-5xl font-black uppercase tracking-tight mb-1 sm:mb-3 leading-tight drop-shadow-md ${isActivePrize ? 'text-white' : 'text-unt-blue'}`}>{selectedPrize.name}</h2>
+              <h2 className={`text-xl sm:text-3xl font-black uppercase tracking-tight mb-1 sm:mb-3 leading-tight drop-shadow-md ${isActivePrize ? 'text-white' : 'text-unt-blue'}`}>{selectedPrize.name}</h2>
               <div className={`flex flex-col space-y-2 ${isActivePrize ? 'text-unt-yellow' : 'text-gray-400'}`}>
                 <div className="flex items-center justify-start space-x-2 sm:space-x-3 font-bold uppercase text-[10px] sm:text-sm">
                   <Award size={16} sm:size={20} />
                   <span className="line-clamp-1">{selectedPrize.status === 'finished' ? `¡GANADOR: ${selectedPrize.winner_name}!` : 'Sorteo en curso'}</span>
                 </div>
-                {selectedPrize.description && (
-                  <p className={`text-[10px] sm:text-xs font-medium leading-relaxed max-w-md ${isActivePrize ? 'text-white/80' : 'text-gray-500'}`}>
-                    {selectedPrize.description}
-                  </p>
-                )}
               </div>
             </div>
           </div>
@@ -138,6 +176,14 @@ const PublicView = ({ gameState, prizes }) => {
               <p className={`${isActivePrize ? 'text-white/60' : 'text-gray-500'} text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1 sm:mb-2`}>Total Cantados</p>
               <p className={`text-3xl sm:text-5xl font-black ${isActivePrize ? 'text-unt-yellow' : 'text-unt-blue'}`}>{isActivePrize ? gameState.drawnNumbers.length : 0}</p>
             </div>
+            {selectedPrize.description && (
+              <div className={`${isActivePrize ? 'bg-white/5' : 'bg-gray-50'} p-4 sm:p-6 rounded-2xl border ${isActivePrize ? 'border-white/10' : 'border-gray-100'} text-center lg:text-right`}>
+                <p className={`${isActivePrize ? 'text-white/40' : 'text-gray-400'} text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-2`}>Descripción del Sorteo</p>
+                <p className={`text-[10px] sm:text-xs font-medium leading-relaxed max-w-[250px] ${isActivePrize ? 'text-white/80' : 'text-gray-600'}`}>
+                  {selectedPrize.description}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

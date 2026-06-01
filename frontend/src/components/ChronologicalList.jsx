@@ -14,10 +14,10 @@ const ChronologicalList = ({ drawnNumbers }) => {
   return (
     <div className="bg-white rounded-xl shadow-lg border border-unt-blue/5 overflow-hidden">
       <div className="bg-unt-blue p-3 text-unt-yellow font-bold flex items-center justify-between">
-        <span>Historial Reciente</span>
+        <span>Historial del Sorteo</span>
         <Clock size={16} />
       </div>
-      <div className="max-h-[500px] overflow-y-auto divide-y divide-gray-100">
+      <div className="max-h-[500px] overflow-y-auto divide-y divide-gray-100 flex flex-col">
         {drawnNumbers.map((item, index) => (
           <div 
             key={item.id || index} 

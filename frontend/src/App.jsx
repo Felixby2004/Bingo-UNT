@@ -44,9 +44,12 @@ function App() {
     });
 
     socket.on('game_finished', (prize) => {
-      if (gameState.prize?.id === prize.id) {
-        setGameState(prev => ({ ...prev, prize }));
-      }
+      setGameState(prev => {
+        if (prev.prize?.id === prize.id) {
+          return { ...prev, prize };
+        }
+        return prev;
+      });
       fetchPrizes();
     });
 
@@ -190,9 +193,7 @@ function App() {
           ) : (
             <Login onLogin={setUser} />
           )
-        ) : view === 'history' ? (
-          <HistoryView />
-      ) : (
+        ) : (
             <PublicView 
               gameState={gameState} 
               prizes={prizes}

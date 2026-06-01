@@ -6,7 +6,6 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl }) => {
 
   const navItems = [
     { id: 'public', label: 'Público', icon: <Users size={18} /> },
-    { id: 'history', label: 'Historial', icon: <History size={18} /> },
   ];
 
   const handleNavClick = (id) => {
