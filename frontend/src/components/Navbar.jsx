@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LayoutDashboard, Users, Trophy, History, LogOut, Menu, X } from 'lucide-react';
 
-const Navbar = ({ view, setView, user, onLogout }) => {
+const Navbar = ({ view, setView, user, onLogout, logoUrl }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
@@ -22,7 +22,7 @@ const Navbar = ({ view, setView, user, onLogout }) => {
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => handleNavClick('public')}>
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-unt-yellow rounded-xl rotate-3 flex items-center justify-center shadow-lg transform hover:rotate-0 transition-transform shrink-0 overflow-hidden">
               <img 
-                src="https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268" 
+                src={logoUrl || "https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268"} 
                 alt="Logo PROM 28" 
                 className="w-full h-full object-cover"
               />

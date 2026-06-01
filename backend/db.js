@@ -114,6 +114,15 @@ const initDb = async () => {
       )
     `);
 
+    // Configuration table for global settings (like logo)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS site_config (
+        key VARCHAR(50) PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Clean up expired codes
     await client.query(`
       DELETE FROM email_verification_codes 

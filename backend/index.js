@@ -527,6 +527,35 @@ app.post('/api/admin/setup-2fa', authenticateToken, async (req, res) => {
   }
 });
 
+// NEW: Logo and Config Routes
+app.get('/api/config/logo', async (req, res) => {
+  try {
+    const result = await query("SELECT value FROM site_config WHERE key = 'logo_url'");
+    const logoUrl = result.rows[0]?.value || 'https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268';
+    res.json({ logoUrl });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/config/logo', authenticateToken, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No se subió ninguna imagen' });
+    
+    const logoUrl = req.file.path;
+    await query(`
+      INSERT INTO site_config (key, value) 
+      VALUES ('logo_url', $1) 
+      ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = CURRENT_TIMESTAMP
+    `, [logoUrl]);
+    
+    io.emit('logo_updated', { logoUrl });
+    res.json({ success: true, logoUrl });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Confirm 2FA
 app.post('/api/admin/confirm-2fa', authenticateToken, async (req, res) => {
   const { token } = req.body;

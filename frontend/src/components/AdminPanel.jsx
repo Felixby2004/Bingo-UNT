@@ -23,6 +23,9 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
   const [hourOffset, setHourOffset] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  const [logoFile, setLogoFile] = useState(null);
+  const [isUpdatingLogo, setIsUpdatingLogo] = useState(false);
+
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
@@ -122,6 +125,27 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
     setSelectedPattern(prize.winning_pattern || Array(25).fill(true));
     setImagePreview(prize.image_url);
     setImageFile(null);
+  };
+
+  const handleUpdateLogo = async (e) => {
+    e.preventDefault();
+    if (!logoFile) return;
+    
+    setIsUpdatingLogo(true);
+    const formData = new FormData();
+    formData.append('image', logoFile);
+
+    try {
+      await axios.post(`${apiUrl}/api/admin/config/logo`, formData, { withCredentials: true });
+      alert('✅ Logo de la promoción actualizado con éxito');
+      setLogoFile(null);
+      // El cambio se verá reflejado por socket o al recargar
+    } catch (err) {
+      console.error('Error updating logo:', err);
+      alert('Error al actualizar el logo');
+    } finally {
+      setIsUpdatingLogo(false);
+    }
   };
 
   const handleDeletePrize = async (id) => {
@@ -294,6 +318,44 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
             <button className="w-full bg-unt-blue text-unt-yellow py-3 rounded-xl font-black flex items-center justify-center space-x-2">
               {editingPrize ? <Save size={18} /> : <Plus size={18} />}
               <span>{editingPrize ? 'GUARDAR' : 'AÑADIR'}</span>
+            </button>
+          </form>
+        </section>
+
+        {/* NEW: Logo Upload Section */}
+        <section className="bg-white p-6 rounded-3xl shadow-xl border border-gray-100">
+          <h2 className="text-lg font-black text-unt-blue flex items-center space-x-2 mb-4">
+            <Settings size={20} className="text-unt-yellow" />
+            <span>LOGO PROMOCIÓN</span>
+          </h2>
+          <form onSubmit={handleUpdateLogo} className="space-y-4">
+            <div className="relative group">
+              <input 
+                type="file" 
+                onChange={(e) => setLogoFile(e.target.files[0])} 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                accept="image/*" 
+              />
+              <div className={`w-full h-24 rounded-xl border-2 border-dashed flex flex-col items-center justify-center transition-all ${logoFile ? 'border-unt-blue bg-unt-blue/5' : 'border-gray-200 bg-gray-50 hover:border-unt-blue/30'}`}>
+                {logoFile ? (
+                  <div className="text-center">
+                    <p className="text-[10px] font-black text-unt-blue uppercase">Archivo seleccionado</p>
+                    <p className="text-[10px] text-gray-400 truncate max-w-[200px]">{logoFile.name}</p>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="text-gray-300 mb-1" size={20} />
+                    <p className="text-[10px] font-bold text-gray-400 uppercase">Cambiar Logo Promoción</p>
+                  </>
+                )}
+              </div>
+            </div>
+            <button 
+              type="submit"
+              disabled={!logoFile || isUpdatingLogo}
+              className="w-full bg-unt-blue text-unt-yellow py-3 rounded-xl font-black text-xs uppercase shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+            >
+              {isUpdatingLogo ? 'SUBIENDO...' : 'ACTUALIZAR LOGO'}
             </button>
           </form>
         </section>

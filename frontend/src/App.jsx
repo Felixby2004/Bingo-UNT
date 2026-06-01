@@ -19,11 +19,17 @@ function App() {
   const [gameState, setGameState] = useState({ prize: null, drawnNumbers: [] });
   const [prizes, setPrizes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [logoUrl, setLogoUrl] = useState('https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268');
 
   useEffect(() => {
     checkAuth();
     fetchCurrentGame();
     fetchPrizes();
+    fetchLogo();
+
+    socket.on('logo_updated', ({ logoUrl }) => {
+      setLogoUrl(logoUrl);
+    });
 
     socket.on('number_drawn', (newNumber) => {
       setGameState(prev => ({
@@ -54,6 +60,7 @@ function App() {
     socket.on('prize_removed', () => fetchPrizes());
 
     return () => {
+      socket.off('logo_updated');
       socket.off('number_drawn');
       socket.off('game_started');
       socket.off('game_finished');
@@ -62,6 +69,16 @@ function App() {
       socket.off('prize_removed');
     };
   }, [gameState.prize?.id]);
+
+  const fetchLogo = async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const res = await axios.get(`${apiUrl}/api/config/logo`);
+      if (res.data.logoUrl) setLogoUrl(res.data.logoUrl);
+    } catch (err) {
+      console.error('Error fetching logo:', err);
+    }
+  };
 
   const checkAuth = async () => {
     try {
@@ -141,6 +158,7 @@ function App() {
         setView={setView} 
         user={user} 
         onLogout={handleLogout} 
+        logoUrl={logoUrl}
       />
       
       <main className="flex-grow container mx-auto px-4 py-8">
@@ -166,7 +184,7 @@ function App() {
           )}
         </main>
         
-        <Footer />
+        <Footer logoUrl={logoUrl} />
     </div>
   );
 }
