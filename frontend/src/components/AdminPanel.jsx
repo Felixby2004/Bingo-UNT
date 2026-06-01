@@ -338,7 +338,7 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
                 <button key={i} type="button" onClick={() => togglePattern(i)} className={`aspect-square rounded-md border ${i === 12 ? 'bg-unt-blue' : sel ? 'bg-unt-yellow' : 'bg-white'}`} />
               ))}
             </div>
-            <button className="w-full bg-unt-blue text-unt-yellow py-3 rounded-xl font-black flex items-center justify-center space-x-2">
+            <button className="w-full bg-unt-blue text-unt-yellow py-3 rounded-xl font-black flex items-center justify-center space-x-2 hover:bg-unt-blue/90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-unt-blue/20">
               {editingPrize ? <Save size={18} /> : <Plus size={18} />}
               <span>{editingPrize ? 'GUARDAR' : 'AÑADIR'}</span>
             </button>
@@ -406,7 +406,12 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
                   </div>
                 </div>
                 {p.status !== 'finished' && p.status !== 'active' && (
-                  <button onClick={() => handleStartGame(p.id)} className="w-full mt-3 bg-white border border-unt-blue text-unt-blue text-[10px] font-black py-2 rounded-lg uppercase">Iniciar</button>
+                  <button 
+                    onClick={() => handleStartGame(p.id)} 
+                    className="w-full mt-3 bg-white border-2 border-unt-blue text-unt-blue text-[10px] font-black py-2 rounded-lg uppercase hover:bg-unt-blue hover:text-unt-yellow transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-unt-blue/20"
+                  >
+                    Iniciar
+                  </button>
                 )}
                 {p.status === 'active' && <div className="mt-3 text-center bg-unt-blue text-unt-yellow text-[10px] font-black py-2 rounded-lg animate-pulse uppercase">En curso...</div>}
               </div>
@@ -582,7 +587,7 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
                       </div>
                       <button 
                         onClick={handleFinishGame}
-                        className="w-full max-w-md bg-red-500 text-white py-4 rounded-2xl font-black text-lg hover:bg-red-600 transition-all shadow-xl shadow-red-500/20 hover:scale-[1.02] active:scale-[0.98]"
+                        className="w-full max-w-md bg-red-600 text-white py-4 rounded-2xl font-black text-lg hover:bg-red-700 transition-all shadow-xl shadow-red-600/30 hover:scale-[1.05] active:scale-[0.98] border-b-4 border-red-800"
                       >
                         FINALIZAR SORTEO Y GUARDAR GANADOR
                       </button>
