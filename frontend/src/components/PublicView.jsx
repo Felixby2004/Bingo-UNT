@@ -221,16 +221,16 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
           </div>
 
           {/* Right Section: Stats and Description */}
-          <div className="flex flex-col sm:flex-row lg:flex-col items-center lg:items-end gap-4 w-full lg:w-1/3">
-            <div className={`flex-grow sm:flex-grow-0 w-full sm:w-auto ${isActuallyPlaying ? 'bg-white/10' : 'bg-gray-100'} backdrop-blur-md px-4 py-3 sm:px-8 sm:py-4 rounded-2xl sm:rounded-[2rem] border-2 ${isActuallyPlaying ? 'border-white/20' : 'border-gray-100'} text-center lg:text-right`}>
-              <p className={`${isActuallyPlaying ? 'text-white/60' : 'text-gray-500'} text-[9px] sm:text-[11px] font-bold uppercase tracking-widest mb-0.5`}>Total Cantados</p>
-              <p className={`text-2xl sm:text-4xl font-black ${isActuallyPlaying ? 'text-unt-yellow' : 'text-unt-blue'}`}>{selectedPrizeNumbers.length}</p>
+          <div className="flex flex-col gap-3 w-full lg:w-1/3">
+            <div className={`flex items-center justify-between ${isActuallyPlaying ? 'bg-white/10' : 'bg-gray-100'} backdrop-blur-md px-5 py-3 rounded-2xl border ${isActuallyPlaying ? 'border-white/20' : 'border-gray-100'}`}>
+              <p className={`${isActuallyPlaying ? 'text-white/60' : 'text-gray-500'} text-[10px] sm:text-xs font-black uppercase tracking-widest`}>Total Cantados</p>
+              <p className={`text-xl sm:text-2xl font-black ${isActuallyPlaying ? 'text-unt-yellow' : 'text-unt-blue'}`}>{selectedPrizeNumbers.length}</p>
             </div>
             
             {selectedPrize.description && (
-              <div className={`w-full ${isActuallyPlaying ? 'bg-white/5' : 'bg-gray-50'} p-3 sm:p-4 rounded-xl sm:rounded-2xl border ${isActuallyPlaying ? 'border-white/10' : 'border-gray-100'}`}>
-                <p className={`${isActuallyPlaying ? 'text-white/40' : 'text-gray-400'} text-[7px] sm:text-[9px] font-black uppercase tracking-widest mb-1 lg:text-right`}>Descripción</p>
-                <p className={`text-[9px] sm:text-xs font-medium leading-tight line-clamp-3 lg:text-right ${isActuallyPlaying ? 'text-white/80' : 'text-gray-600'}`}>
+              <div className={`w-full ${isActuallyPlaying ? 'bg-white/5' : 'bg-gray-50'} p-4 rounded-2xl border ${isActuallyPlaying ? 'border-white/10' : 'border-gray-100'}`}>
+                <p className={`${isActuallyPlaying ? 'text-white/40' : 'text-gray-400'} text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-1.5 lg:text-right`}>Descripción</p>
+                <p className={`text-[10px] sm:text-xs font-medium leading-relaxed lg:text-right ${isActuallyPlaying ? 'text-white/90' : 'text-gray-700'}`}>
                   {selectedPrize.description}
                 </p>
               </div>
