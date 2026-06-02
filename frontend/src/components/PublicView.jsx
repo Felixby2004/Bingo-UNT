@@ -182,63 +182,62 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
       )}
 
       {/* Real-time Game Banner or Static Prize Info */}
-      <div className={`rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 shadow-2xl relative overflow-hidden ${isActuallyPlaying ? 'bg-gradient-to-br from-unt-blue to-night-blue' : 'bg-white border-2 sm:border-4 border-gray-100'}`}>
+      <div className={`rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 shadow-2xl relative overflow-hidden ${isActuallyPlaying ? 'bg-gradient-to-br from-unt-blue to-night-blue' : 'bg-white border-2 sm:border-4 border-gray-100'}`}>
         <div className="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-unt-yellow/20 rounded-full -mr-32 -mt-32 sm:-mr-48 sm:-mt-48 blur-3xl animate-pulse"></div>
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-12 items-center">
-          <div className="flex items-center space-x-4 sm:space-x-8">
+        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8">
+          
+          {/* Left Section: Image and Name */}
+          <div className="flex items-center space-x-4 sm:space-x-6 w-full lg:w-1/3">
             {selectedPrize.image_url && (
-              <div className={`flex-shrink-0 w-24 h-24 sm:w-56 sm:h-56 rounded-[1.5rem] sm:rounded-[2.5rem] bg-white border-4 sm:border-8 shadow-2xl overflow-hidden flex items-center justify-center transition-all duration-500 ${isActuallyPlaying ? 'border-unt-yellow' : 'border-gray-100'}`}>
+              <div className={`flex-shrink-0 w-20 h-20 sm:w-40 sm:h-40 rounded-[1.2rem] sm:rounded-[2rem] bg-white border-4 sm:border-6 shadow-xl overflow-hidden flex items-center justify-center transition-all duration-500 ${isActuallyPlaying ? 'border-unt-yellow' : 'border-gray-100'}`}>
                 <img 
                   src={selectedPrize.image_url} 
-                  className="w-full h-full object-contain p-2" 
+                  className="w-full h-full object-contain p-1.5" 
                   alt={`Imagen detallada del premio: ${selectedPrize.name}`}
                   loading="lazy"
                 />
               </div>
             )}
-            <div className="text-left">
+            <div className="text-left flex-grow">
               {isActuallyPlaying && (
-                <span className="inline-block bg-unt-yellow text-unt-blue text-[10px] sm:text-xs font-bold px-3 py-1 sm:px-4 sm:py-1.5 rounded-full uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-2 sm:mb-4 animate-bounce shadow-lg shadow-unt-yellow/50">¡EN VIVO!</span>
+                <span className="inline-block bg-unt-yellow text-unt-blue text-[8px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-widest mb-1 sm:mb-2 animate-bounce shadow-lg shadow-unt-yellow/50">¡EN VIVO!</span>
               )}
-              <h2 className={`text-xl sm:text-3xl font-black uppercase tracking-tight mb-1 sm:mb-3 leading-tight drop-shadow-md ${isActuallyPlaying ? 'text-white' : 'text-unt-blue'}`}>{selectedPrize.name}</h2>
-              <div className={`flex flex-col space-y-2 ${isActuallyPlaying ? 'text-unt-yellow' : 'text-gray-600'}`}>
-                <div className="flex items-center justify-start space-x-2 sm:space-x-3 font-bold uppercase text-[10px] sm:text-sm">
-                  <Award size={16} sm:size={20} />
-                  <span className="line-clamp-1">{selectedPrize.status === 'finished' ? `¡GANADOR: ${selectedPrize.winner_name}!` : 'Sorteo en curso'}</span>
-                </div>
+              <h2 className={`text-lg sm:text-2xl font-black uppercase tracking-tight mb-1 leading-tight drop-shadow-md line-clamp-3 ${isActuallyPlaying ? 'text-white' : 'text-unt-blue'}`}>
+                {selectedPrize.name}
+              </h2>
+              <div className={`flex items-center space-x-1.5 font-bold uppercase text-[9px] sm:text-xs ${isActuallyPlaying ? 'text-unt-yellow' : 'text-gray-500'}`}>
+                <Award size={14} />
+                <span className="line-clamp-1">{selectedPrize.status === 'finished' ? `GANADOR: ${selectedPrize.winner_name}` : 'Sorteo en curso'}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col items-center">
-            <div className={`w-36 h-36 sm:w-56 sm:h-56 rounded-full flex flex-col items-center justify-center shadow-2xl border-[8px] sm:border-[12px] transform hover:scale-105 sm:hover:scale-110 transition-all duration-500 ${isActuallyPlaying ? 'bg-white border-unt-yellow scale-100 sm:scale-105' : 'bg-gray-50 border-gray-100'}`}>
-              <span className="text-unt-blue/40 font-bold text-xl sm:text-3xl leading-none">{(isActuallyPlaying || selectedPrize.status === 'finished') ? (lastNumber?.letter || '!') : '!'}</span>
-              <span className="text-5xl sm:text-9xl font-black text-unt-blue leading-tight tracking-tighter">{(isActuallyPlaying || selectedPrize.status === 'finished') ? (lastNumber?.number || '??') : '??'}</span>
+          {/* Center Section: Main Number */}
+          <div className="flex flex-col items-center justify-center lg:w-1/4">
+            <div className={`w-32 h-32 sm:w-44 sm:h-44 rounded-full flex flex-col items-center justify-center shadow-2xl border-[6px] sm:border-[10px] transform transition-all duration-500 ${isActuallyPlaying ? 'bg-white border-unt-yellow' : 'bg-gray-50 border-gray-100'}`}>
+              <span className="text-unt-blue/40 font-bold text-lg sm:text-2xl leading-none">{(isActuallyPlaying || selectedPrize.status === 'finished') ? (lastNumber?.letter || '!') : '!'}</span>
+              <span className="text-4xl sm:text-7xl font-black text-unt-blue leading-tight tracking-tighter">{(isActuallyPlaying || selectedPrize.status === 'finished') ? (lastNumber?.number || '??') : '??'}</span>
             </div>
-            <p className={`mt-3 sm:mt-6 text-[8px] sm:text-xs font-bold uppercase tracking-[0.3em] sm:tracking-[0.4em] ${isActuallyPlaying ? 'text-white/70' : 'text-gray-500'}`}>Último Cantado</p>
+            <p className={`mt-2 sm:mt-4 text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.2em] sm:tracking-[0.4em] ${isActuallyPlaying ? 'text-white/60' : 'text-gray-400'}`}>Último Cantado</p>
           </div>
 
-          <div className="flex flex-col items-center lg:items-end space-y-4 sm:space-y-6">
-            <div className={`${isActuallyPlaying ? 'bg-white/10' : 'bg-gray-100'} backdrop-blur-md px-6 py-4 sm:px-10 sm:py-6 rounded-[1.5rem] sm:rounded-[2.5rem] border-2 sm:border-4 ${isActuallyPlaying ? 'border-white/20' : 'border-gray-100'} text-center lg:text-right shadow-xl`}>
-              <p className={`${isActuallyPlaying ? 'text-white/70' : 'text-gray-600'} text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1 sm:mb-2`}>Total Cantados</p>
-              <p className={`text-3xl sm:text-5xl font-black ${isActuallyPlaying ? 'text-unt-yellow' : 'text-unt-blue'}`}>{selectedPrizeNumbers.length}</p>
+          {/* Right Section: Stats and Description */}
+          <div className="flex flex-col sm:flex-row lg:flex-col items-center lg:items-end gap-4 w-full lg:w-1/3">
+            <div className={`flex-grow sm:flex-grow-0 w-full sm:w-auto ${isActuallyPlaying ? 'bg-white/10' : 'bg-gray-100'} backdrop-blur-md px-4 py-3 sm:px-8 sm:py-4 rounded-2xl sm:rounded-[2rem] border-2 ${isActuallyPlaying ? 'border-white/20' : 'border-gray-100'} text-center lg:text-right`}>
+              <p className={`${isActuallyPlaying ? 'text-white/60' : 'text-gray-500'} text-[9px] sm:text-[11px] font-bold uppercase tracking-widest mb-0.5`}>Total Cantados</p>
+              <p className={`text-2xl sm:text-4xl font-black ${isActuallyPlaying ? 'text-unt-yellow' : 'text-unt-blue'}`}>{selectedPrizeNumbers.length}</p>
             </div>
+            
             {selectedPrize.description && (
-              <div className={`${isActuallyPlaying ? 'bg-white/5' : 'bg-gray-50'} p-4 sm:p-6 rounded-2xl border ${isActuallyPlaying ? 'border-white/10' : 'border-gray-100'} text-center lg:text-right`}>
-                <p className={`${isActuallyPlaying ? 'text-white/60' : 'text-gray-500'} text-[8px] sm:text-[10px] font-black uppercase tracking-widest mb-2`}>
-                  Descripción del Sorteo
-                </p>
-
-                <p
-                  className={`text-[10px] sm:text-xs font-medium leading-relaxed max-w-[250px] text-justify ${
-                    isActuallyPlaying ? 'text-white/90' : 'text-gray-700'
-                  }`}
-                >
+              <div className={`w-full ${isActuallyPlaying ? 'bg-white/5' : 'bg-gray-50'} p-3 sm:p-4 rounded-xl sm:rounded-2xl border ${isActuallyPlaying ? 'border-white/10' : 'border-gray-100'}`}>
+                <p className={`${isActuallyPlaying ? 'text-white/40' : 'text-gray-400'} text-[7px] sm:text-[9px] font-black uppercase tracking-widest mb-1 lg:text-right`}>Descripción</p>
+                <p className={`text-[9px] sm:text-xs font-medium leading-tight line-clamp-3 lg:text-right ${isActuallyPlaying ? 'text-white/80' : 'text-gray-600'}`}>
                   {selectedPrize.description}
                 </p>
               </div>
             )}
           </div>
+
         </div>
       </div>
 
