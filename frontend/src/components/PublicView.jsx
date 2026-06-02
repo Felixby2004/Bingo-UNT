@@ -96,12 +96,12 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
                 onClick={() => setSelectedPrize(p)}
                 className="group bg-white rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-xl hover:shadow-unt-yellow/20 transition-all cursor-pointer border-2 sm:border-4 border-transparent hover:border-unt-yellow hover:-translate-y-2 flex flex-col p-3 sm:p-4"
               >
-                <div className="aspect-[4/3] sm:aspect-video relative overflow-hidden bg-gray-50 rounded-[1.5rem] sm:rounded-[2.5rem]">
+                <div className="aspect-[4/3] sm:aspect-video relative overflow-hidden bg-white rounded-[1.5rem] sm:rounded-[2.5rem] flex items-center justify-center border border-gray-50">
                   {p.image_url ? (
                     <img 
                       src={p.image_url} 
                       alt={`Imagen del premio: ${p.name}`} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      className="w-full h-full object-contain transition-transform duration-700" 
                       loading="lazy"
                     />
                   ) : (
@@ -187,12 +187,14 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-12 items-center">
           <div className="flex items-center space-x-4 sm:space-x-8">
             {selectedPrize.image_url && (
-              <img 
-                src={selectedPrize.image_url} 
-                className={`w-24 h-24 sm:w-48 sm:h-48 rounded-[1.5rem] sm:rounded-[2.5rem] object-cover border-4 sm:border-8 shadow-2xl transform -rotate-2 sm:-rotate-3 transition-transform hover:rotate-0 duration-500 ${isActuallyPlaying ? 'border-unt-yellow' : 'border-gray-100'}`} 
-                alt={`Imagen detallada del premio: ${selectedPrize.name}`}
-                loading="lazy"
-              />
+              <div className={`w-24 h-24 sm:w-48 sm:h-48 rounded-[1.5rem] sm:rounded-[2.5rem] bg-white border-4 sm:border-8 shadow-2xl overflow-hidden flex items-center justify-center transition-all duration-500 ${isActuallyPlaying ? 'border-unt-yellow' : 'border-gray-100'}`}>
+                <img 
+                  src={selectedPrize.image_url} 
+                  className="w-full h-full object-contain p-2" 
+                  alt={`Imagen detallada del premio: ${selectedPrize.name}`}
+                  loading="lazy"
+                />
+              </div>
             )}
             <div className="text-left">
               {isActuallyPlaying && (
