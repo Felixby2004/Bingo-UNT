@@ -1,27 +1,29 @@
 config:
-  target: "http://localhost:3001"
+  target: "https://bingo-promo28.onrender.com/"
   phases:
     - duration: 60
-      arrivalRate: 10
-      name: Warm up
+      arrivalRate: 20
+      name: "Warm up (20 users/sec)"
     - duration: 120
-      arrivalRate: 10
+      arrivalRate: 20
       rampTo: 100
-      name: Ramp up load
+      name: "Ramp up to high load"
     - duration: 300
-      arrivalRate: 500
-      name: Sustained load (500 users/sec)
+      arrivalRate: 1000
+      name: "Sustained peak load (1000 users/sec)"
   defaults:
     headers:
       Content-Type: "application/json"
 
 scenarios:
-  - name: "Public User Flow"
+  - name: "Public Participant Flow"
     flow:
       - get:
           url: "/api/game/current"
       - get:
           url: "/api/prizes"
-      - think: 5
+      - think: 2
       - get:
           url: "/api/game/current"
+      - get:
+          url: "/api/site-config/logo"
