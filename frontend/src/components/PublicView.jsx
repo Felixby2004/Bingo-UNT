@@ -94,45 +94,47 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
               <div 
                 key={p.id} 
                 onClick={() => setSelectedPrize(p)}
-                className="group bg-white rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-xl hover:shadow-unt-yellow/20 transition-all cursor-pointer border-2 sm:border-4 border-transparent hover:border-unt-yellow hover:-translate-y-2"
+                className="group bg-white rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-xl hover:shadow-unt-yellow/20 transition-all cursor-pointer border-2 sm:border-4 border-transparent hover:border-unt-yellow hover:-translate-y-2 flex flex-col"
               >
-                <div className="aspect-square relative overflow-hidden bg-gray-50">
+                <div className="aspect-[4/3] sm:aspect-video relative overflow-hidden bg-gray-50 border-b border-gray-100">
                   {p.image_url ? (
                     <img 
                       src={p.image_url} 
                       alt={`Imagen del premio: ${p.name}`} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                       loading="lazy"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300">
-                      <Trophy size={60} className="sm:size-[120px]" />
+                      <Trophy size={60} className="sm:size-[100px]" />
                     </div>
                   )}
-                  <div className="absolute top-3 right-3 sm:top-6 sm:right-6">
-                    <span className={`text-[8px] sm:text-xs font-bold px-2 py-1 sm:px-5 sm:py-2.5 rounded-full uppercase tracking-widest shadow-xl border ${
-                      p.status === 'finished' ? 'bg-gray-800 text-white border-gray-700' : 
-                      p.status === 'active' ? 'bg-red-500 text-white border-red-400 animate-pulse' : 
-                      'bg-unt-blue text-white border-unt-blue/50'
+                  <div className="absolute top-3 right-3 sm:top-5 sm:right-5">
+                    <span className={`text-[8px] sm:text-[10px] font-black px-2 py-1 sm:px-4 sm:py-2 rounded-full uppercase tracking-widest shadow-2xl border backdrop-blur-md ${
+                      p.status === 'finished' ? 'bg-gray-900/80 text-white border-white/20' : 
+                      p.status === 'active' ? 'bg-red-600/90 text-white border-white/20 animate-pulse' : 
+                      'bg-unt-blue/90 text-white border-white/20'
                     }`}>
                       {p.status === 'finished' ? 'Finalizado' : p.status === 'active' ? 'En Vivo' : 'Espera'}
                     </span>
                   </div>
                 </div>
-                <div className="p-4 sm:p-10 text-center">
-                  <h3 className="text-sm sm:text-2xl font-black text-unt-blue uppercase mb-1 sm:mb-3 group-hover:text-unt-yellow transition-colors leading-tight line-clamp-1">{p.name}</h3>
-                  <p className="hidden sm:block text-gray-600 text-sm font-medium line-clamp-2 mb-8 h-10">{p.description}</p>
+                <div className="p-5 sm:p-8 text-center flex-grow flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm sm:text-xl font-black text-unt-blue uppercase mb-1 sm:mb-2 group-hover:text-unt-yellow transition-colors leading-tight line-clamp-1">{p.name}</h3>
+                    <p className="hidden sm:block text-gray-600 text-xs font-medium line-clamp-2 mb-6">{p.description}</p>
+                  </div>
                   
                   {p.status === 'finished' ? (
-                    <div className="bg-green-50 p-2 sm:p-6 rounded-xl sm:rounded-3xl flex flex-col items-center space-y-1 sm:space-y-2 border-2 border-green-100">
-                      <Award className="text-green-600 size-4 sm:size-8" />
-                      <p className="text-[8px] sm:text-xs text-green-600 font-bold uppercase tracking-widest">¡Ganador!</p>
-                      <p className="text-xs sm:text-xl font-black text-green-700 line-clamp-1">{p.winner_name}</p>
+                    <div className="bg-green-50 p-2 sm:p-4 rounded-xl sm:rounded-2xl flex flex-col items-center space-y-1 border border-green-100">
+                      <Award className="text-green-600 size-4 sm:size-6" />
+                      <p className="text-[8px] sm:text-[10px] text-green-600 font-black uppercase tracking-widest">¡Ganador!</p>
+                      <p className="text-xs sm:text-lg font-black text-green-700 line-clamp-1">{p.winner_name}</p>
                     </div>
                   ) : (
-                    <div className="inline-flex items-center bg-unt-blue text-unt-yellow px-4 py-2 sm:px-8 sm:py-4 rounded-lg sm:rounded-2xl font-bold text-[10px] sm:text-sm uppercase tracking-widest group-hover:bg-unt-yellow group-hover:text-unt-blue transition-all shadow-lg">
-                      <span>¡VER!</span>
-                      <ChevronLeft size={16} className="rotate-180 ml-1 sm:ml-3 group-hover:translate-x-2 transition-transform" />
+                    <div className="inline-flex items-center justify-center bg-unt-blue text-unt-yellow px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest group-hover:bg-unt-yellow group-hover:text-unt-blue transition-all shadow-lg">
+                      <span>¡VER SORTEO!</span>
+                      <ChevronLeft size={14} className="rotate-180 ml-2 group-hover:translate-x-1 transition-transform" />
                     </div>
                   )}
                 </div>
