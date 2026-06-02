@@ -201,7 +201,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
               {isActuallyPlaying && (
                 <span className="inline-block bg-unt-yellow text-unt-blue text-[8px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-widest mb-1 sm:mb-2 animate-bounce shadow-lg shadow-unt-yellow/50">¡EN VIVO!</span>
               )}
-              <h2 className={`text-lg sm:text-2xl font-black uppercase tracking-tight mb-1 leading-tight drop-shadow-md line-clamp-3 ${isActuallyPlaying ? 'text-white' : 'text-unt-blue'}`}>
+              <h2 className={`text-base sm:text-xl lg:text-2xl font-black uppercase tracking-tight mb-1 leading-tight drop-shadow-md ${isActuallyPlaying ? 'text-white' : 'text-unt-blue'}`}>
                 {selectedPrize.name}
               </h2>
               <div className={`flex items-center space-x-1.5 font-bold uppercase text-[9px] sm:text-xs ${isActuallyPlaying ? 'text-unt-yellow' : 'text-gray-500'}`}>
