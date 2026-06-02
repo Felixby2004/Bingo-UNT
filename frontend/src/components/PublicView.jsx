@@ -119,10 +119,9 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
                     </span>
                   </div>
                 </div>
-                <div className="p-3 sm:p-6 text-center flex-grow flex flex-col justify-between">
+                <div className="p-5 sm:p-8 text-center flex-grow flex flex-col justify-between">
                   <div>
-                    <h3 className="text-sm sm:text-xl font-black text-unt-blue uppercase mb-1 sm:mb-2 group-hover:text-unt-yellow transition-colors leading-tight line-clamp-1">{p.name}</h3>
-                    <p className="hidden sm:block text-gray-600 text-xs font-medium line-clamp-2 mb-6">{p.description}</p>
+                    <h3 className="text-sm sm:text-xl font-black text-unt-blue uppercase mb-3 group-hover:text-unt-yellow transition-colors leading-tight line-clamp-2">{p.name}</h3>
                   </div>
                   
                   {p.status === 'finished' ? (
