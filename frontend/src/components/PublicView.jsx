@@ -94,14 +94,14 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
               <div 
                 key={p.id} 
                 onClick={() => setSelectedPrize(p)}
-                className="group bg-white rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-xl hover:shadow-unt-yellow/20 transition-all cursor-pointer border-2 sm:border-4 border-transparent hover:border-unt-yellow hover:-translate-y-2 flex flex-col"
+                className="group bg-white rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-xl hover:shadow-unt-yellow/20 transition-all cursor-pointer border-2 sm:border-4 border-transparent hover:border-unt-yellow hover:-translate-y-2 flex flex-col p-3 sm:p-4"
               >
-                <div className="aspect-[4/3] sm:aspect-video relative overflow-hidden bg-gray-50 border-b border-gray-100">
+                <div className="aspect-[4/3] sm:aspect-video relative overflow-hidden bg-gray-50 rounded-[1.5rem] sm:rounded-[2.5rem]">
                   {p.image_url ? (
                     <img 
                       src={p.image_url} 
                       alt={`Imagen del premio: ${p.name}`} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                       loading="lazy"
                     />
                   ) : (
@@ -109,8 +109,8 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
                       <Trophy size={60} className="sm:size-[100px]" />
                     </div>
                   )}
-                  <div className="absolute top-3 right-3 sm:top-5 sm:right-5">
-                    <span className={`text-[8px] sm:text-[10px] font-black px-2 py-1 sm:px-4 sm:py-2 rounded-full uppercase tracking-widest shadow-2xl border backdrop-blur-md ${
+                  <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
+                    <span className={`text-[7px] sm:text-[10px] font-black px-2 py-1 sm:px-4 sm:py-2 rounded-full uppercase tracking-widest shadow-2xl border backdrop-blur-md ${
                       p.status === 'finished' ? 'bg-gray-900/80 text-white border-white/20' : 
                       p.status === 'active' ? 'bg-red-600/90 text-white border-white/20 animate-pulse' : 
                       'bg-unt-blue/90 text-white border-white/20'
@@ -119,7 +119,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
                     </span>
                   </div>
                 </div>
-                <div className="p-5 sm:p-8 text-center flex-grow flex flex-col justify-between">
+                <div className="p-3 sm:p-6 text-center flex-grow flex flex-col justify-between">
                   <div>
                     <h3 className="text-sm sm:text-xl font-black text-unt-blue uppercase mb-1 sm:mb-2 group-hover:text-unt-yellow transition-colors leading-tight line-clamp-1">{p.name}</h3>
                     <p className="hidden sm:block text-gray-600 text-xs font-medium line-clamp-2 mb-6">{p.description}</p>
