@@ -3,7 +3,8 @@ import { Instagram, Music2 } from 'lucide-react';
 
 const Footer = ({ logoUrl }) => {
   return (
-    <footer className="bg-unt-blue text-unt-white mt-12 sm:mt-20 border-t border-white/5 pt-8 sm:pt-10 pb-8 sm:pb-10 text-center">
+    <footer className="bg-unt-blue text-unt-white mt-8 sm:mt-12 border-t border-unt-yellow/10 relative overflow-hidden pt-8 sm:pt-10 pb-8 sm:pb-10 text-center">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-unt-yellow/30 to-transparent"></div>
       <div className="flex flex-col items-center space-y-4 sm:space-y-6 px-4">
         <div className="flex items-center space-x-6">
           <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center overflow-hidden shrink-0">

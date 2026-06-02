@@ -74,7 +74,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
   // If no prize is selected, show the prize selection screen
   if (!selectedPrize) {
     return (
-      <div className="space-y-8 pb-20 animate-in fade-in duration-700">
+      <div className="space-y-8 pb-8 animate-in fade-in duration-700">
         <div className="text-center space-y-3">
           <div className="inline-block bg-unt-yellow/20 p-3 rounded-full mb-1">
             <Trophy size={40} className="text-unt-yellow animate-bounce" />
@@ -149,7 +149,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
   const isActuallyPlaying = gameState.prize?.id === selectedPrize.id && selectedPrize.status === 'active';
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="space-y-8 pb-8">
       <button 
         onClick={() => setSelectedPrize(null)}
         className="flex items-center space-x-2 text-unt-blue font-black text-xs uppercase tracking-widest hover:text-unt-yellow transition-colors"
