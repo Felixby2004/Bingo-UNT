@@ -187,10 +187,10 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-12 items-center">
           <div className="flex items-center space-x-4 sm:space-x-8">
             {selectedPrize.image_url && (
-              <div className={`w-24 h-24 sm:w-48 sm:h-48 rounded-[1.5rem] sm:rounded-[2.5rem] bg-white border-4 sm:border-8 shadow-2xl overflow-hidden flex items-center justify-center transition-all duration-500 ${isActuallyPlaying ? 'border-unt-yellow' : 'border-gray-100'}`}>
+              <div className={`w-24 h-24 sm:w-64 sm:h-64 rounded-[1.5rem] sm:rounded-[2.5rem] bg-white border-4 sm:border-8 shadow-2xl overflow-hidden flex items-center justify-center transition-all duration-500 ${isActuallyPlaying ? 'border-unt-yellow' : 'border-gray-100'}`}>
                 <img 
                   src={selectedPrize.image_url} 
-                  className="w-full h-full object-contain p-2" 
+                  className="w-full h-full object-contain p-1" 
                   alt={`Imagen detallada del premio: ${selectedPrize.name}`}
                   loading="lazy"
                 />
