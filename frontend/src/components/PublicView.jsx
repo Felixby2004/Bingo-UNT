@@ -53,6 +53,11 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
     };
 
     fetchHistory();
+
+    // Scroll to top when a prize is selected
+    if (selectedPrize) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }, [selectedPrize?.id, selectedPrize?.status, gameState.prize?.id]);
 
   const lastNumber = selectedPrizeNumbers[0];

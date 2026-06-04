@@ -38,6 +38,13 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
     return () => clearInterval(timer);
   }, [hourOffset]);
 
+  // Scroll to top when a game starts
+  useEffect(() => {
+    if (gameState.prize) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [gameState.prize?.id]);
+
   const handleSetup2FA = async () => {
     try {
       const res = await axios.post(`${apiUrl}/api/admin/setup-2fa`, {}, { withCredentials: true });
