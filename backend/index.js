@@ -651,19 +651,27 @@ app.put('/api/prizes/:id', authenticateToken, upload.single('image'), async (req
   try {
     const { id } = req.params;
     const { name, description, winning_pattern } = req.body;
-    let image_url = req.body.image_url;
     
+    const currentPrize = await query(
+      'SELECT image_url FROM prizes WHERE id = $1',
+      [id]
+    );
+
+    let image_url = currentPrize.rows[0]?.image_url || null;
+
+    if (req.file) {
+      image_url = req.file.path;
+    }
+
     let parsedPattern = null;
     if (winning_pattern) {
       try {
-        parsedPattern = typeof winning_pattern === 'string' ? JSON.parse(winning_pattern) : winning_pattern;
+        parsedPattern = typeof winning_pattern === 'string'
+          ? JSON.parse(winning_pattern)
+          : winning_pattern;
       } catch (e) {
         parsedPattern = winning_pattern;
       }
-    }
-    
-    if (req.file) {
-      image_url = req.file.path;
     }
 
     const result = await query(
