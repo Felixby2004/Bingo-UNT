@@ -28,7 +28,7 @@ const Footer = ({ logoUrl }) => {
           <p className="font-bold text-xs sm:text-sm uppercase tracking-wider sm:tracking-widest">Promo XXVIII - Ingeniería de Sistemas</p>
           <p className="font-medium text-[8px] sm:text-[10px] uppercase text-white/70">Universidad Nacional de Trujillo</p>
         </div>
-        <p className="text-[7px] sm:text-[8px] font-medium uppercase tracking-widest text-white">© 2026 Bingo Promo 28 - Desarrollado por Felix A. Chávez V.</p>
+        <p className="text-[7px] sm:text-[8px] font-medium uppercase tracking-widest text-white">© 2026 Bingo Promo 28 - Desarrollado por Felix A. Chávez Vidal</p>
       </div>
     </footer>
   );
