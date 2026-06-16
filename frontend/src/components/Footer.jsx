@@ -1,10 +1,10 @@
 import React from 'react';
-import { Instagram, Music2 } from 'lucide-react';
+import { Instagram } from 'lucide-react';
 
 const Footer = ({ logoUrl }) => {
   return (
-    <footer className="bg-unt-blue text-unt-white mt-8 sm:mt-12 border-t border-unt-yellow/10 relative overflow-hidden pt-8 sm:pt-10 pb-8 sm:pb-10 text-center">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-unt-yellow/30 to-transparent"></div>
+    <footer className="bg-unt-primary text-unt-white mt-8 sm:mt-12 border-t border-unt-accent/10 relative overflow-hidden pt-8 sm:pt-10 pb-8 sm:pb-10 text-center">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-unt-accent/30 to-transparent"></div>
       <div className="flex flex-col items-center space-y-4 sm:space-y-6 px-4">
         <div className="flex items-center space-x-6">
           <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center overflow-hidden shrink-0">
@@ -22,6 +22,16 @@ const Footer = ({ logoUrl }) => {
             className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl sm:rounded-2xl shadow-lg flex items-center justify-center text-pink-500 hover:scale-110 transition-transform"
           >
             <Instagram size={20} />
+          </a>
+          {/* KICK Link */}
+          <a 
+            href="https://kick.com/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            aria-label="Siguenos en KICK"
+            className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl sm:rounded-2xl shadow-lg flex items-center justify-center text-unt-primary hover:scale-110 transition-transform font-black text-lg"
+          >
+            K
           </a>
         </div>
         <div className="space-y-1">

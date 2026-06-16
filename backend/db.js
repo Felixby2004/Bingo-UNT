@@ -124,6 +124,29 @@ const initDb = async () => {
       )
     `);
 
+    // Gallery images table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS gallery_images (
+        id SERIAL PRIMARY KEY,
+        image_url TEXT NOT NULL,
+        caption TEXT,
+        sort_order INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Past events table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS past_events (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        date DATE NOT NULL,
+        description TEXT,
+        image_url TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Clean up expired codes
     await client.query(`
       DELETE FROM email_verification_codes 

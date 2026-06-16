@@ -81,10 +81,10 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
     return (
       <div className="space-y-8 pb-8 animate-in fade-in duration-700">
         <div className="text-center space-y-3">
-          <div className="inline-block bg-unt-yellow/20 p-3 rounded-full mb-1">
-            <Trophy size={40} className="text-unt-yellow animate-bounce" />
+          <div className="inline-block bg-unt-accent/20 p-3 rounded-full mb-1">
+            <Trophy size={40} className="text-unt-accent animate-bounce" />
           </div>
-          <h2 className="text-4xl font-black text-unt-blue uppercase tracking-tight drop-shadow-sm">¡Premios!</h2>
+          <h2 className="text-4xl font-black text-unt-primary uppercase tracking-tight drop-shadow-sm">¡Premios!</h2>
           <p className="text-gray-600 font-semibold uppercase tracking-widest text-sm">¡Elige un premio y mira el sorteo!</p>
         </div>
 
@@ -99,7 +99,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
               <div 
                 key={p.id} 
                 onClick={() => setSelectedPrize(p)}
-                className="group bg-white rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-xl hover:shadow-unt-yellow/20 transition-all cursor-pointer border-2 sm:border-4 border-transparent hover:border-unt-yellow hover:-translate-y-2 flex flex-col p-3 sm:p-4"
+                className="group bg-white rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-xl hover:shadow-unt-accent/20 transition-all cursor-pointer border-2 sm:border-4 border-transparent hover:border-unt-accent hover:-translate-y-2 flex flex-col p-3 sm:p-4"
               >
                 <div className="aspect-[4/3] sm:aspect-video relative overflow-hidden bg-white rounded-[1.5rem] sm:rounded-[2.5rem] flex items-center justify-center border border-gray-50">
                   {p.image_url ? (
@@ -118,7 +118,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
                     <span className={`text-[7px] sm:text-[10px] font-black px-2 py-1 sm:px-4 sm:py-2 rounded-full uppercase tracking-widest shadow-2xl border backdrop-blur-md ${
                       p.status === 'finished' ? 'bg-gray-900/80 text-white border-white/20' : 
                       p.status === 'active' ? 'bg-red-600/90 text-white border-white/20 animate-pulse' : 
-                      'bg-unt-blue/90 text-white border-white/20'
+                      'bg-unt-primary/90 text-white border-white/20'
                     }`}>
                       {p.status === 'finished' ? 'Finalizado' : p.status === 'active' ? 'En Vivo' : 'Espera'}
                     </span>
@@ -126,7 +126,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
                 </div>
                 <div className="p-5 sm:p-8 text-center flex-grow flex flex-col justify-between">
                   <div>
-                    <h3 className="text-sm sm:text-xl font-black text-unt-blue uppercase mb-3 group-hover:text-unt-yellow transition-colors leading-tight line-clamp-2">{p.name}</h3>
+                    <h3 className="text-sm sm:text-xl font-black text-unt-primary uppercase mb-3 group-hover:text-unt-accent transition-colors leading-tight line-clamp-2">{p.name}</h3>
                   </div>
                   
                   {p.status === 'finished' ? (
@@ -136,7 +136,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
                       <p className="text-xs sm:text-lg font-black text-green-700 line-clamp-1">{p.winner_name}</p>
                     </div>
                   ) : (
-                    <div className="inline-flex items-center justify-center bg-unt-blue text-unt-yellow px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest group-hover:bg-unt-yellow group-hover:text-unt-blue transition-all shadow-lg">
+                    <div className="inline-flex items-center justify-center bg-unt-primary text-unt-accent px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest group-hover:bg-unt-accent group-hover:text-unt-white transition-all shadow-lg">
                       <span>¡VER SORTEO!</span>
                       <ChevronLeft size={14} className="rotate-180 ml-2 group-hover:translate-x-1 transition-transform" />
                     </div>
@@ -157,7 +157,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
     <div className="space-y-8 pb-8">
       <button 
         onClick={() => setSelectedPrize(null)}
-        className="flex items-center space-x-2 text-unt-blue font-black text-xs uppercase tracking-widest hover:text-unt-yellow transition-colors"
+        className="flex items-center space-x-2 text-unt-primary font-black text-xs uppercase tracking-widest hover:text-unt-accent transition-colors"
       >
         <ChevronLeft size={16} />
         <span>Volver a Premios</span>
@@ -174,7 +174,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
               </div>
               <div>
                 <p className="text-[10px] font-black text-green-600 uppercase tracking-[0.2em] mb-1">Sorteo Finalizado</p>
-                <h3 className="text-2xl font-black text-unt-blue uppercase tracking-tight">¡Felicidades al Ganador(a)!</h3>
+                <h3 className="text-2xl font-black text-unt-primary uppercase tracking-tight">¡Felicidades al Ganador(a)!</h3>
               </div>
             </div>
             <div className="bg-green-500 text-white px-10 py-4 rounded-2xl shadow-xl shadow-green-500/20 transform hover:scale-[1.02] transition-all">
@@ -186,14 +186,14 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
       )}
 
       {/* Real-time Game Banner or Static Prize Info */}
-      <div className={`rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 shadow-2xl relative overflow-hidden ${isActuallyPlaying ? 'bg-gradient-to-br from-unt-blue to-night-blue' : 'bg-white border-2 sm:border-4 border-gray-100'}`}>
-        <div className="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-unt-yellow/20 rounded-full -mr-32 -mt-32 sm:-mr-48 sm:-mt-48 blur-3xl animate-pulse"></div>
+      <div className={`rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 shadow-2xl relative overflow-hidden ${isActuallyPlaying ? 'bg-gradient-to-br from-unt-primary to-unt-night' : 'bg-white border-2 sm:border-4 border-gray-100'}`}>
+        <div className="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-unt-accent/20 rounded-full -mr-32 -mt-32 sm:-mr-48 sm:-mt-48 blur-3xl animate-pulse"></div>
         <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8">
           
           {/* Left Section: Image and Name */}
           <div className="flex items-center space-x-4 sm:space-x-6 w-full lg:w-1/3">
             {selectedPrize.image_url && (
-              <div className={`flex-shrink-0 w-20 h-20 sm:w-40 sm:h-40 rounded-[1.2rem] sm:rounded-[2rem] bg-white border-4 sm:border-6 shadow-xl overflow-hidden flex items-center justify-center transition-all duration-500 ${isActuallyPlaying ? 'border-unt-yellow' : 'border-gray-100'}`}>
+              <div className={`flex-shrink-0 w-20 h-20 sm:w-40 sm:h-40 rounded-[1.2rem] sm:rounded-[2rem] bg-white border-4 sm:border-6 shadow-xl overflow-hidden flex items-center justify-center transition-all duration-500 ${isActuallyPlaying ? 'border-unt-accent' : 'border-gray-100'}`}>
                 <img 
                   src={selectedPrize.image_url} 
                   className="w-full h-full object-contain p-1.5" 
@@ -204,12 +204,12 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
             )}
             <div className="text-left flex-grow">
               {isActuallyPlaying && (
-                <span className="inline-block bg-unt-yellow text-unt-blue text-[8px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-widest mb-1 sm:mb-2 animate-bounce shadow-lg shadow-unt-yellow/50">¡EN VIVO!</span>
+                <span className="inline-block bg-unt-accent text-unt-white text-[8px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-widest mb-1 sm:mb-2 animate-bounce shadow-lg shadow-unt-accent/50">¡EN VIVO!</span>
               )}
-              <h2 className={`text-base sm:text-xl lg:text-2xl font-black uppercase tracking-tight mb-1 leading-tight drop-shadow-md ${isActuallyPlaying ? 'text-white' : 'text-unt-blue'}`}>
+              <h2 className={`text-base sm:text-xl lg:text-2xl font-black uppercase tracking-tight mb-1 leading-tight drop-shadow-md ${isActuallyPlaying ? 'text-white' : 'text-unt-primary'}`}>
                 {selectedPrize.name}
               </h2>
-              <div className={`flex items-center space-x-1.5 font-bold uppercase text-[9px] sm:text-xs ${isActuallyPlaying ? 'text-unt-yellow' : 'text-gray-500'}`}>
+              <div className={`flex items-center space-x-1.5 font-bold uppercase text-[9px] sm:text-xs ${isActuallyPlaying ? 'text-unt-accent' : 'text-gray-500'}`}>
                 <Award size={14} />
                 <span className="line-clamp-1">{selectedPrize.status === 'finished' ? `GANADOR: ${selectedPrize.winner_name}` : 'Sorteo en curso'}</span>
               </div>
@@ -218,9 +218,9 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
 
           {/* Center Section: Main Number */}
           <div className="flex flex-col items-center justify-center lg:w-1/4">
-            <div className={`w-32 h-32 sm:w-44 sm:h-44 rounded-full flex flex-col items-center justify-center shadow-2xl border-[6px] sm:border-[10px] transform transition-all duration-500 ${isActuallyPlaying ? 'bg-white border-unt-yellow' : 'bg-gray-50 border-gray-100'}`}>
-              <span className="text-unt-blue/40 font-bold text-lg sm:text-2xl leading-none">{(isActuallyPlaying || selectedPrize.status === 'finished') ? (lastNumber?.letter || '!') : '!'}</span>
-              <span className="text-4xl sm:text-7xl font-black text-unt-blue leading-tight tracking-tighter">{(isActuallyPlaying || selectedPrize.status === 'finished') ? (lastNumber?.number || '??') : '??'}</span>
+            <div className={`w-32 h-32 sm:w-44 sm:h-44 rounded-full flex flex-col items-center justify-center shadow-2xl border-[6px] sm:border-[10px] transform transition-all duration-500 ${isActuallyPlaying ? 'bg-white border-unt-accent' : 'bg-gray-50 border-gray-100'}`}>
+              <span className="text-unt-primary/40 font-bold text-lg sm:text-2xl leading-none">{(isActuallyPlaying || selectedPrize.status === 'finished') ? (lastNumber?.letter || '!') : '!'}</span>
+              <span className="text-4xl sm:text-7xl font-black text-unt-primary leading-tight tracking-tighter">{(isActuallyPlaying || selectedPrize.status === 'finished') ? (lastNumber?.number || '??') : '??'}</span>
             </div>
             <p className={`mt-2 sm:mt-4 text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.2em] sm:tracking-[0.4em] ${isActuallyPlaying ? 'text-white/60' : 'text-gray-400'}`}>Último Cantado</p>
           </div>
@@ -229,7 +229,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
           <div className="flex flex-col gap-3 w-full lg:w-1/3">
             <div className={`flex items-center justify-between ${isActuallyPlaying ? 'bg-white/10' : 'bg-gray-100'} backdrop-blur-md px-5 py-3 rounded-2xl border ${isActuallyPlaying ? 'border-white/20' : 'border-gray-100'}`}>
               <p className={`${isActuallyPlaying ? 'text-white/60' : 'text-gray-500'} text-[10px] sm:text-xs font-black uppercase tracking-widest`}>Total Cantados</p>
-              <p className={`text-xl sm:text-2xl font-black ${isActuallyPlaying ? 'text-unt-yellow' : 'text-unt-blue'}`}>{selectedPrizeNumbers.length}</p>
+              <p className={`text-xl sm:text-2xl font-black ${isActuallyPlaying ? 'text-unt-accent' : 'text-unt-primary'}`}>{selectedPrizeNumbers.length}</p>
             </div>
             
             {selectedPrize.description && (
@@ -250,28 +250,28 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
         {/* Left: Tabbed Bingo View */}
         <div className="lg:col-span-12 space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-black text-unt-blue uppercase tracking-tight flex items-center space-x-2">
-              <Grid size={20} className="text-unt-yellow" />
+            <h3 className="text-lg font-black text-unt-primary uppercase tracking-tight flex items-center space-x-2">
+              <Grid size={20} className="text-unt-accent" />
               <span>Control de Cartilla</span>
             </h3>
             <div className="flex bg-gray-100 p-1.5 rounded-2xl">
               <button 
                 onClick={() => setActiveTab('grid')}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'grid' ? 'bg-white text-unt-blue shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'grid' ? 'bg-white text-unt-primary shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
               >
                 <Grid size={14} />
                 <span className="hidden sm:inline">TABLERO</span>
               </button>
               <button 
                 onClick={() => setActiveTab('card')}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'card' ? 'bg-white text-unt-blue shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'card' ? 'bg-white text-unt-primary shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
               >
                 <CreditCard size={14} />
                 <span className="hidden sm:inline">PATRÓN</span>
               </button>
               <button 
                 onClick={() => setActiveTab('list')}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'list' ? 'bg-white text-unt-blue shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'list' ? 'bg-white text-unt-primary shadow-lg' : 'text-gray-400 hover:text-gray-600'}`}
               >
                 <List size={14} />
                 <span className="hidden sm:inline">LISTA</span>
@@ -281,7 +281,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
 
           {loadingNumbers ? (
             <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[3rem] shadow-xl border-4 border-dashed border-gray-50">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-unt-blue mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-unt-primary mb-4"></div>
               <p className="text-gray-400 font-black uppercase tracking-widest text-xs">Cargando datos del sorteo...</p>
             </div>
           ) : activeTab === 'grid' ? (

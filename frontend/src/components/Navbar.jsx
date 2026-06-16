@@ -15,7 +15,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
   };
 
   return (
-    <nav className="bg-unt-blue text-unt-white shadow-2xl sticky top-0 z-50 border-b border-unt-yellow/10">
+    <nav className="bg-unt-primary text-unt-white shadow-2xl sticky top-0 z-50 border-b border-unt-accent/10">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo y Título */}
@@ -29,7 +29,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
             </div>
             <div className="flex flex-col">
               <span className="font-black text-sm sm:text-lg tracking-tight block leading-none uppercase">Bingo Sistemas</span>
-              <span className="text-[10px] font-bold text-unt-yellow tracking-widest uppercase opacity-80">Promo XXVIII</span>
+              <span className="text-[10px] font-bold text-unt-accent tracking-widest uppercase opacity-80">Promo XXVIII</span>
             </div>
           </div>
           
@@ -41,7 +41,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
                 onClick={() => handleNavClick(item.id)}
                 className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest ${
                   view === item.id 
-                  ? 'bg-unt-yellow text-unt-blue shadow-lg shadow-unt-yellow/20' 
+                  ? 'bg-unt-accent text-unt-white shadow-lg shadow-unt-accent/20' 
                   : 'hover:bg-white/5 text-unt-white/60'
                 }`}
               >
@@ -58,7 +58,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
                   onClick={() => handleNavClick('admin')}
                   className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest ${
                     view === 'admin' 
-                    ? 'bg-unt-yellow text-unt-blue shadow-lg shadow-unt-yellow/20' 
+                    ? 'bg-unt-accent text-unt-white shadow-lg shadow-unt-accent/20' 
                     : 'hover:bg-white/5 text-unt-white/60'
                   }`}
                 >
@@ -78,7 +78,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
                 onClick={() => handleNavClick('admin')}
                 className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest ${
                   view === 'admin' 
-                  ? 'bg-unt-yellow text-unt-blue shadow-lg shadow-unt-yellow/20' 
+                  ? 'bg-unt-accent text-unt-white shadow-lg shadow-unt-accent/20' 
                   : 'hover:bg-white/5 text-unt-white/60'
                 }`}
               >
@@ -101,7 +101,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
 
       {/* Mobile Menu Overlay */}
       {isOpen && (
-        <div className="md:hidden bg-unt-blue border-t border-white/10 animate-in slide-in-from-top duration-300">
+        <div className="md:hidden bg-unt-primary border-t border-white/10 animate-in slide-in-from-top duration-300">
           <div className="container mx-auto px-4 py-6 flex flex-col space-y-3">
             {navItems.map((item) => (
               <button
@@ -109,7 +109,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
                 onClick={() => handleNavClick(item.id)}
                 className={`w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest transition-all ${
                   view === item.id 
-                  ? 'bg-unt-yellow text-unt-blue shadow-xl' 
+                  ? 'bg-unt-accent text-unt-white shadow-xl' 
                   : 'bg-white/5 text-unt-white/80'
                 }`}
               >
@@ -126,7 +126,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
                   onClick={() => handleNavClick('admin')}
                   className={`w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest transition-all ${
                     view === 'admin' 
-                    ? 'bg-unt-yellow text-unt-blue shadow-xl' 
+                    ? 'bg-unt-accent text-unt-white shadow-xl' 
                     : 'bg-white/5 text-unt-white/80'
                   }`}
                 >
@@ -146,7 +146,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
                 onClick={() => handleNavClick('admin')}
                 className={`w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest transition-all ${
                   view === 'admin' 
-                  ? 'bg-unt-yellow text-unt-blue shadow-xl' 
+                  ? 'bg-unt-accent text-unt-white shadow-xl' 
                   : 'bg-white/5 text-unt-white/80'
                 }`}
               >

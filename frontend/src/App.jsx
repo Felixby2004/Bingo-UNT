@@ -1,250 +1,139 @@
 import React, { useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
-axios.defaults.withCredentials = true;
-
-import Navbar from './components/Navbar';
-import AdminPanel from './components/AdminPanel';
-import PublicView from './components/PublicView';
-import Login from './components/Login';
-import HistoryView from './components/HistoryView';
+import Home from './components/Home';
+import BingoLanding from './components/BingoLanding';
+import BingoGame from './components/BingoGame';
 import Footer from './components/Footer';
 
-const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:3001');
-
 function App() {
-  const [view, setView] = useState('public'); // 'public', 'admin'
-  const [selectedPrize, setSelectedPrize] = useState(null);
-  const [user, setUser] = useState(null);
-  const [gameState, setGameState] = useState({ prize: null, drawnNumbers: [] });
-  const [prizes, setPrizes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  return (
+    <Routes>
+      <Route path="/" element={<MainLayout><Home /></MainLayout>} />
+      <Route path="/bingo" element={<MainLayout><BingoLanding /></MainLayout>} />
+      <Route path="/bingo/game" element={<BingoGame />} />
+    </Routes>
+  );
+}
+
+function MainLayout({ children }) {
   const [logoUrl, setLogoUrl] = useState('https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268');
 
-  // Lógica para navegación interna y prevención de salida accidental
   useEffect(() => {
-    const handlePopState = (event) => {
-      const state = event.state;
-      if (state) {
-        // Sincronizamos los estados de la aplicación con el historial
-        if (state.view) setView(state.view);
-        setSelectedPrize(state.selectedPrize || null);
-      } else {
-        // Si intentan ir más atrás del inicio, los mantenemos en la vista pública
-        setView('public');
-        setSelectedPrize(null);
-        window.history.pushState({ view: 'public', selectedPrize: null }, '', window.location.pathname);
+    const fetchLogo = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        const res = await axios.get(`${apiUrl}/api/config/logo`);
+        if (res.data.logoUrl) setLogoUrl(res.data.logoUrl);
+      } catch (err) {
+        console.error('Error fetching logo:', err);
       }
     };
-
-    window.addEventListener('popstate', handlePopState);
-
-    // Estado inicial
-    if (!window.history.state) {
-      window.history.replaceState({ view: 'public', selectedPrize: null }, '', window.location.pathname);
-    }
-
-    return () => window.removeEventListener('popstate', handlePopState);
+    fetchLogo();
   }, []);
 
-  // Actualizar historial cuando cambian los estados manualmente
-  useEffect(() => {
-    const currentState = window.history.state;
-    const hasChanged = !currentState || 
-                      currentState.view !== view || 
-                      (currentState.selectedPrize?.id !== selectedPrize?.id);
+  return (
+    <div className="min-h-screen bg-unt-light flex flex-col font-sans text-unt-black">
+      <NavbarForRoutes logoUrl={logoUrl} />
+      <main className="flex-grow container mx-auto px-4 py-8">
+        {children}
+      </main>
+      <Footer logoUrl={logoUrl} />
+    </div>
+  );
+}
 
-    if (hasChanged) {
-      window.history.pushState({ view, selectedPrize }, '', window.location.pathname);
-    }
-  }, [view, selectedPrize]);
+function NavbarForRoutes({ logoUrl }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [eventsOpen, setEventsOpen] = useState(false);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    checkAuth();
-    fetchCurrentGame();
-    fetchPrizes();
-    fetchLogo();
-
-    socket.on('logo_updated', ({ logoUrl }) => {
-      setLogoUrl(logoUrl);
-    });
-
-    socket.on('number_drawn', (newNumber) => {
-      setGameState(prev => ({
-        ...prev,
-        drawnNumbers: [newNumber, ...prev.drawnNumbers]
-      }));
-    });
-
-    socket.on('game_started', ({ prize, drawnNumbers }) => {
-      setGameState({ prize, drawnNumbers });
-      fetchPrizes();
-    });
-
-    socket.on('game_finished', (prize) => {
-      setGameState(prev => {
-        if (prev.prize?.id === prize.id) {
-          return { ...prev, prize };
-        }
-        return prev;
-      });
-      fetchPrizes();
-    });
-
-    socket.on('prize_added', () => fetchPrizes());
-    socket.on('prize_updated', (updatedPrize) => {
-      fetchPrizes();
-      if (gameState.prize?.id === updatedPrize.id) {
-        setGameState(prev => ({ ...prev, prize: updatedPrize }));
-      }
-    });
-    socket.on('prize_removed', () => fetchPrizes());
-
-    socket.on('number_updated', (updatedNumber) => {
-      setGameState(prev => ({
-        ...prev,
-        drawnNumbers: prev.drawnNumbers.map(n => n.id === updatedNumber.id ? updatedNumber : n)
-      }));
-    });
-
-    socket.on('number_removed', ({ id }) => {
-      setGameState(prev => ({
-        ...prev,
-        drawnNumbers: prev.drawnNumbers.filter(n => n.id !== id)
-      }));
-    });
-
-    return () => {
-      socket.off('logo_updated');
-      socket.off('number_drawn');
-      socket.off('number_updated');
-      socket.off('number_removed');
-      socket.off('game_started');
-      socket.off('game_finished');
-      socket.off('prize_added');
-      socket.off('prize_updated');
-      socket.off('prize_removed');
-    };
-  }, [gameState.prize?.id]);
-
-  const fetchLogo = async () => {
-    try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const res = await axios.get(`${apiUrl}/api/config/logo`);
-      if (res.data.logoUrl) setLogoUrl(res.data.logoUrl);
-    } catch (err) {
-      console.error('Error fetching logo:', err);
-    }
-  };
-
-  const checkAuth = async () => {
-    try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const token = localStorage.getItem('admin_token');
-      const config = { withCredentials: true };
-      
-      if (token) {
-        config.headers = { Authorization: `Bearer ${token}` };
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      }
-
-      const res = await axios.get(`${apiUrl}/api/admin/me`, config);
-      
-      if (res.data.user) {
-        setUser(res.data.user);
-        const currentPath = window.location.hash || window.location.pathname;
-        if (currentPath.includes('admin') || view === 'admin') {
-          setView('admin');
-        }
-      }
-    } catch (err) {
-      localStorage.removeItem('admin_token');
-      delete axios.defaults.headers.common['Authorization'];
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCurrentGame = async () => {
-    try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/game/current`);
-      setGameState(res.data);
-    } catch (err) {
-      // Error handled by state (gameState will be null or previous)
-    }
-  };
-
-  const fetchPrizes = async () => {
-    try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/prizes`);
-      setPrizes(res.data);
-    } catch (err) {
-      // Error handled by empty prizes list
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      await axios.post(`${apiUrl}/api/logout`, {}, { withCredentials: true });
-    } catch (err) {
-      console.error('Logout error:', err);
-    } finally {
-      // Limpiar TODO rastro local
-      localStorage.removeItem('admin_token');
-      delete axios.defaults.headers.common['Authorization'];
-      setUser(null);
-      setView('public');
-      // Forzar recarga para limpiar cualquier estado en memoria
-      window.location.href = '/';
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-unt-blue"></div>
-      </div>
-    );
-  }
+  const events = [
+    { name: 'Bingo 28', path: '/bingo' },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
-      <Navbar 
-        view={view} 
-        setView={setView} 
-        user={user} 
-        onLogout={handleLogout} 
-        logoUrl={logoUrl}
-        setSelectedPrize={setSelectedPrize}
-      />
-      
-      <main className="flex-grow container mx-auto px-4 py-8">
-        {view === 'admin' ? (
-          user ? (
-            <AdminPanel 
-              gameState={gameState} 
-              prizes={prizes}
-              refreshGame={fetchCurrentGame}
-              refreshPrizes={fetchPrizes}
-              user={user}
-            />
-          ) : (
-            <Login onLogin={setUser} />
-          )
-        ) : (
-            <PublicView 
-              gameState={gameState} 
-              prizes={prizes}
-              selectedPrize={selectedPrize}
-              setSelectedPrize={setSelectedPrize}
-            />
-          )}
-        </main>
-        
-        <Footer logoUrl={logoUrl} />
-    </div>
+    <nav className="bg-unt-primary text-unt-white shadow-2xl sticky top-0 z-50 border-b border-unt-accent/10">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center h-16 sm:h-20">
+          <Link to="/" className="flex items-center space-x-3">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center shrink-0 overflow-hidden">
+              <img
+                src={logoUrl}
+                alt="Logo PROM 28"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-black text-sm sm:text-lg tracking-tight block leading-none uppercase">Promo XXVIII</span>
+              <span className="text-[10px] font-bold text-unt-accent tracking-widest uppercase opacity-80">Ingeniería de Sistemas</span>
+            </div>
+          </Link>
+
+          <div className="hidden md:flex items-center space-x-4">
+            <div className="relative">
+              <button
+                onClick={() => setEventsOpen(!eventsOpen)}
+                className="flex items-center space-x-2 px-4 py-2 rounded-xl font-bold transition-all text-xs uppercase tracking-widest hover:bg-white/5"
+              >
+                <span>Eventos</span>
+                <svg className={`w-4 h-4 transition-transform ${eventsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {eventsOpen && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-unt-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                  {events.map((event, idx) => (
+                    <Link
+                      key={idx}
+                      to={event.path}
+                      onClick={() => setEventsOpen(false)}
+                      className="block px-4 py-3 text-sm font-bold text-gray-700 hover:bg-unt-light hover:text-unt-primary"
+                    >
+                      {event.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Link
+              to="/bingo/game"
+              className="px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest bg-unt-accent text-unt-white shadow-lg shadow-unt-accent/20 hover:opacity-90 transition-opacity"
+            >
+              Bingo
+            </Link>
+          </div>
+
+          <button
+            className="md:hidden p-2 rounded-xl bg-white/5 text-unt-white"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
+          >
+            {isOpen ? (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {isOpen && (
+        <div className="md:hidden bg-unt-primary border-t border-white/10 animate-in slide-in-from-top duration-300">
+          <div className="container mx-auto px-4 py-6 space-y-4">
+            <Link to="/" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-sm font-bold text-unt-white uppercase tracking-widest rounded-xl hover:bg-white/5">Inicio</Link>
+            <Link to="/bingo" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-sm font-bold text-unt-white uppercase tracking-widest rounded-xl hover:bg-white/5">Bingo 28</Link>
+            <Link to="/bingo/game" onClick={() => setIsOpen(false)} className="block px-4 py-3 text-sm font-bold text-unt-accent uppercase tracking-widest rounded-xl bg-unt-accent/20">Ir al Bingo</Link>
+          </div>
+        </div>
+      )}
+    </nav>
   );
 }
 

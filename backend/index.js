@@ -532,6 +532,16 @@ app.get('/api/config/logo', async (req, res) => {
   }
 });
 
+app.get('/api/config/whatsapp', async (req, res) => {
+  try {
+    const result = await query("SELECT value FROM site_config WHERE key = 'whatsapp_number'");
+    const whatsappNumber = result.rows[0]?.value || process.env.WHATSAPP_NUMBER || '';
+    res.json({ whatsappNumber });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post('/api/admin/config/logo', authenticateToken, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No se subió ninguna imagen' });
@@ -545,6 +555,128 @@ app.post('/api/admin/config/logo', authenticateToken, upload.single('image'), as
     
     io.emit('logo_updated', { logoUrl });
     res.json({ success: true, logoUrl });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/admin/config/whatsapp', authenticateToken, async (req, res) => {
+  try {
+    const { whatsappNumber } = req.body;
+    await query(`
+      INSERT INTO site_config (key, value) 
+      VALUES ('whatsapp_number', $1) 
+      ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = CURRENT_TIMESTAMP
+    `, [whatsappNumber]);
+    res.json({ success: true, whatsappNumber });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- GALLERY IMAGES ---
+app.get('/api/gallery', async (req, res) => {
+  try {
+    const result = await query('SELECT * FROM gallery_images ORDER BY sort_order ASC, created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/gallery', authenticateToken, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No se subió ninguna imagen' });
+    const { caption, sort_order } = req.body;
+    const result = await query(
+      'INSERT INTO gallery_images (image_url, caption, sort_order) VALUES ($1, $2, $3) RETURNING *',
+      [req.file.path, caption, sort_order || 0]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/admin/gallery/:id', authenticateToken, upload.single('image'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { caption, sort_order } = req.body;
+    
+    const currentImage = await query('SELECT image_url FROM gallery_images WHERE id = $1', [id]);
+    let imageUrl = currentImage.rows[0]?.image_url;
+    
+    if (req.file) imageUrl = req.file.path;
+    
+    const result = await query(
+      'UPDATE gallery_images SET image_url = $1, caption = $2, sort_order = $3 WHERE id = $4 RETURNING *',
+      [imageUrl, caption, sort_order, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Imagen no encontrada' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/admin/gallery/:id', authenticateToken, async (req, res) => {
+  try {
+    await query('DELETE FROM gallery_images WHERE id = $1', [req.params.id]);
+    res.sendStatus(204);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --- PAST EVENTS ---
+app.get('/api/past-events', async (req, res) => {
+  try {
+    const result = await query('SELECT * FROM past_events ORDER BY date DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/past-events', authenticateToken, upload.single('image'), async (req, res) => {
+  try {
+    const { title, date, description } = req.body;
+    const imageUrl = req.file ? req.file.path : null;
+    const result = await query(
+      'INSERT INTO past_events (title, date, description, image_url) VALUES ($1, $2, $3, $4) RETURNING *',
+      [title, date, description, imageUrl]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/admin/past-events/:id', authenticateToken, upload.single('image'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, date, description } = req.body;
+    
+    const currentEvent = await query('SELECT image_url FROM past_events WHERE id = $1', [id]);
+    let imageUrl = currentEvent.rows[0]?.image_url;
+    
+    if (req.file) imageUrl = req.file.path;
+    
+    const result = await query(
+      'UPDATE past_events SET title = $1, date = $2, description = $3, image_url = $4 WHERE id = $5 RETURNING *',
+      [title, date, description, imageUrl, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Evento no encontrado' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/admin/past-events/:id', authenticateToken, async (req, res) => {
+  try {
+    await query('DELETE FROM past_events WHERE id = $1', [req.params.id]);
+    res.sendStatus(204);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
