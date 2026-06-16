@@ -81,11 +81,6 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
     }
   };
 
-  const handleBingoLogout = () => {
-    onLogout();
-    setSelectedPrize(null);
-  };
-
   const refreshPrizes = async () => {
     const res = await axios.get(`${apiUrl}/api/prizes`);
     setPrizes(res.data);
@@ -181,12 +176,12 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
             <div className={`
               fixed z-40 transition-all duration-300 ease-in-out
               ${streamState === 'normal' 
-                ? 'right-8 top-24 w-96 shadow-2xl' 
-                : 'right-8 top-24 w-48 shadow-lg'}
+                ? 'right-4 top-20 w-72 sm:w-80 md:w-96 shadow-2xl' 
+                : 'right-4 top-20 w-40 sm:w-48 shadow-lg'}
             `}>
               <div className="bg-unt-blue rounded-t-xl p-3 flex items-center justify-between">
-                <h2 className="text-sm font-black text-unt-yellow uppercase flex items-center gap-2">
-                  <Music2 size={16} />
+                <h2 className="text-xs sm:text-sm font-black text-unt-yellow uppercase flex items-center gap-2">
+                  <Music2 size={14} sm={16} />
                   Transmisión
                 </h2>
                 <div className="flex gap-2">
@@ -196,7 +191,7 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
                       className="text-white hover:text-unt-yellow transition-colors"
                       title="Minimizar"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="19" x2="19" y2="19"></line></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="19" x2="19" y2="19"></line></svg>
                     </button>
                   ) : (
                     <button 
@@ -204,7 +199,7 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
                       className="text-white hover:text-unt-yellow transition-colors"
                       title="Expandir"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
                     </button>
                   )}
                   <button 
@@ -212,13 +207,13 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
                     className="text-white hover:text-red-400 transition-colors"
                     title="Cerrar"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                   </button>
                 </div>
               </div>
               <div className={`
                 bg-black overflow-hidden
-                ${streamState === 'normal' ? 'aspect-video rounded-b-xl' : 'h-28 rounded-b-xl'}
+                ${streamState === 'normal' ? 'aspect-video rounded-b-xl' : 'h-24 sm:h-28 rounded-b-xl'}
               `}>
                 <iframe 
                   src="https://player.kick.com/felix-04p" 
@@ -237,7 +232,7 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
           {streamState === 'collapsed' && (
             <button 
               onClick={() => setStreamState('normal')}
-              className="fixed right-8 top-24 z-40 bg-unt-blue text-unt-yellow p-3 rounded-full shadow-2xl hover:scale-110 transition-transform"
+              className="fixed right-4 top-20 z-40 bg-unt-blue text-unt-yellow p-3 rounded-full shadow-2xl hover:scale-110 transition-transform"
               title="Abrir transmisión"
             >
               <Music2 size={24} />
@@ -253,13 +248,13 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
 
           {/* WhatsApp Button */}
           {whatsappNumber && (
-            <div className="fixed bottom-8 right-8 z-50">
+            <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50">
               <button
                 onClick={openWhatsapp}
-                className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all"
+                className="bg-green-500 hover:bg-green-600 text-white p-3 sm:p-4 rounded-full shadow-2xl hover:scale-110 transition-all"
                 title="Contactar por WhatsApp"
               >
-                <MessageCircle size={32} />
+                <MessageCircle size={20} sm={32} />
               </button>
             </div>
           )}

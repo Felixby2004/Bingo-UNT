@@ -3,12 +3,42 @@ import BingoGrid from './BingoGrid';
 import ChronologicalList from './ChronologicalList';
 import BingoCard from './BingoCard';
 import axios from 'axios';
-import { List, Grid, Trophy, Clock, Award, CreditCard, Instagram, Music2, ChevronLeft } from 'lucide-react';
+import { List, Grid, Trophy, Clock, Award, CreditCard, Instagram, Music2, ChevronLeft, Calendar } from 'lucide-react';
 
 const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
   const [activeTab, setActiveTab] = useState('grid');
   const [selectedPrizeNumbers, setSelectedPrizeNumbers] = useState([]);
   const [loadingNumbers, setLoadingNumbers] = useState(false);
+  
+  // Fecha del evento: 3 de Julio de 2026, 14:00
+  const eventDate = new Date('2026-07-03T14:00:00');
+  
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date();
+      const difference = eventDate - now;
+
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60)
+        });
+      }
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -76,11 +106,72 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
     return order[a.status] - order[b.status];
   });
 
-  // If no prize is selected, show the prize selection screen
+  // If no prize is selected, show the main landing with countdown, details, then prizes
   if (!selectedPrize) {
     return (
       <div className="space-y-8 pb-8 animate-in fade-in duration-700">
-        <div className="text-center space-y-3">
+        {/* Title Section with Dark Background */}
+        <div className="bg-gradient-to-b from-unt-blue to-night-blue rounded-[2rem] p-6 sm:p-8 text-center">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white uppercase tracking-tighter mb-4">
+            Próximo Bingo
+          </h1>
+          <p className="text-lg sm:text-xl md:text-2xl font-bold text-unt-yellow">
+            ¡No te lo pierdas!
+          </p>
+        </div>
+
+        {/* Countdown Section */}
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 md:gap-8">
+            {Object.entries(timeLeft).map(([unit, value]) => (
+              <div key={unit} className="bg-gray-100 rounded-2xl p-4 sm:p-6 md:p-8 text-center border-2 border-unt-blue">
+                <div className="text-3xl sm:text-4xl md:text-6xl font-black text-unt-blue">
+                  {String(value).padStart(2, '0')}
+                </div>
+                <div className="text-gray-600 font-bold uppercase tracking-widest text-xs sm:text-sm md:text-lg mt-1 sm:mt-2">
+                  {unit === 'days' ? 'Días' : unit === 'hours' ? 'Horas' : unit === 'minutes' ? 'Minutos' : 'Segundos'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Event Details */}
+        <div className="max-w-3xl mx-auto bg-gray-50 rounded-[2rem] p-6 sm:p-8 md:p-12 shadow-xl border-2 border-gray-200">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="bg-unt-blue p-3 sm:p-4 rounded-xl">
+                <Calendar size={24} sm={32} className="text-unt-yellow" />
+              </div>
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-unt-blue uppercase">Fecha</h3>
+                <p className="text-gray-600 font-bold text-base sm:text-lg">3 de Julio de 2026</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="bg-unt-blue p-3 sm:p-4 rounded-xl">
+                <Clock size={24} sm={32} className="text-unt-yellow" />
+              </div>
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-unt-blue uppercase">Hora</h3>
+                <p className="text-gray-600 font-bold text-base sm:text-lg">2:00 PM</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="bg-unt-blue p-3 sm:p-4 rounded-xl">
+                <Trophy size={24} sm={32} className="text-unt-yellow" />
+              </div>
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-unt-blue uppercase">Lugar</h3>
+                <p className="text-gray-600 font-bold text-base sm:text-lg">Loza Ciencias Económicas (UNT)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center space-y-3 pt-4">
           <div className="inline-block bg-unt-yellow/20 p-3 rounded-full mb-1">
             <Trophy size={40} className="text-unt-yellow animate-bounce" />
           </div>

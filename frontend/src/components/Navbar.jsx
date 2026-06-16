@@ -1,9 +1,34 @@
-import React, { useState } from 'react';
-import { LayoutDashboard, Settings, LogOut, Menu, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LayoutDashboard, Settings, LogOut, Menu, X, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const Navbar = ({ user, onLogout, logoUrl, setView }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState(null);
+  
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  
+  useEffect(() => {
+    const fetchWhatsapp = async () => {
+      try {
+        const res = await axios.get(`${apiUrl}/api/config/whatsapp`);
+        setWhatsappNumber(res.data.whatsapp_number);
+      } catch (err) {
+        console.error('Error fetching whatsapp number:', err);
+      }
+    };
+    fetchWhatsapp();
+  }, [apiUrl]);
+  
+  const handleContactClick = () => {
+    if (!whatsappNumber) {
+      alert('Número de WhatsApp no configurado');
+      return;
+    }
+    const message = encodeURIComponent('BINGO, BINGO!!!');
+    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+  };
 
   return (
     <nav className="bg-unt-blue text-white shadow-2xl sticky top-0 z-50 border-b border-unt-yellow/10">
@@ -26,18 +51,25 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
           
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-2">
+            <button 
+              onClick={handleContactClick}
+              className="px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest bg-white/10 hover:bg-white/20 text-white"
+            >
+              <MessageCircle size={18} />
+              <span>Contacto</span>
+            </button>
             {user ? (
-              <div className="flex items-center space-x-2">
+              <>
                 <button
                   onClick={() => setView && setView('admin')}
-                  className="px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest hover:bg-white/5 text-white/60"
+                  className="px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest hover:bg-white/10 text-white/60"
                 >
                   <LayoutDashboard size={18} />
                   <span>Panel</span>
                 </button>
                 <button
                   onClick={() => setView && setView('config')}
-                  className="px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest hover:bg-white/5 text-white/60"
+                  className="px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest hover:bg-white/10 text-white/60"
                 >
                   <Settings size={18} />
                   <span>Config</span>
@@ -49,7 +81,7 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
                 >
                   <LogOut size={20} />
                 </button>
-              </div>
+              </>
             ) : (
               <button
                 onClick={() => setView && setView('login')}
@@ -63,7 +95,7 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
 
           {/* Mobile Menu Button (Hamburger) */}
           <button 
-            className="md:hidden p-2 rounded-xl bg-white/5 text-white"
+            className="md:hidden p-2 rounded-xl bg-white/10 text-white"
             onClick={() => setIsOpen(!isOpen)}
             aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
           >
@@ -75,6 +107,13 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
         {isOpen && (
           <div className="md:hidden bg-unt-blue border-t border-unt-yellow/10 py-4">
             <div className="space-y-2">
+              <button 
+                onClick={() => { handleContactClick(); setIsOpen(false); }}
+                className="w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest bg-white/10 text-white"
+              >
+                <MessageCircle size={18} />
+                <span>Contacto</span>
+              </button>
               {user ? (
                 <>
                   <button
@@ -82,7 +121,7 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
                       setView && setView('admin');
                       setIsOpen(false);
                     }}
-                    className="w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest bg-white/5 text-white/80"
+                    className="w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest bg-white/10 text-white/80"
                   >
                     <LayoutDashboard size={18} />
                     <span>Panel de Control</span>
@@ -92,7 +131,7 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
                       setView && setView('config');
                       setIsOpen(false);
                     }}
-                    className="w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest bg-white/5 text-white/80"
+                    className="w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest bg-white/10 text-white/80"
                   >
                     <Settings size={18} />
                     <span>Configuración</span>
