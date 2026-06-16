@@ -22,6 +22,17 @@ const BingoGame = () => {
     currentNumber: null
   });
 
+  // Inicializar token desde localStorage al cargar
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // Intentar cargar datos iniciales o validar el token
+      setUser({ username: 'admin' }); // Por ahora establecemos un usuario básico
+      setView('admin'); // Si hay token, ir directamente al panel
+    }
+  }, []);
+
   // Configuration management
   const [gallery, setGallery] = useState([]);
   const [pastEvents, setPastEvents] = useState([]);
