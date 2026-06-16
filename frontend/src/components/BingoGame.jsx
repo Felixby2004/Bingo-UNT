@@ -3,14 +3,14 @@ import axios from 'axios';
 import PublicView from './PublicView';
 import Login from './Login';
 import AdminPanel from './AdminPanel';
-import { Music2, MessageCircle } from 'lucide-react';
+import { Music2, MessageCircle, X, Minimize2, Maximize2 } from 'lucide-react';
 
 const BingoGame = ({ user, onLogout, view, setView }) => {
   const [prizes, setPrizes] = useState([]);
   const [selectedPrize, setSelectedPrize] = useState(null);
   const [whatsappNumber, setWhatsappNumber] = useState(null);
-  const [streamState, setStreamState] = useState('normal');
-  const [streamPosition, setStreamPosition] = useState({ x: 0, y: 0 });
+  const [streamState, setStreamState] = useState('normal'); // 'normal', 'minimized', 'collapsed'
+  const [streamPosition, setStreamPosition] = useState({ x: 20, y: 100 }); // Initial position
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [showPrizes, setShowPrizes] = useState(false);
@@ -75,6 +75,7 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
 
   const handleMouseDown = (e) => {
     if (!e.target.closest('.drag-handle')) return;
+    e.preventDefault();
     setIsDragging(true);
     setDragOffset({ x: e.clientX - streamPosition.x, y: e.clientY - streamPosition.y });
   };
@@ -152,7 +153,7 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
 
   const handleLogin = async (userData) => {
     try {
-      await axios.get(`${apiUrl}/api/admin/me`);
+      const response = await axios.get(`${apiUrl}/api/admin/me`);
       setView('admin');
     } catch (err) {
       console.error('Error fetching user data after login:', err);
@@ -202,77 +203,82 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* KICK Stream Section */}
-      {(showPrizes || selectedPrize) && streamState !== 'collapsed' && (
+      {/* KICK Stream Section - ALWAYS SHOW for testing */}
+      {streamState !== 'collapsed' && (
         <div
           ref={streamContainerRef}
           className={`
-            fixed z-40 transition-all duration-300 ease-in-out
+            fixed z-50 transition-all duration-300 ease-in-out
             ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}
-            ${streamState === 'normal' ? 'w-72 sm:w-80 md:w-96 shadow-2xl' : 'w-40 sm:w-48 shadow-lg'}
+            shadow-2xl
           `}
           style={{
             top: `${streamPosition.y}px`,
             right: 'auto',
-            left: `${streamPosition.x}px`
+            left: `${streamPosition.x}px`,
+            width: streamState === 'minimized' ? '80px' : '300px',
           }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
         >
-          <div className="bg-unt-blue rounded-t-xl p-3 flex items-center justify-between drag-handle">
-            <h2 className="text-xs sm:text-sm font-black text-unt-yellow uppercase flex items-center gap-2">
-              <Music2 size={14} />
-              Transmisión
-            </h2>
-            <div className="flex gap-2" onMouseDown={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
-              {streamState === 'normal' ? (
-                <button 
-                  onClick={() => setStreamState('minimized')}
-                  className="text-white hover:text-unt-yellow transition-colors"
-                  title="Minimizar"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="19" x2="19" y2="19"></line></svg>
-                </button>
-              ) : (
-                <button 
-                  onClick={() => setStreamState('normal')}
-                  className="text-white hover:text-unt-yellow transition-colors"
-                  title="Expandir"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
-                </button>
-              )}
+          <div className="bg-unt-blue p-3 flex items-center justify-between drag-handle rounded-t-xl">
+            {streamState === 'normal' ? (
+              <>
+                <h2 className="text-xs sm:text-sm font-black text-unt-yellow uppercase flex items-center gap-2">
+                  <Music2 size={14} />
+                  Transmisión
+                </h2>
+                <div className="flex gap-2" onMouseDown={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
+                  <button 
+                    onClick={() => setStreamState('minimized')}
+                    className="text-white hover:text-unt-yellow transition-colors"
+                    title="Minimizar"
+                  >
+                    <Minimize2 size={16} />
+                  </button>
+                  <button 
+                    onClick={() => setStreamState('collapsed')}
+                    className="text-white hover:text-red-400 transition-colors"
+                    title="Cerrar"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </>
+            ) : (
               <button 
-                onClick={() => setStreamState('collapsed')}
-                className="text-white hover:text-red-400 transition-colors"
-                title="Cerrar"
+                onClick={() => setStreamState('normal')}
+                className="w-full flex items-center justify-center"
+                title="Expandir"
+                onMouseDown={(e) => e.stopPropagation()}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <div className="flex items-center gap-2">
+                  <Music2 size={32} className="text-unt-yellow" />
+                </div>
               </button>
+            )}
+          </div>
+          {streamState === 'normal' && (
+            <div className="bg-black aspect-video rounded-b-xl overflow-hidden">
+              <iframe 
+                src="https://player.kick.com/felix-04p" 
+                height="100%" 
+                width="100%" 
+                frameBorder="0" 
+                scrolling="no" 
+                allowFullScreen
+                title="KICK Stream"
+              />
             </div>
-          </div>
-          <div className={`
-            bg-black overflow-hidden
-            ${streamState === 'normal' ? 'aspect-video rounded-b-xl' : 'h-24 sm:h-28 rounded-b-xl'}
-          `}>
-            <iframe 
-              src="https://player.kick.com/felix-04p" 
-              height="100%" 
-              width="100%" 
-              frameBorder="0" 
-              scrolling="no" 
-              allowFullScreen
-              title="KICK Stream"
-            />
-          </div>
+          )}
         </div>
       )}
 
       {/* Button to re-open collapsed stream */}
-      {(showPrizes || selectedPrize) && streamState === 'collapsed' && (
+      {streamState === 'collapsed' && (
         <button 
           onClick={() => setStreamState('normal')}
-          className="fixed right-4 top-20 z-40 bg-unt-blue text-unt-yellow p-3 rounded-full shadow-2xl hover:scale-110 transition-transform"
+          className="fixed right-4 top-20 z-50 bg-unt-blue text-unt-yellow p-3 rounded-full shadow-2xl hover:scale-110 transition-transform"
           title="Abrir transmisión"
         >
           <Music2 size={24} />
@@ -290,7 +296,7 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
 
       {/* WhatsApp Button */}
       {selectedPrize && whatsappNumber && (
-        <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50">
+        <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-40">
           <button
             onClick={openWhatsapp}
             className="bg-green-500 hover:bg-green-600 text-white p-3 sm:p-4 rounded-full shadow-2xl hover:scale-110 transition-all"
