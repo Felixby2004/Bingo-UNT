@@ -7,13 +7,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        'unt-primary': '#4B0082', // Indigo/purple
-        'unt-accent': '#FF7F50', // Coral/orange
-        'unt-secondary': '#8A2BE2', // Blue Violet
-        'unt-light': '#F0E6FA', // Light purple background
-        'unt-night': '#1A0033', // Dark purple
+        'unt-blue': '#002B5B',
+        'unt-yellow': '#FFD700',
         'unt-white': '#FFFFFF',
         'unt-black': '#000000',
+        'night-blue': '#001F3F',
       },
     },
   },

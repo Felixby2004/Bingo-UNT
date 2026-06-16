@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply bg-unt-light text-unt-black min-h-screen font-sans;
+  @apply bg-unt-white text-unt-black min-h-screen font-sans;
 }
 
 .bingo-grid {
@@ -13,13 +13,13 @@ body {
 }
 
 .bingo-cell {
-  @apply aspect-square flex items-center justify-center border-2 border-unt-primary rounded-lg font-bold text-lg transition-all duration-300;
+  @apply aspect-square flex items-center justify-center border-2 border-unt-blue rounded-lg font-bold text-lg transition-all duration-300;
 }
 
 .bingo-cell.active {
-  @apply bg-unt-accent text-unt-white border-unt-accent scale-105 shadow-lg;
+  @apply bg-unt-yellow text-unt-blue border-unt-yellow scale-105 shadow-lg;
 }
 
 .bingo-header-cell {
-  @apply aspect-square flex items-center justify-center bg-unt-primary text-unt-accent rounded-lg font-black text-2xl mb-2;
+  @apply aspect-square flex items-center justify-center bg-unt-blue text-unt-yellow rounded-lg font-black text-2xl mb-2;
 }

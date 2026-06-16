@@ -1,44 +1,64 @@
 import React from 'react';
-import { Instagram } from 'lucide-react';
+import { Instagram, Twitch, MessageCircle, Music2 } from 'lucide-react';
 
-const Footer = ({ logoUrl }) => {
+const Footer = () => {
   return (
-    <footer className="bg-unt-primary text-unt-white mt-8 sm:mt-12 border-t border-unt-accent/10 relative overflow-hidden pt-8 sm:pt-10 pb-8 sm:pb-10 text-center">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-unt-accent/30 to-transparent"></div>
-      <div className="flex flex-col items-center space-y-4 sm:space-y-6 px-4">
-        <div className="flex items-center space-x-6">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center overflow-hidden shrink-0">
-            <img 
-              src={logoUrl || "https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268"} 
-              alt="Logo PROM 28" 
-              className="w-full h-full object-contain"
-            />
+    <footer className="bg-unt-blue text-white py-12 px-4 mt-8">
+      <div className="container mx-auto max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Columna 1: Logo y nombre */}
+          <div className="space-y-4">
+            <h3 className="text-2xl font-black text-unt-yellow uppercase">
+              Bingo Sistemas
+            </h3>
+            <p className="text-white/60">
+              Promoción XXVIII - Universidad Nacional del Altiplano
+            </p>
           </div>
-          <a 
-            href="https://www.instagram.com/sistemas28_unt?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            aria-label="Siguenos en Instagram"
-            className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl sm:rounded-2xl shadow-lg flex items-center justify-center text-pink-500 hover:scale-110 transition-transform"
-          >
-            <Instagram size={20} />
-          </a>
-          {/* KICK Link */}
-          <a 
-            href="https://kick.com/" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            aria-label="Siguenos en KICK"
-            className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl sm:rounded-2xl shadow-lg flex items-center justify-center text-unt-primary hover:scale-110 transition-transform font-black text-lg"
-          >
-            K
-          </a>
+
+          {/* Columna 2: Redes sociales */}
+          <div className="space-y-4">
+            <h4 className="text-lg font-bold text-unt-yellow uppercase">
+              SÍGUENOS
+            </h4>
+            <div className="flex space-x-4">
+              <a 
+                href="https://instagram.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="bg-white/10 p-3 rounded-xl hover:bg-unt-yellow hover:text-unt-blue transition-all"
+              >
+                <Instagram size={24} />
+              </a>
+              <a 
+                href="https://twitch.tv" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="bg-white/10 p-3 rounded-xl hover:bg-unt-yellow hover:text-unt-blue transition-all"
+              >
+                <Twitch size={24} />
+              </a>
+              <a 
+                href="https://kick.com/felix-04p" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="bg-white/10 p-3 rounded-xl hover:bg-unt-yellow hover:text-unt-blue transition-all"
+              >
+                <Music2 size={24} />
+              </a>
+            </div>
+          </div>
+
+          {/* Columna 3: Derechos reservados */}
+          <div className="space-y-4">
+            <h4 className="text-lg font-bold text-unt-yellow uppercase">
+              CONTACTO
+            </h4>
+            <p className="text-white/60">
+              © 2026 Bingo Sistemas - Promo XXVIII. Todos los derechos reservados.
+            </p>
+          </div>
         </div>
-        <div className="space-y-1">
-          <p className="font-bold text-xs sm:text-sm uppercase tracking-wider sm:tracking-widest">Promo XXVIII - Ingeniería de Sistemas</p>
-          <p className="font-medium text-[8px] sm:text-[10px] uppercase text-white/70">Universidad Nacional de Trujillo</p>
-        </div>
-        <p className="text-[7px] sm:text-[8px] font-medium uppercase tracking-widest text-white">© 2026 Bingo Promo 28 - Desarrollado por Felix A. Chávez Vidal</p>
       </div>
     </footer>
   );
