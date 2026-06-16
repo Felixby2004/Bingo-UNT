@@ -170,9 +170,9 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
           user={user}
         />
       ) : (
-        <div className="space-y-8">
-          {/* KICK Stream Section - Floating and Controllable */}
-          {streamState !== 'collapsed' && (
+        <>
+          {/* KICK Stream Section - Floating and Controllable - Only show when a prize is selected */}
+          {selectedPrize && streamState !== 'collapsed' && (
             <div className={`
               fixed z-40 transition-all duration-300 ease-in-out
               ${streamState === 'normal' 
@@ -228,8 +228,8 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
             </div>
           )}
 
-          {/* Button to re-open collapsed stream */}
-          {streamState === 'collapsed' && (
+          {/* Button to re-open collapsed stream - Only show when a prize is selected */}
+          {selectedPrize && streamState === 'collapsed' && (
             <button 
               onClick={() => setStreamState('normal')}
               className="fixed right-4 top-20 z-40 bg-unt-blue text-unt-yellow p-3 rounded-full shadow-2xl hover:scale-110 transition-transform"
@@ -246,8 +246,8 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
             setSelectedPrize={setSelectedPrize}
           />
 
-          {/* WhatsApp Button */}
-          {whatsappNumber && (
+          {/* WhatsApp Button - Only show when a prize is selected */}
+          {selectedPrize && whatsappNumber && (
             <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50">
               <button
                 onClick={openWhatsapp}
@@ -258,7 +258,7 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
               </button>
             </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );

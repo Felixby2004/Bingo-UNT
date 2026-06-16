@@ -3,12 +3,13 @@ import BingoGrid from './BingoGrid';
 import ChronologicalList from './ChronologicalList';
 import BingoCard from './BingoCard';
 import axios from 'axios';
-import { List, Grid, Trophy, Clock, Award, CreditCard, Instagram, Music2, ChevronLeft, Calendar } from 'lucide-react';
+import { List, Grid, Trophy, Clock, Award, CreditCard, ChevronLeft, Calendar } from 'lucide-react';
 
 const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
   const [activeTab, setActiveTab] = useState('grid');
   const [selectedPrizeNumbers, setSelectedPrizeNumbers] = useState([]);
   const [loadingNumbers, setLoadingNumbers] = useState(false);
+  const [showPrizes, setShowPrizes] = useState(false); // Estado para controlar si mostrar premios o la sección principal
   
   // Fecha del evento: 3 de Julio de 2026, 14:00
   const eventDate = new Date('2026-07-03T14:00:00');
@@ -46,8 +47,9 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
   useEffect(() => {
     if (gameState.prize && !selectedPrize) {
       setSelectedPrize(gameState.prize);
+      setShowPrizes(true);
     }
-  }, [gameState.prize]);
+  }, [gameState.prize, setSelectedPrize]);
 
   // Sync with gameState updates if the selected prize is the one being played/finished
   useEffect(() => {
@@ -56,7 +58,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
       // Si es el premio activo, usamos los números del gameState
       setSelectedPrizeNumbers(gameState.drawnNumbers);
     }
-  }, [gameState.prize, gameState.drawnNumbers]);
+  }, [gameState.prize, gameState.drawnNumbers, selectedPrize]);
 
   // Fetch numbers for finished prizes
   useEffect(() => {
@@ -88,7 +90,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
     if (selectedPrize) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [selectedPrize?.id, selectedPrize?.status, gameState.prize?.id]);
+  }, [selectedPrize?.id, selectedPrize?.status, gameState.prize?.id, apiUrl, gameState.drawnNumbers]);
 
   const lastNumber = selectedPrizeNumbers[0];
 
@@ -106,8 +108,8 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
     return order[a.status] - order[b.status];
   });
 
-  // If no prize is selected, show the main landing with countdown, details, then prizes
-  if (!selectedPrize) {
+  // Si no hay premio seleccionado y no se está mostrando los premios: Mostrar la sección principal
+  if (!showPrizes && !selectedPrize) {
     return (
       <div className="space-y-8 pb-8 animate-in fade-in duration-700">
         {/* Title Section with Dark Background */}
@@ -171,6 +173,32 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
           </div>
         </div>
 
+        {/* Botón de Ir a los premios */}
+        <div className="text-center">
+          <button
+            onClick={() => setShowPrizes(true)}
+            className="bg-unt-blue text-unt-yellow px-12 py-6 rounded-xl font-black text-xl sm:text-2xl uppercase hover:scale-105 transition-transform shadow-2xl flex items-center gap-3 mx-auto"
+          >
+            <Trophy size={24} sm={32} />
+            Ir a los Premios
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Si se está mostrando los premios pero no hay uno seleccionado
+  if (showPrizes && !selectedPrize) {
+    return (
+      <div className="space-y-8 pb-8 animate-in fade-in duration-700">
+        <button 
+          onClick={() => setShowPrizes(false)}
+          className="flex items-center space-x-2 text-unt-blue font-black text-xs uppercase tracking-widest hover:text-unt-yellow transition-colors"
+        >
+          <ChevronLeft size={16} />
+          <span>Volver al Inicio</span>
+        </button>
+        
         <div className="text-center space-y-3 pt-4">
           <div className="inline-block bg-unt-yellow/20 p-3 rounded-full mb-1">
             <Trophy size={40} className="text-unt-yellow animate-bounce" />
@@ -228,7 +256,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
                     </div>
                   ) : (
                     <div className="inline-flex items-center justify-center bg-unt-blue text-unt-yellow px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-black text-[10px] sm:text-xs uppercase tracking-widest group-hover:bg-unt-yellow group-hover:text-unt-blue transition-all shadow-lg">
-                      <span>¡VER SORTEO!</span>
+                      <span>¡Ver Sorteo!</span>
                       <ChevronLeft size={14} className="rotate-180 ml-2 group-hover:translate-x-1 transition-transform" />
                     </div>
                   )}
@@ -247,7 +275,10 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
   return (
     <div className="space-y-8 pb-8">
       <button 
-        onClick={() => setSelectedPrize(null)}
+        onClick={() => {
+          setSelectedPrize(null);
+          setShowPrizes(true);
+        }}
         className="flex items-center space-x-2 text-unt-blue font-black text-xs uppercase tracking-widest hover:text-unt-yellow transition-colors"
       >
         <ChevronLeft size={16} />
@@ -277,7 +308,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
       )}
 
       {/* Real-time Game Banner or Static Prize Info */}
-      <div className={`rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 shadow-2xl relative overflow-hidden ${isActuallyPlaying ? 'bg-gradient-to-br from-unt-blue to-night-blue' : 'bg-white border-2 sm:border-4 border-gray-100'}`}>
+      <div className={`rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 shadow-2xl relative overflow-hidden ${isActuallyPlaying ? 'bg-gradient-to-b from-unt-blue to-night-blue' : 'bg-white border-2 sm:border-4 border-gray-100'}`}>
         <div className="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-unt-yellow/20 rounded-full -mr-32 -mt-32 sm:-mr-48 sm:-mt-48 blur-3xl animate-pulse"></div>
         <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8">
           
@@ -295,7 +326,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
             )}
             <div className="text-left flex-grow">
               {isActuallyPlaying && (
-                <span className="inline-block bg-unt-yellow text-unt-blue text-[8px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-widest mb-1 sm:mb-2 animate-bounce shadow-lg shadow-unt-yellow/50">¡EN VIVO!</span>
+                <span className="inline-block bg-unt-yellow text-unt-blue text-[8px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-widest mb-1 sm:mb-2 animate-bounce shadow-lg shadow-unt-yellow/50">¡En Vivo!</span>
               )}
               <h2 className={`text-base sm:text-xl lg:text-2xl font-black uppercase tracking-tight mb-1 leading-tight drop-shadow-md ${isActuallyPlaying ? 'text-white' : 'text-unt-blue'}`}>
                 {selectedPrize.name}
