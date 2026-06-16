@@ -35,14 +35,14 @@ const Home = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center space-y-6">
             <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter">
-              Bingo Sistemas
+              Promoción 28
             </h1>
             <p className="text-xl md:text-2xl font-bold text-unt-yellow">
-              Promoción XXVIII
+              Universidad Nacional del Altiplano
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <a href="/bingo" className="bg-unt-yellow text-unt-blue px-8 py-4 rounded-xl font-black text-lg uppercase hover:scale-105 transition-transform shadow-lg">
-                Ver Siguiente Bingo
+                Ver Bingo
               </a>
               <button className="border-2 border-unt-yellow text-unt-yellow px-8 py-4 rounded-xl font-black text-lg uppercase hover:bg-unt-yellow hover:text-unt-blue transition-all">
                 Conocer Más
@@ -57,12 +57,12 @@ const Home = () => {
         <div className="container mx-auto max-w-4xl">
           <div className="text-center space-y-4">
             <h2 className="text-3xl md:text-4xl font-black text-unt-blue uppercase">
-              ¿Qué es Bingo Sistemas?
+              ¿Qué es Promoción 28?
             </h2>
             <p className="text-gray-600 text-lg leading-relaxed">
-              Bienvenido a Bingo Sistemas, el evento más esperado de la Promoción XXVIII.
-              Disfruta de una tarde llena de diversión, premios increíbles y la mejor compañía.
-              ¡No te lo pierdas!
+              Bienvenido a la página oficial de la Promoción 28 de la Universidad Nacional del Altiplano.
+              Aquí encontrarás información sobre nuestros eventos, actividades y el famoso Bingo de Sistemas.
+              ¡Explora y forma parte de nuestra historia!
             </p>
           </div>
         </div>

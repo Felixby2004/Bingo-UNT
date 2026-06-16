@@ -13,6 +13,7 @@ const BingoGame = () => {
   const [view, setView] = useState('public'); // 'public', 'login', 'admin', 'config'
   const [logoUrl, setLogoUrl] = useState('');
   const [whatsappNumber, setWhatsappNumber] = useState(null);
+  const [streamState, setStreamState] = useState('normal'); // 'normal', 'minimized', 'collapsed'
   const socketRef = useRef(null);
   const [gameState, setGameState] = useState({
     isPlaying: false,
@@ -484,26 +485,73 @@ const BingoGame = () => {
           />
         ) : (
           <div className="space-y-8">
-            {/* KICK Stream Section */}
-            <div className="bg-unt-blue rounded-[2rem] p-6 shadow-2xl">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-black text-unt-yellow uppercase flex items-center gap-2">
-                  <Music2 size={28} />
-                  Transmisión en Vivo
-                </h2>
+            {/* KICK Stream Section - Floating and Controllable */}
+            {streamState !== 'collapsed' && (
+              <div className={`
+                fixed z-40 transition-all duration-300 ease-in-out
+                ${streamState === 'normal' 
+                  ? 'right-8 top-24 w-96 shadow-2xl' 
+                  : 'right-8 top-24 w-48 shadow-lg'}
+              `}>
+                <div className="bg-unt-blue rounded-t-xl p-3 flex items-center justify-between">
+                  <h2 className="text-sm font-black text-unt-yellow uppercase flex items-center gap-2">
+                    <Music2 size={16} />
+                    Transmisión
+                  </h2>
+                  <div className="flex gap-2">
+                    {streamState === 'normal' ? (
+                      <button 
+                        onClick={() => setStreamState('minimized')}
+                        className="text-white hover:text-unt-yellow transition-colors"
+                        title="Minimizar"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="19" x2="19" y2="19"></line></svg>
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => setStreamState('normal')}
+                        className="text-white hover:text-unt-yellow transition-colors"
+                        title="Expandir"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => setStreamState('collapsed')}
+                      className="text-white hover:text-red-400 transition-colors"
+                      title="Cerrar"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                  </div>
+                </div>
+                <div className={`
+                  bg-black overflow-hidden
+                  ${streamState === 'normal' ? 'aspect-video rounded-b-xl' : 'h-28 rounded-b-xl'}
+                `}>
+                  <iframe 
+                    src="https://player.kick.com/felix-04p" 
+                    height="100%" 
+                    width="100%" 
+                    frameBorder="0" 
+                    scrolling="no" 
+                    allowFullScreen
+                    title="KICK Stream"
+                  />
+                </div>
               </div>
-              <div className="aspect-video rounded-xl overflow-hidden bg-black">
-                <iframe 
-                  src="https://player.kick.com/felix-04p" 
-                  height="100%" 
-                  width="100%" 
-                  frameBorder="0" 
-                  scrolling="no" 
-                  allowFullScreen
-                  title="KICK Stream"
-                />
-              </div>
-            </div>
+            )}
+
+            {/* Button to re-open collapsed stream */}
+            {streamState === 'collapsed' && (
+              <button 
+                onClick={() => setStreamState('normal')}
+                className="fixed right-8 top-24 z-40 bg-unt-blue text-unt-yellow p-3 rounded-full shadow-2xl hover:scale-110 transition-transform"
+                title="Abrir transmisión"
+              >
+                <Music2 size={24} />
+              </button>
+            )}
 
             <PublicView 
               gameState={gameState}

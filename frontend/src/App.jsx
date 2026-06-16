@@ -6,14 +6,42 @@ import BingoLanding from './components/BingoLanding';
 import BingoGame from './components/BingoGame';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
+import Login from './components/Login';
 
 function App() {
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+    navigate('/bingo/game');
+  };
+
   return (
     <Routes>
       <Route path="/" element={<MainLayout><Home /></MainLayout>} />
       <Route path="/bingo" element={<MainLayout><BingoLanding /></MainLayout>} />
+      <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
       <Route path="/bingo/game" element={<BingoGame />} />
     </Routes>
+  );
+}
+
+function LoginPage({ onLogin }) {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-unt-blue to-night-blue flex items-center justify-center py-12 px-4">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-2">
+            Promoción 28
+          </h1>
+          <p className="text-xl font-bold text-unt-yellow">
+            Inicia Sesión
+          </p>
+        </div>
+        <Login onLogin={onLogin} />
+      </div>
+    </div>
   );
 }
 

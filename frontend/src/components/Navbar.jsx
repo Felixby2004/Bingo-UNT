@@ -9,8 +9,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
 
   const navItems = [
     { id: 'home', label: 'Inicio', path: '/' },
-    { id: 'events', label: 'Eventos', path: '/bingo' },
-    { id: 'public', label: 'Bingo', path: '/bingo/game' },
+    { id: 'events', label: 'Bingo', path: '/bingo' },
   ];
 
   const handleNavClick = (item) => {
@@ -92,19 +91,13 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => {
-                  if (setView) {
-                    setView('login');
-                  } else {
-                    navigate('/bingo/game');
-                  }
-                }}
+              <Link
+                to="/login"
                 className="px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest bg-unt-yellow text-unt-blue shadow-lg shadow-unt-yellow/20 hover:bg-yellow-400"
               >
                 <LayoutDashboard size={18} />
                 <span>Entrar</span>
-              </button>
+              </Link>
             )}
           </div>
 
@@ -173,20 +166,14 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
                 </button>
               </>
             ) : (
-              <button
-                onClick={() => {
-                  if (setView) {
-                    setView('login');
-                  } else {
-                    navigate('/bingo/game');
-                  }
-                  setIsOpen(false);
-                }}
+              <Link
+                to="/login"
+                onClick={() => setIsOpen(false)}
                 className="w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest bg-unt-yellow text-unt-blue shadow-xl"
               >
                 <LayoutDashboard size={18} />
                 <span>Entrar</span>
-              </button>
+              </Link>
             )}
           </div>
         </div>

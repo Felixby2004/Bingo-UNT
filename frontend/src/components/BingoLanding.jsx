@@ -36,26 +36,29 @@ const BingoLanding = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-unt-blue to-night-blue">
+    <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter mb-4">
-            Próximo Bingo
-          </h1>
-          <p className="text-xl md:text-2xl font-bold text-unt-yellow">
-            ¡No te lo pierdas!
-          </p>
+        {/* Title Section with Dark Background */}
+        <div className="bg-gradient-to-b from-unt-blue to-night-blue rounded-[2rem] p-8 mb-12">
+          <div className="text-center">
+            <h1 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter mb-4">
+              Próximo Bingo
+            </h1>
+            <p className="text-xl md:text-2xl font-bold text-unt-yellow">
+              ¡No te lo pierdas!
+            </p>
+          </div>
         </div>
 
         {/* Countdown Section */}
-        <div className="max-w-4xl mx-auto mb-16">
+        <div className="max-w-4xl mx-auto mb-12">
           <div className="grid grid-cols-4 gap-4 md:gap-8">
             {Object.entries(timeLeft).map(([unit, value]) => (
-              <div key={unit} className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-8 text-center border border-white/20">
-                <div className="text-4xl md:text-6xl font-black text-unt-yellow">
+              <div key={unit} className="bg-gray-100 rounded-2xl p-6 md:p-8 text-center border-2 border-unt-blue">
+                <div className="text-4xl md:text-6xl font-black text-unt-blue">
                   {String(value).padStart(2, '0')}
                 </div>
-                <div className="text-white/80 font-bold uppercase tracking-widest text-sm md:text-lg mt-2">
+                <div className="text-gray-600 font-bold uppercase tracking-widest text-sm md:text-lg mt-2">
                   {unit === 'days' ? 'Días' : unit === 'hours' ? 'Horas' : unit === 'minutes' ? 'Minutos' : 'Segundos'}
                 </div>
               </div>
@@ -64,7 +67,7 @@ const BingoLanding = () => {
         </div>
 
         {/* Event Details */}
-        <div className="max-w-3xl mx-auto bg-white rounded-[2rem] p-8 md:p-12 shadow-2xl mb-12">
+        <div className="max-w-3xl mx-auto bg-gray-50 rounded-[2rem] p-8 md:p-12 shadow-xl mb-12 border-2 border-gray-200">
           <div className="space-y-6">
             <div className="flex items-center gap-4">
               <div className="bg-unt-blue p-4 rounded-xl">
@@ -102,7 +105,7 @@ const BingoLanding = () => {
         <div className="text-center">
           <button 
             onClick={() => navigate('/bingo/game')}
-            className="bg-unt-yellow text-unt-blue px-12 py-6 rounded-xl font-black text-2xl uppercase hover:scale-105 transition-transform shadow-2xl flex items-center gap-3 mx-auto"
+            className="bg-unt-blue text-unt-yellow px-12 py-6 rounded-xl font-black text-2xl uppercase hover:scale-105 transition-transform shadow-2xl flex items-center gap-3 mx-auto"
           >
             ¡Ir al Bingo!
             <ChevronRight size={32} />
