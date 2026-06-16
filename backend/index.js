@@ -146,7 +146,7 @@ const sendEmailCode = async (email, username) => {
       msg.subject = '🔐 Tu Código de Acceso - Bingo UNT';
       msg.html = `
         <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px; padding: 20px;">
-          <h2 style="color: #1F3A93; text-align: center;">🎲 BINGO UNT - ACCESO ADMINISTRADOR</h2>
+          <h2 style="color: #1F3A93; text-align: center;">ACCESO ADMINISTRADOR</h2>
           <p style="font-size: 16px; color: #333;">¡Hola <strong>${username}</strong>!</p>
           <p style="font-size: 14px; color: #666;">Usa el siguiente código para verificar tu identidad:</p>
           <div style="background-color: #f0f0f0; border-left: 4px solid #FFD700; padding: 20px; margin: 20px 0; text-align: center;">

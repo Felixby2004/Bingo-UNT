@@ -154,8 +154,10 @@ const Login = ({ onLogin }) => {
             <Lock className="text-unt-blue" size={40} />
           </div>
           <h2 className="text-2xl font-black text-unt-white uppercase tracking-tight">Inicio de Sesión</h2>
-          <p className="text-unt-yellow/70 text-sm font-bold">BINGO - PROMO XXVIII</p>
+          <p className="text-unt-yellow/70 text-sm font-bold">System 28</p>
         </div>
+
+
 
         <form 
           onSubmit={isResetting2FA ? handleVerifyReset2FA : (requiresTOTP ? handleTOTPSubmit : (requiresEmailCode ? handleEmailCodeSubmit : handleLoginSubmit))} 

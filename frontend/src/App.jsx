@@ -31,14 +31,6 @@ function LoginPage({ onLogin }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-unt-blue to-night-blue flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-black text-white uppercase tracking-tighter mb-2">
-            Promoción 28
-          </h1>
-          <p className="text-xl font-bold text-unt-yellow">
-            Inicia Sesión
-          </p>
-        </div>
         <Login onLogin={onLogin} />
       </div>
     </div>

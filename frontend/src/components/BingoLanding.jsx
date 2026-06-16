@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 const BingoLanding = () => {
   const navigate = useNavigate();
   
-  // Fecha del evento: 3 de Julio de 2026, 18:00
-  const eventDate = new Date('2026-07-03T18:00:00');
+  // Fecha del evento: 3 de Julio de 2026, 14:00
+  const eventDate = new Date('2026-07-03T14:00:00');
   
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -85,7 +85,7 @@ const BingoLanding = () => {
               </div>
               <div>
                 <h3 className="text-2xl font-black text-unt-blue uppercase">Hora</h3>
-                <p className="text-gray-600 font-bold text-lg">18:00 horas</p>
+                <p className="text-gray-600 font-bold text-lg">2:00 PM</p>
               </div>
             </div>
 
@@ -94,8 +94,8 @@ const BingoLanding = () => {
                 <Trophy size={32} className="text-unt-yellow" />
               </div>
               <div>
-                <h3 className="text-2xl font-black text-unt-blue uppercase">Premios</h3>
-                <p className="text-gray-600 font-bold text-lg">Grandes premios esperan por ti!</p>
+                <h3 className="text-2xl font-black text-unt-blue uppercase">Lugar</h3>
+                <p className="text-gray-600 font-bold text-lg">Loza Ciencias Económicas (UNT)</p>
               </div>
             </div>
           </div>

@@ -38,7 +38,7 @@ const Home = () => {
               Promoción 28
             </h1>
             <p className="text-xl md:text-2xl font-bold text-unt-yellow">
-              Universidad Nacional del Altiplano
+              Universidad Nacional del Trujillo
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <a href="/bingo" className="bg-unt-yellow text-unt-blue px-8 py-4 rounded-xl font-black text-lg uppercase hover:scale-105 transition-transform shadow-lg">
@@ -60,7 +60,7 @@ const Home = () => {
               ¿Qué es Promoción 28?
             </h2>
             <p className="text-gray-600 text-lg leading-relaxed">
-              Bienvenido a la página oficial de la Promoción 28 de la Universidad Nacional del Altiplano.
+              Bienvenido a la página oficial de la Promoción 28 de la Universidad Nacional del Trujillo.
               Aquí encontrarás información sobre nuestros eventos, actividades y el famoso Bingo de Sistemas.
               ¡Explora y forma parte de nuestra historia!
             </p>

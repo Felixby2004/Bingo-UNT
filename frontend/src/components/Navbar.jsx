@@ -35,8 +35,8 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-sm sm:text-lg tracking-tight block leading-tight uppercase">Bingo Sistemas</span>
-              <span className="text-[10px] font-bold text-unt-yellow tracking-widest uppercase opacity-80">Promoción XXVIII</span>
+              <span className="font-black text-sm sm:text-lg tracking-tight block leading-tight uppercase">System 28</span>
+              <span className="text-[10px] font-bold text-unt-yellow tracking-widest uppercase opacity-80">Ing. Sistemas | UNT</span>
             </div>
           </Link>
           

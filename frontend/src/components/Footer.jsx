@@ -12,7 +12,7 @@ const Footer = () => {
               Promoción 28
             </h3>
             <p className="text-white/60">
-              Universidad Nacional del Altiplano
+              Universidad Nacional del Trujillo
             </p>
           </div>
 
@@ -23,7 +23,7 @@ const Footer = () => {
             </h4>
             <div className="flex space-x-4">
               <a 
-                href="https://instagram.com" 
+                href="https://www.instagram.com/sistemas28_unt?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="bg-white/10 p-3 rounded-xl hover:bg-unt-yellow hover:text-unt-blue transition-all"
@@ -47,7 +47,7 @@ const Footer = () => {
               Contacto
             </h4>
             <p className="text-white/60">
-              © 2026 Promoción 28 - UNAP. Todos los derechos reservados.
+              © 2026 Promoción 28 - UNT - Ing. Sistemas Promo XXVIII. Todos los derechos reservados.
             </p>
           </div>
         </div>
