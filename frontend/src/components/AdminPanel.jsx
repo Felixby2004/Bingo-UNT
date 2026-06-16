@@ -62,8 +62,13 @@ const AdminPanel = ({ gameState, prizes, refreshGame, refreshPrizes, user }) => 
       const res = await axios.post(`${apiUrl}/api/admin/confirm-2fa`, { token: twoFAToken }, { withCredentials: true });
       if (res.data.success) {
         alert('✅ 2FA Activado correctamente. Panel desbloqueado.');
+        // Instead of reloading, fetch updated user data
+        const userRes = await axios.get(`${apiUrl}/api/admin/me`, { withCredentials: true });
+        // Since AdminPanel receives user as a prop, we need to handle this differently
+        // Let's just set show2FASetup to false and let BingoGame's useEffect refresh the user on next render
         setShow2FASetup(false);
-        setTimeout(() => window.location.reload(), 500);
+        // To trigger a state update in BingoGame, we can reload, but let's do it smarter
+        window.location.reload();
       }
     } catch (err) {
       console.error('Confirm 2FA error:', err);

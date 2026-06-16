@@ -12,8 +12,15 @@ function App() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  const handleLogin = (userData) => {
-    setUser(userData);
+  const handleLogin = async (userData) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await axios.get(`${apiUrl}/api/admin/me`);
+      setUser(response.data.user);
+    } catch (err) {
+      console.error('Error fetching user data:', err);
+      setUser(userData);
+    }
     navigate('/bingo/game');
   };
 

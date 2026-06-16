@@ -44,17 +44,18 @@ const BingoGame = () => {
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-  // Initialize Socket.IO connection
+  // Initialize Socket.IO connection and fetch user data
   useEffect(() => {
-    const ioUrl = apiUrl;
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    
     const ioScript = document.createElement('script');
-    ioScript.src = `${ioUrl}/socket.io/socket.io.js`;
+    ioScript.src = `${apiUrl}/socket.io/socket.io.js`;
     ioScript.onload = () => {
-      socketRef.current = window.io(ioUrl, {
+      socketRef.current = window.io(apiUrl, {
         transports: ['websocket', 'polling']
       });
       
-      socketRef.current.on('gameState', (state) => {
+      socketRef.current.on('game_state', (state) => {
         setGameState(state);
         if (state.prize && !selectedPrize) {
           setSelectedPrize(state.prize);
@@ -66,6 +67,26 @@ const BingoGame = () => {
       });
     };
     document.body.appendChild(ioScript);
+
+    // Fetch latest user data
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('admin_token');
+        if (token) {
+          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          const response = await axios.get(`${apiUrl}/api/admin/me`);
+          setUser(response.data.user);
+          setView('admin'); // Go to admin panel after successful login
+        }
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+        // If token is invalid, clear it
+        localStorage.removeItem('admin_token');
+        delete axios.defaults.headers.common['Authorization'];
+      }
+    };
+    fetchUserData();
 
     return () => {
       if (socketRef.current) {
@@ -99,9 +120,17 @@ const BingoGame = () => {
     fetchInitialData();
   }, [apiUrl]);
 
-  const handleLogin = (userData) => {
-    setUser(userData);
-    setView('admin');
+  const handleLogin = async (userData) => {
+    // Fetch the latest user data from the server to ensure we have two_fa_enabled status
+    try {
+      const response = await axios.get(`${apiUrl}/api/admin/me`);
+      setUser(response.data.user);
+      setView('admin');
+    } catch (err) {
+      console.error('Error fetching user data after login:', err);
+      setUser(userData);
+      setView('admin');
+    }
   };
 
   const handleLogout = () => {
