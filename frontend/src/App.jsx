@@ -10,7 +10,29 @@ import Login from './components/Login';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Verificar si el usuario está logeado al cargar la app
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('admin_token');
+      if (token) {
+        try {
+          const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          const response = await axios.get(`${apiUrl}/api/admin/me`);
+          setUser(response.data.user);
+        } catch (err) {
+          console.error('Error fetching user data:', err);
+          localStorage.removeItem('admin_token');
+          delete axios.defaults.headers.common['Authorization'];
+        }
+      }
+      setLoading(false);
+    };
+    checkAuth();
+  }, []);
 
   const handleLogin = async (userData) => {
     try {
@@ -24,12 +46,26 @@ function App() {
     navigate('/bingo/game');
   };
 
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('admin_token');
+    delete axios.defaults.headers.common['Authorization'];
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-unt-blue flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-unt-yellow mx-auto"></div>
+      </div>
+    );
+  }
+
   return (
     <Routes>
-      <Route path="/" element={<MainLayout><Home /></MainLayout>} />
-      <Route path="/bingo" element={<MainLayout><BingoLanding /></MainLayout>} />
+      <Route path="/" element={<MainLayout user={user} onLogout={handleLogout}><Home /></MainLayout>} />
+      <Route path="/bingo" element={<MainLayout user={user} onLogout={handleLogout}><BingoLanding /></MainLayout>} />
       <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
-      <Route path="/bingo/game" element={<BingoGame />} />
+      <Route path="/bingo/game" element={<BingoGame user={user} onLogout={handleLogout} />} />
     </Routes>
   );
 }
@@ -44,7 +80,7 @@ function LoginPage({ onLogin }) {
   );
 }
 
-function MainLayout({ children }) {
+function MainLayout({ children, user, onLogout }) {
   const [logoUrl, setLogoUrl] = useState('https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268');
 
   useEffect(() => {
@@ -62,7 +98,7 @@ function MainLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-unt-white flex flex-col font-sans text-unt-black">
-      <Navbar logoUrl={logoUrl} />
+      <Navbar logoUrl={logoUrl} user={user} onLogout={onLogout} />
       <main className="flex-grow">
         {children}
       </main>

@@ -6,8 +6,8 @@ import Login from './Login';
 import AdminPanel from './AdminPanel';
 import { Trophy, Settings, LogOut, Music2, MessageCircle, Plus, Trash2, Edit2, Save } from 'lucide-react';
 
-const BingoGame = () => {
-  const [user, setUser] = useState(null);
+const BingoGame = ({ user: propUser, onLogout: propOnLogout }) => {
+  const [user, setUser] = useState(propUser);
   const [prizes, setPrizes] = useState([]);
   const [selectedPrize, setSelectedPrize] = useState(null);
   const [view, setView] = useState('public'); // 'public', 'login', 'admin', 'config'
@@ -21,6 +21,11 @@ const BingoGame = () => {
     drawnNumbers: [],
     currentNumber: null
   });
+
+  // Sincronizar estado user con las props
+  useEffect(() => {
+    setUser(propUser);
+  }, [propUser]);
 
   // Inicializar token desde localStorage al cargar
   useEffect(() => {
@@ -130,11 +135,15 @@ const BingoGame = () => {
   };
 
   const handleLogout = () => {
-    setUser(null);
+    if (propOnLogout) {
+      propOnLogout();
+    } else {
+      setUser(null);
+      localStorage.removeItem('admin_token');
+      delete axios.defaults.headers.common['Authorization'];
+    }
     setView('public');
     setSelectedPrize(null);
-    axios.defaults.headers.common['Authorization'] = undefined;
-    localStorage.removeItem('admin_token');
   };
 
   const refreshPrizes = async () => {

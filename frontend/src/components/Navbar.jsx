@@ -21,6 +21,22 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
     setIsOpen(false);
   };
 
+  const handleAdminClick = () => {
+    navigate('/bingo/game');
+    if (setView) {
+      setView('admin');
+    }
+    setIsOpen(false);
+  };
+
+  const handleConfigClick = () => {
+    navigate('/bingo/game');
+    if (setView) {
+      setView('config');
+    }
+    setIsOpen(false);
+  };
+
   return (
     <nav className="bg-unt-blue text-white shadow-2xl sticky top-0 z-50 border-b border-unt-yellow/10">
       <div className="container mx-auto px-4">
@@ -61,7 +77,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
             {user ? (
               <div className="flex items-center space-x-2">
                 <button
-                  onClick={() => setView && setView('admin')}
+                  onClick={handleAdminClick}
                   className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest ${
                     view === 'admin' 
                       ? 'bg-unt-yellow text-unt-blue shadow-lg shadow-unt-yellow/20' 
@@ -72,7 +88,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
                   <span>Panel</span>
                 </button>
                 <button
-                  onClick={() => setView && setView('config')}
+                  onClick={handleConfigClick}
                   className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest ${
                     view === 'config' 
                       ? 'bg-unt-yellow text-unt-blue shadow-lg shadow-unt-yellow/20' 
@@ -136,7 +152,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
             {user ? (
               <>
                 <button
-                  onClick={() => { setView && setView('admin'); setIsOpen(false); }}
+                  onClick={handleAdminClick}
                   className={`w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest transition-all ${
                     view === 'admin' 
                       ? 'bg-unt-yellow text-unt-blue shadow-xl' 
@@ -147,7 +163,7 @@ const Navbar = ({ view, setView, user, onLogout, logoUrl, setSelectedPrize }) =>
                   <span>Panel de Control</span>
                 </button>
                 <button
-                  onClick={() => { setView && setView('config'); setIsOpen(false); }}
+                  onClick={handleConfigClick}
                   className={`w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest transition-all ${
                     view === 'config' 
                       ? 'bg-unt-yellow text-unt-blue shadow-xl' 
