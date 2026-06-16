@@ -27,9 +27,6 @@ const BingoGame = () => {
     const token = localStorage.getItem('admin_token');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // Intentar cargar datos iniciales o validar el token
-      setUser({ username: 'admin' }); // Por ahora establecemos un usuario básico
-      setView('admin'); // Si hay token, ir directamente al panel
     }
   }, []);
 
@@ -77,7 +74,6 @@ const BingoGame = () => {
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           const response = await axios.get(`${apiUrl}/api/admin/me`);
           setUser(response.data.user);
-          setView('admin'); // Go to admin panel after successful login
         }
       } catch (err) {
         console.error('Error fetching user data:', err);
@@ -100,15 +96,15 @@ const BingoGame = () => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const [prizesRes, settingsRes, whatsappRes, galleryRes, eventsRes] = await Promise.all([
+        const [prizesRes, logoRes, whatsappRes, galleryRes, eventsRes] = await Promise.all([
           axios.get(`${apiUrl}/api/prizes`),
-          axios.get(`${apiUrl}/api/settings`),
+          axios.get(`${apiUrl}/api/config/logo`),
           axios.get(`${apiUrl}/api/config/whatsapp`),
           axios.get(`${apiUrl}/api/gallery`),
           axios.get(`${apiUrl}/api/past-events`)
         ]);
         setPrizes(prizesRes.data);
-        setLogoUrl(settingsRes.data.logo_url || '');
+        setLogoUrl(logoRes.data.logoUrl || '');
         setWhatsappNumber(whatsappRes.data.whatsapp_number || null);
         setConfigWhatsapp(whatsappRes.data.whatsapp_number || '');
         setGallery(galleryRes.data);
