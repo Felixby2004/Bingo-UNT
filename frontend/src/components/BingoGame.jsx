@@ -75,7 +75,7 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
     fetchInitialData();
   }, [apiUrl]);
 
-  // Handle drag and drop
+  // Handle drag and drop for mouse
   const handleMouseDown = (e) => {
     // Only start dragging if clicking on the header (not the buttons or iframe)
     if (!e.target.closest('.drag-handle')) return;
@@ -84,6 +84,19 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
     setDragOffset({
       x: e.clientX - streamPosition.x,
       y: e.clientY - streamPosition.y
+    });
+  };
+
+  // Handle drag and drop for touch
+  const handleTouchStart = (e) => {
+    // Only start dragging if clicking on the header (not the buttons or iframe)
+    if (!e.target.closest('.drag-handle')) return;
+    
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragOffset({
+      x: touch.clientX - streamPosition.x,
+      y: touch.clientY - streamPosition.y
     });
   };
 
@@ -105,7 +118,30 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
     setStreamPosition({ x: newX, y: newY });
   };
 
+  const handleTouchMove = (e) => {
+    if (!isDragging || !streamContainerRef.current) return;
+    
+    const touch = e.touches[0];
+    const containerWidth = streamContainerRef.current.offsetWidth;
+    const containerHeight = streamContainerRef.current.offsetHeight;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    let newX = touch.clientX - dragOffset.x;
+    let newY = touch.clientY - dragOffset.y;
+
+    // Keep within viewport bounds
+    newX = Math.max(0, Math.min(newX, windowWidth - containerWidth));
+    newY = Math.max(0, Math.min(newY, windowHeight - containerHeight));
+
+    setStreamPosition({ x: newX, y: newY });
+  };
+
   const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchEnd = () => {
     setIsDragging(false);
   };
 
@@ -113,13 +149,22 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd);
+      window.addEventListener('touchcancel', handleTouchEnd);
     } else {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchEnd);
     }
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchEnd);
     };
   }, [isDragging]);
 
@@ -240,13 +285,14 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
                 left: streamPosition.x + 'px'
               }}
               onMouseDown={handleMouseDown}
+              onTouchStart={handleTouchStart}
             >
               <div className="bg-unt-blue rounded-t-xl p-3 flex items-center justify-between drag-handle">
                 <h2 className="text-xs sm:text-sm font-black text-unt-yellow uppercase flex items-center gap-2">
                   <Music2 size={14} sm={16} />
                   Transmisión
                 </h2>
-                <div className="flex gap-2" onMouseDown={(e) => e.stopPropagation()}>
+                <div className="flex gap-2" onMouseDown={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
                   {streamState === 'normal' ? (
                     <button 
                       onClick={() => setStreamState('minimized')}
