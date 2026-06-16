@@ -10,7 +10,11 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
   const [selectedPrize, setSelectedPrize] = useState(null);
   const [whatsappNumber, setWhatsappNumber] = useState(null);
   const [streamState, setStreamState] = useState('normal'); // 'normal', 'minimized', 'collapsed'
+  const [streamPosition, setStreamPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const socketRef = useRef(null);
+  const streamContainerRef = useRef(null);
   const [gameState, setGameState] = useState({
     isPlaying: false,
     prize: null,
@@ -70,6 +74,54 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
     };
     fetchInitialData();
   }, [apiUrl]);
+
+  // Handle drag and drop
+  const handleMouseDown = (e) => {
+    // Only start dragging if clicking on the header (not the buttons or iframe)
+    if (!e.target.closest('.drag-handle')) return;
+    
+    setIsDragging(true);
+    setDragOffset({
+      x: e.clientX - streamPosition.x,
+      y: e.clientY - streamPosition.y
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging || !streamContainerRef.current) return;
+
+    const containerWidth = streamContainerRef.current.offsetWidth;
+    const containerHeight = streamContainerRef.current.offsetHeight;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    let newX = e.clientX - dragOffset.x;
+    let newY = e.clientY - dragOffset.y;
+
+    // Keep within viewport bounds
+    newX = Math.max(0, Math.min(newX, windowWidth - containerWidth));
+    newY = Math.max(0, Math.min(newY, windowHeight - containerHeight));
+
+    setStreamPosition({ x: newX, y: newY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    } else {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
 
   const handleLogin = async (userData) => {
     try {
@@ -171,20 +223,30 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
         />
       ) : (
         <>
-          {/* KICK Stream Section - Floating and Controllable - Only show when a prize is selected */}
+          {/* KICK Stream Section - Floating, Controllable, Draggable */}
           {selectedPrize && streamState !== 'collapsed' && (
-            <div className={`
-              fixed z-40 transition-all duration-300 ease-in-out
-              ${streamState === 'normal' 
-                ? 'right-4 top-20 w-72 sm:w-80 md:w-96 shadow-2xl' 
-                : 'right-4 top-20 w-40 sm:w-48 shadow-lg'}
-            `}>
-              <div className="bg-unt-blue rounded-t-xl p-3 flex items-center justify-between">
+            <div
+              ref={streamContainerRef}
+              className={`
+                fixed z-40 transition-all duration-300 ease-in-out
+                ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}
+                ${streamState === 'normal' 
+                  ? 'w-72 sm:w-80 md:w-96 shadow-2xl' 
+                  : 'w-40 sm:w-48 shadow-lg'}
+              `}
+              style={{
+                top: streamPosition.y + 'px',
+                right: 'auto',
+                left: streamPosition.x + 'px'
+              }}
+              onMouseDown={handleMouseDown}
+            >
+              <div className="bg-unt-blue rounded-t-xl p-3 flex items-center justify-between drag-handle">
                 <h2 className="text-xs sm:text-sm font-black text-unt-yellow uppercase flex items-center gap-2">
                   <Music2 size={14} sm={16} />
                   Transmisión
                 </h2>
-                <div className="flex gap-2">
+                <div className="flex gap-2" onMouseDown={(e) => e.stopPropagation()}>
                   {streamState === 'normal' ? (
                     <button 
                       onClick={() => setStreamState('minimized')}
@@ -228,7 +290,7 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
             </div>
           )}
 
-          {/* Button to re-open collapsed stream - Only show when a prize is selected */}
+          {/* Button to re-open collapsed stream */}
           {selectedPrize && streamState === 'collapsed' && (
             <button 
               onClick={() => setStreamState('normal')}
@@ -246,7 +308,7 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
             setSelectedPrize={setSelectedPrize}
           />
 
-          {/* WhatsApp Button - Only show when a prize is selected */}
+          {/* WhatsApp Button */}
           {selectedPrize && whatsappNumber && (
             <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50">
               <button
