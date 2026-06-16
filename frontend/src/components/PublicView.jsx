@@ -55,7 +55,6 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
   useEffect(() => {
     if (gameState.prize && selectedPrize && gameState.prize.id === selectedPrize.id) {
       setSelectedPrize(gameState.prize);
-      // Si es el premio activo, usamos los números del gameState
       setSelectedPrizeNumbers(gameState.drawnNumbers);
     }
   }, [gameState.prize, gameState.drawnNumbers, selectedPrize]);
@@ -64,8 +63,6 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
   useEffect(() => {
     const fetchHistory = async () => {
       if (selectedPrize && selectedPrize.status === 'finished') {
-        // Solo buscamos historial si NO es el premio activo actual (o si queremos refrescarlo)
-        // Pero para simplificar, si está finalizado, traemos su historia oficial
         setLoadingNumbers(true);
         try {
           const res = await axios.get(`${apiUrl}/api/prizes/${selectedPrize.id}/history`);
@@ -76,17 +73,14 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
           setLoadingNumbers(false);
         }
       } else if (selectedPrize && selectedPrize.status === 'active' && gameState.prize?.id === selectedPrize.id) {
-        // Si es el activo, sincronizamos con gameState
         setSelectedPrizeNumbers(gameState.drawnNumbers);
       } else {
-        // En espera u otros estados
         setSelectedPrizeNumbers([]);
       }
     };
 
     fetchHistory();
 
-    // Scroll to top when a prize is selected
     if (selectedPrize) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -95,20 +89,16 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
   const lastNumber = selectedPrizeNumbers[0];
 
   const sortedPrizes = [...prizes].sort((a, b) => {
-    // Si ambos están finalizados, por fecha de fin desc
     if (a.status === 'finished' && b.status === 'finished') {
       return new Date(b.finished_at) - new Date(a.finished_at);
     }
-    // Si uno está activo, va primero
     if (a.status === 'active') return -1;
     if (b.status === 'active') return 1;
-    // Si uno está finalizado, va después del activo pero antes que espera? 
-    // O mejor: active > pending > finished
     const order = { 'active': 0, 'pending': 1, 'finished': 2 };
     return order[a.status] - order[b.status];
   });
 
-  // Si no hay premio seleccionado y no se está mostrando los premios: Mostrar la sección principal
+  // Sección principal (cuenta regresiva, fecha, lugar)
   if (!showPrizes && !selectedPrize) {
     return (
       <div className="space-y-8 pb-8 animate-in fade-in duration-700">
@@ -269,7 +259,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
     );
   }
 
-  // Prize Detail View (The original PublicView logic)
+  // Prize Detail View (vista de sorteo)
   const isActuallyPlaying = gameState.prize?.id === selectedPrize.id && selectedPrize.status === 'active';
 
   return (
@@ -285,7 +275,6 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
         <span>Volver a Premios</span>
       </button>
 
-      {/* Winner Banner if Finished */}
       {selectedPrize.status === 'finished' && (
         <div className="bg-white border-2 border-green-500/30 rounded-[2rem] p-6 shadow-xl animate-in fade-in slide-in-from-top-4 duration-700 overflow-hidden relative group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
@@ -307,12 +296,10 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
         </div>
       )}
 
-      {/* Real-time Game Banner or Static Prize Info */}
       <div className={`rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 shadow-2xl relative overflow-hidden ${isActuallyPlaying ? 'bg-gradient-to-b from-unt-blue to-night-blue' : 'bg-white border-2 sm:border-4 border-gray-100'}`}>
         <div className="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-unt-yellow/20 rounded-full -mr-32 -mt-32 sm:-mr-48 sm:-mt-48 blur-3xl animate-pulse"></div>
         <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8">
           
-          {/* Left Section: Image and Name */}
           <div className="flex items-center space-x-4 sm:space-x-6 w-full lg:w-1/3">
             {selectedPrize.image_url && (
               <div className={`flex-shrink-0 w-20 h-20 sm:w-40 sm:h-40 rounded-[1.2rem] sm:rounded-[2rem] bg-white border-4 sm:border-6 shadow-xl overflow-hidden flex items-center justify-center transition-all duration-500 ${isActuallyPlaying ? 'border-unt-yellow' : 'border-gray-100'}`}>
@@ -328,7 +315,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
               {isActuallyPlaying && (
                 <span className="inline-block bg-unt-yellow text-unt-blue text-[8px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-widest mb-1 sm:mb-2 animate-bounce shadow-lg shadow-unt-yellow/50">¡En Vivo!</span>
               )}
-              <h2 className={`text-base sm:text-xl lg:text-2xl font-black uppercase tracking-tight mb-1 leading-tight drop-shadow-md ${isActuallyPlaying ? 'text-white' : 'text-unt-blue'}`}>
+              <h2 className={`text-sm sm:text-xl lg:text-2xl font-black uppercase tracking-tight mb-1 leading-tight drop-shadow-md ${isActuallyPlaying ? 'text-white' : 'text-unt-blue'}`}>
                 {selectedPrize.name}
               </h2>
               <div className={`flex items-center space-x-1.5 font-bold uppercase text-[9px] sm:text-xs ${isActuallyPlaying ? 'text-unt-yellow' : 'text-gray-500'}`}>
@@ -338,7 +325,6 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
             </div>
           </div>
 
-          {/* Center Section: Main Number */}
           <div className="flex flex-col items-center justify-center lg:w-1/4">
             <div className={`w-32 h-32 sm:w-44 sm:h-44 rounded-full flex flex-col items-center justify-center shadow-2xl border-[6px] sm:border-[10px] transform transition-all duration-500 ${isActuallyPlaying ? 'bg-white border-unt-yellow' : 'bg-gray-50 border-gray-100'}`}>
               <span className="text-unt-blue/40 font-bold text-lg sm:text-2xl leading-none">{(isActuallyPlaying || selectedPrize.status === 'finished') ? (lastNumber?.letter || '!') : '!'}</span>
@@ -347,7 +333,6 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
             <p className={`mt-2 sm:mt-4 text-[7px] sm:text-[10px] font-bold uppercase tracking-[0.2em] sm:tracking-[0.4em] ${isActuallyPlaying ? 'text-white/60' : 'text-gray-400'}`}>Último Cantado</p>
           </div>
 
-          {/* Right Section: Stats and Description */}
           <div className="flex flex-col gap-3 w-full lg:w-1/3">
             <div className={`flex items-center justify-between ${isActuallyPlaying ? 'bg-white/10' : 'bg-gray-100'} backdrop-blur-md px-5 py-3 rounded-2xl border ${isActuallyPlaying ? 'border-white/20' : 'border-gray-100'}`}>
               <p className={`${isActuallyPlaying ? 'text-white/60' : 'text-gray-500'} text-[10px] sm:text-xs font-black uppercase tracking-widest`}>Total Cantados</p>
@@ -363,13 +348,10 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
               </div>
             )}
           </div>
-
         </div>
       </div>
 
-      {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left: Tabbed Bingo View */}
         <div className="lg:col-span-12 space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-black text-unt-blue uppercase tracking-tight flex items-center space-x-2">

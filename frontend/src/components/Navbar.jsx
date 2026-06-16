@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Settings, LogOut, Menu, X, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, LogOut, Menu, X, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
@@ -13,7 +13,7 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
     const fetchWhatsapp = async () => {
       try {
         const res = await axios.get(`${apiUrl}/api/config/whatsapp`);
-        setWhatsappNumber(res.data.whatsapp_number);
+        setWhatsappNumber(res.data.whatsappNumber);
       } catch (err) {
         console.error('Error fetching whatsapp number:', err);
       }
@@ -26,7 +26,7 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
       alert('Número de WhatsApp no configurado');
       return;
     }
-    const message = encodeURIComponent('BINGO, BINGO!!!');
+    const message = encodeURIComponent('BINGO, BINGO!');
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
   };
 
@@ -62,17 +62,10 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
               <>
                 <button
                   onClick={() => setView && setView('admin')}
-                  className="px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest hover:bg-white/10 text-white/60"
+                  className="px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest hover:bg-white/10 text-white/80"
                 >
                   <LayoutDashboard size={18} />
                   <span>Panel</span>
-                </button>
-                <button
-                  onClick={() => setView && setView('config')}
-                  className="px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest hover:bg-white/10 text-white/60"
-                >
-                  <Settings size={18} />
-                  <span>Config</span>
                 </button>
                 <button
                   onClick={onLogout}
@@ -125,16 +118,6 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
                   >
                     <LayoutDashboard size={18} />
                     <span>Panel de Control</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setView && setView('config');
-                      setIsOpen(false);
-                    }}
-                    className="w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest bg-white/10 text-white/80"
-                  >
-                    <Settings size={18} />
-                    <span>Configuración</span>
                   </button>
                   <button
                     onClick={() => {
