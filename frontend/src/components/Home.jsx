@@ -14,7 +14,7 @@ const Home = () => {
       try {
         const [galleryRes, eventsRes] = await Promise.all([
           axios.get(`${apiUrl}/api/gallery`),
-          axios.get(`${apiUrl}/past-events`)
+          axios.get(`${apiUrl}/api/past-events`)
         ]);
         setGallery(galleryRes.data);
         setPastEvents(eventsRes.data);
@@ -35,15 +35,15 @@ const Home = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center space-y-6">
             <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter">
-              BINGO SISTEMAS
+              Bingo Sistemas
             </h1>
             <p className="text-xl md:text-2xl font-bold text-unt-yellow">
-              PROMOCIÓN XXVIII
+              Promoción XXVIII
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <button className="bg-unt-yellow text-unt-blue px-8 py-4 rounded-xl font-black text-lg uppercase hover:scale-105 transition-transform shadow-lg">
+              <a href="/bingo" className="bg-unt-yellow text-unt-blue px-8 py-4 rounded-xl font-black text-lg uppercase hover:scale-105 transition-transform shadow-lg">
                 Ver Siguiente Bingo
-              </button>
+              </a>
               <button className="border-2 border-unt-yellow text-unt-yellow px-8 py-4 rounded-xl font-black text-lg uppercase hover:bg-unt-yellow hover:text-unt-blue transition-all">
                 Conocer Más
               </button>
@@ -121,7 +121,7 @@ const Home = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pastEvents.map((event) => (
-                <div key={event.id} className="bg-white rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all border-2 border-gray-50">
+                <div key={event.id} className="bg-white rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all border-2 border-gray-100">
                   <div className="aspect-video bg-gray-100 overflow-hidden">
                     {event.image_url ? (
                       <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />

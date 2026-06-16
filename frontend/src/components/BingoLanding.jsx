@@ -40,9 +40,9 @@ const BingoLanding = () => {
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter mb-4">
-            PRÓXIMO BINGO
+            Próximo Bingo
           </h1>
-          <p className="text-2xl md:text-3xl font-bold text-unt-yellow">
+          <p className="text-xl md:text-2xl font-bold text-unt-yellow">
             ¡No te lo pierdas!
           </p>
         </div>
@@ -104,7 +104,7 @@ const BingoLanding = () => {
             onClick={() => navigate('/bingo/game')}
             className="bg-unt-yellow text-unt-blue px-12 py-6 rounded-xl font-black text-2xl uppercase hover:scale-105 transition-transform shadow-2xl flex items-center gap-3 mx-auto"
           >
-            ¡Ir al evento!
+            ¡Ir al Bingo!
             <ChevronRight size={32} />
           </button>
         </div>
