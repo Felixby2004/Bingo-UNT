@@ -51,14 +51,20 @@ const BingoLanding = () => {
         </div>
 
         {/* Countdown Section */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <div className="grid grid-cols-4 gap-4 md:gap-8">
+        <div className="max-w-4xl mx-auto mb-12 px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {Object.entries(timeLeft).map(([unit, value]) => (
-              <div key={unit} className="bg-gray-100 rounded-2xl p-6 md:p-8 text-center border-2 border-unt-blue">
-                <div className="text-4xl md:text-6xl font-black text-unt-blue">
+              <div 
+                key={unit}
+                className="bg-gray-100 rounded-2xl p-4 md:p-8 text-center border-2 border-unt-blue flex flex-col justify-center min-w-0"
+              >
+                {/* Tamaño de texto ajustado (text-3xl en móvil, text-5xl/6xl en md) */}
+                <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-unt-blue tabular-nums">
                   {String(value).padStart(2, '0')}
                 </div>
-                <div className="text-gray-600 font-bold uppercase tracking-widest text-sm md:text-lg mt-2">
+                
+                {/* Texto de la unidad con tamaño adaptativo y break-words por seguridad */}
+                <div className="text-gray-600 font-bold uppercase tracking-widest text-xs sm:text-sm md:text-base lg:text-lg mt-2 break-words">
                   {unit === 'days' ? 'Días' : unit === 'hours' ? 'Horas' : unit === 'minutes' ? 'Minutos' : 'Segundos'}
                 </div>
               </div>

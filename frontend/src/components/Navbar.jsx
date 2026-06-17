@@ -27,7 +27,7 @@ const Navbar = ({ user, onLogout, logoUrl, setView, setSelectedPrize, setShowPri
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-sm sm:text-lg tracking-tight block leading-tight uppercase">System 28</span>
+              <span className="font-black text-sm sm:text-lg tracking-tight block leading-tight uppercase">Bingo - System 28</span>
               <span className="text-[10px] font-bold text-unt-yellow tracking-widest uppercase opacity-80">Ing. Sistemas | UNT</span>
             </div>
           </button>
