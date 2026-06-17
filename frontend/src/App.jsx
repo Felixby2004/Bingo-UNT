@@ -106,7 +106,7 @@ function App() {
         />} />
         </Routes>
       </main>
-      <Footer />
+      <Footer logoUrl={logoUrl} />
     </div>
   );
 }
