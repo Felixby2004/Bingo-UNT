@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import BingoGrid from './BingoGrid';
 import ChronologicalList from './ChronologicalList';
 import BingoCard from './BingoCard';
@@ -6,6 +7,8 @@ import axios from 'axios';
 import { List, Grid, Trophy, Clock, Award, CreditCard, ChevronLeft, Calendar } from 'lucide-react';
 
 const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize, showPrizes, setShowPrizes }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('grid');
   const [selectedPrizeNumbers, setSelectedPrizeNumbers] = useState([]);
   const [loadingNumbers, setLoadingNumbers] = useState(false);
@@ -52,13 +55,28 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize, showPr
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-  // If there's an active game, we might want to default to that prize
+  // Sync selectedPrize with search params
   useEffect(() => {
-    if (gameState.prize && !selectedPrize) {
-      setSelectedPrize(gameState.prize);
+    const prizeId = searchParams.get('prize');
+    if (prizeId) {
+      const prize = prizes.find(p => p.id === parseInt(prizeId) || p.id === prizeId);
+      if (prize && (!selectedPrize || selectedPrize.id !== prize.id)) {
+        setSelectedPrize(prize);
+        setShowPrizes(true);
+      }
+    } else if (selectedPrize) {
+      setSelectedPrize(null);
       setShowPrizes(true);
     }
-  }, [gameState.prize, setSelectedPrize]);
+  }, [searchParams, prizes, selectedPrize, setSelectedPrize, setShowPrizes]);
+
+  // If there's an active game, we might want to default to that prize
+  useEffect(() => {
+    if (gameState.prize && !selectedPrize && !searchParams.get('prize')) {
+      setSearchParams({ prize: gameState.prize.id }, { replace: true });
+      setShowPrizes(true);
+    }
+  }, [gameState.prize, setSelectedPrize, searchParams, setSearchParams]);
 
   // Sync with gameState updates if the selected prize is the one being played/finished
   useEffect(() => {
@@ -66,7 +84,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize, showPr
       setSelectedPrize(gameState.prize);
       setSelectedPrizeNumbers(gameState.drawnNumbers);
     }
-  }, [gameState.prize, gameState.drawnNumbers, selectedPrize]);
+  }, [gameState.prize, gameState.drawnNumbers, selectedPrize, setSelectedPrize]);
 
   // Fetch numbers for finished prizes
   useEffect(() => {
@@ -89,10 +107,6 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize, showPr
     };
 
     fetchHistory();
-
-    if (selectedPrize) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
   }, [selectedPrize?.id, selectedPrize?.status, gameState.prize?.id, apiUrl, gameState.drawnNumbers]);
 
   const lastNumber = selectedPrizeNumbers[0];
@@ -168,7 +182,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize, showPr
             sortedPrizes.map(p => (
               <div 
                 key={p.id} 
-                onClick={() => setSelectedPrize(p)}
+                onClick={() => setSearchParams({ prize: p.id })}
                 className="group bg-white rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-xl hover:shadow-unt-yellow/20 transition-all cursor-pointer border-2 sm:border-4 border-transparent hover:border-unt-yellow hover:-translate-y-2 flex flex-col p-3 sm:p-4"
               >
                 <div className="aspect-[4/3] sm:aspect-video relative overflow-hidden bg-white rounded-[1.5rem] sm:rounded-[2.5rem] flex items-center justify-center border border-gray-50">
@@ -227,6 +241,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize, showPr
     <div className="space-y-8 pb-8">
       <button 
         onClick={() => {
+          navigate('.', { replace: true });
           setSelectedPrize(null);
           setShowPrizes(true);
         }}
