@@ -159,7 +159,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize, showPr
             </div>
             <div className="flex items-center gap-2">
               <Trophy size={16} className="text-unt-blue" />
-              <p className="text-xs sm:text-sm font-bold text-gray-700">Loza Ciencias Económicas (UNT)</p>
+              <p className="text-xs sm:text-sm font-bold text-gray-700">Losa Ciencias Económicas (UNT)</p>
             </div>
           </div>
         </div>
