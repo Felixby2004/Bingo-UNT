@@ -1,7 +1,7 @@
 import React from 'react';
 import { Instagram, Radio } from 'lucide-react';
 
-const Footer = () => {
+const Footer = ({logoUrl}) => {
   return (
     <footer className="bg-unt-blue text-white py-12 px-4 mt-8">
       <div className="container mx-auto max-w-6xl">
