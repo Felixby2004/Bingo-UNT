@@ -9,7 +9,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
   const [activeTab, setActiveTab] = useState('grid');
   const [selectedPrizeNumbers, setSelectedPrizeNumbers] = useState([]);
   const [loadingNumbers, setLoadingNumbers] = useState(false);
-  const [showPrizes, setShowPrizes] = useState(false); // Estado para controlar si mostrar premios o la sección principal
+  const [showPrizes, setShowPrizes] = useState(true); // PREMIOS is main page
   
   // Fecha del evento: 3 de Julio de 2026, 14:00
   const eventDate = new Date('2026-07-03T14:00:00');
@@ -98,103 +98,49 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
     return order[a.status] - order[b.status];
   });
 
-  // Sección principal (cuenta regresiva, fecha, lugar)
-  if (!showPrizes && !selectedPrize) {
+  // Si se está mostrando los premios pero no hay uno seleccionado
+  if (showPrizes && !selectedPrize) {
     return (
       <div className="space-y-8 pb-8 animate-in fade-in duration-700">
-        {/* Title Section with Dark Background */}
-        <div className="bg-gradient-to-b from-unt-blue to-night-blue rounded-[2rem] p-6 sm:p-8 text-center">
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white uppercase tracking-tighter mb-4">
-            Próximo Bingo
-          </h1>
-          <p className="text-lg sm:text-xl md:text-2xl font-bold text-unt-yellow">
-            ¡No te lo pierdas!
-          </p>
-        </div>
-
-        {/* Countdown Section */}
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 md:gap-8">
+        {/* Small event info & countdown */}
+        <div className="space-y-4">
+          {/* Countdown */}
+          <div className="flex justify-center gap-3 sm:gap-4">
             {Object.entries(timeLeft).map(([unit, value]) => (
-              <div key={unit} className="bg-gray-100 rounded-2xl p-4 sm:p-6 md:p-8 text-center border-2 border-unt-blue">
-                <div className="text-3xl sm:text-4xl md:text-6xl font-black text-unt-blue">
+              <div key={unit} className="bg-unt-blue text-white rounded-xl p-3 sm:p-4 text-center shadow-lg">
+                <div className="text-xl sm:text-2xl font-black">
                   {String(value).padStart(2, '0')}
                 </div>
-                <div className="text-gray-600 font-bold uppercase tracking-widest text-xs sm:text-sm md:text-lg mt-1 sm:mt-2">
+                <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest opacity-80 mt-1">
                   {unit === 'days' ? 'Días' : unit === 'hours' ? 'Horas' : unit === 'minutes' ? 'Minutos' : 'Segundos'}
                 </div>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Event Details */}
-        <div className="max-w-3xl mx-auto bg-gray-50 rounded-[2rem] p-6 sm:p-8 md:p-12 shadow-xl border-2 border-gray-200">
-          <div className="space-y-4 sm:space-y-6">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="bg-unt-blue p-3 sm:p-4 rounded-xl">
-                <Calendar size={24} sm={32} className="text-unt-yellow" />
-              </div>
-              <div>
-                <h3 className="text-xl sm:text-2xl font-black text-unt-blue uppercase">Fecha</h3>
-                <p className="text-gray-600 font-bold text-base sm:text-lg">3 de Julio de 2026</p>
-              </div>
+          
+          {/* Event details */}
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-center">
+            <div className="flex items-center gap-2">
+              <Calendar size={16} className="text-unt-blue" />
+              <p className="text-xs sm:text-sm font-bold text-gray-700">3 de Julio de 2026</p>
             </div>
-
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="bg-unt-blue p-3 sm:p-4 rounded-xl">
-                <Clock size={24} sm={32} className="text-unt-yellow" />
-              </div>
-              <div>
-                <h3 className="text-xl sm:text-2xl font-black text-unt-blue uppercase">Hora</h3>
-                <p className="text-gray-600 font-bold text-base sm:text-lg">2:00 PM</p>
-              </div>
+            <div className="flex items-center gap-2">
+              <Clock size={16} className="text-unt-blue" />
+              <p className="text-xs sm:text-sm font-bold text-gray-700">2:00 PM</p>
             </div>
-
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="bg-unt-blue p-3 sm:p-4 rounded-xl">
-                <Trophy size={24} sm={32} className="text-unt-yellow" />
-              </div>
-              <div>
-                <h3 className="text-xl sm:text-2xl font-black text-unt-blue uppercase">Lugar</h3>
-                <p className="text-gray-600 font-bold text-base sm:text-lg">Loza Ciencias Económicas (UNT)</p>
-              </div>
+            <div className="flex items-center gap-2">
+              <Trophy size={16} className="text-unt-blue" />
+              <p className="text-xs sm:text-sm font-bold text-gray-700">Loza Ciencias Económicas (UNT)</p>
             </div>
           </div>
         </div>
-
-        {/* Botón de Ir a los premios */}
-        <div className="text-center">
-          <button
-            onClick={() => setShowPrizes(true)}
-            className="bg-unt-blue text-unt-yellow px-12 py-6 rounded-xl font-black text-xl sm:text-2xl uppercase hover:scale-105 transition-transform shadow-2xl flex items-center gap-3 mx-auto"
-          >
-            <Trophy size={24} sm={32} />
-            Ir a los Premios
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Si se está mostrando los premios pero no hay uno seleccionado
-  if (showPrizes && !selectedPrize) {
-    return (
-      <div className="space-y-8 pb-8 animate-in fade-in duration-700">
-        <button 
-          onClick={() => setShowPrizes(false)}
-          className="flex items-center space-x-2 text-unt-blue font-black text-xs uppercase tracking-widest hover:text-unt-yellow transition-colors"
-        >
-          <ChevronLeft size={16} />
-          <span>Volver al Inicio</span>
-        </button>
         
-        <div className="text-center space-y-3 pt-4">
+        <div className="text-center space-y-3 pt-2">
           <div className="inline-block bg-unt-yellow/20 p-3 rounded-full mb-1">
-            <Trophy size={40} className="text-unt-yellow animate-bounce" />
+            <Trophy size={32} className="text-unt-yellow animate-bounce" />
           </div>
-          <h2 className="text-4xl font-black text-unt-blue uppercase tracking-tight drop-shadow-sm">¡Premios!</h2>
-          <p className="text-gray-600 font-semibold uppercase tracking-widest text-sm">¡Elige un premio y mira el sorteo!</p>
+          <h2 className="text-3xl font-black text-unt-blue uppercase tracking-tight drop-shadow-sm">¡Premios!</h2>
+          <p className="text-gray-600 font-semibold uppercase tracking-widest text-xs sm:text-sm">¡Elige un premio y mira el sorteo!</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-10">

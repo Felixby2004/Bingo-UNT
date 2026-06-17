@@ -10,6 +10,9 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
   const [selectedPrize, setSelectedPrize] = useState(null);
   const [whatsappNumber, setWhatsappNumber] = useState(null);
   const [isStreamOpen, setIsStreamOpen] = useState(true); // true = open, false = closed
+  const [streamPosition, setStreamPosition] = useState({ x: 20, y: 100 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [showPrizes, setShowPrizes] = useState(false);
   const socketRef = useRef(null);
   const streamContainerRef = useRef(null);
@@ -72,7 +75,93 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
 
 
 
+  const handleMouseDown = (e) => {
+    if (!e.target.closest('.drag-handle')) return;
+    e.preventDefault();
+    setIsDragging(true);
+    setDragOffset({ x: e.clientX - streamPosition.x, y: e.clientY - streamPosition.y });
+  };
+
+  const handleTouchStart = (e) => {
+    if (!e.target.closest('.drag-handle')) return;
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragOffset({ x: touch.clientX - streamPosition.x, y: touch.clientY - streamPosition.y });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging || !streamContainerRef.current) return;
+    const containerWidth = streamContainerRef.current.offsetWidth;
+    const containerHeight = streamContainerRef.current.offsetHeight;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    let newX = e.clientX - dragOffset.x;
+    let newY = e.clientY - dragOffset.y;
+
+    newX = Math.max(0, Math.min(newX, windowWidth - containerWidth));
+    newY = Math.max(0, Math.min(newY, windowHeight - containerHeight));
+
+    setStreamPosition({ x: newX, y: newY });
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging || !streamContainerRef.current) return;
+    const touch = e.touches[0];
+    const containerWidth = streamContainerRef.current.offsetWidth;
+    const containerHeight = streamContainerRef.current.offsetHeight;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    let newX = touch.clientX - dragOffset.x;
+    let newY = touch.clientY - dragOffset.y;
+
+    newX = Math.max(0, Math.min(newX, windowWidth - containerWidth));
+    newY = Math.max(0, Math.min(newY, windowHeight - containerHeight));
+
+    setStreamPosition({ x: newX, y: newY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd);
+      window.addEventListener('touchcancel', handleTouchEnd);
+    } else {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchEnd);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchEnd);
+    };
+  }, [isDragging]);
+
   const handleLogin = async (userData) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await axios.get(`${apiUrl}/api/admin/me`);
+      onLogin(response.data.user);
+    } catch (err) {
+      console.error('Error fetching user data after login:', err);
+      onLogin(userData);
+    }
     setView('admin');
   };
 
@@ -120,19 +209,35 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       {/* KICK Stream Section */}
       {isStreamOpen && (
-        <div className="fixed z-50 top-20 right-4 shadow-2xl w-72 sm:w-80">
-          <div className="bg-unt-blue p-3 flex items-center justify-between rounded-t-xl">
+        <div
+          ref={streamContainerRef}
+          className={`
+            fixed z-50 transition-all duration-300 ease-in-out
+            ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}
+            shadow-2xl w-72 sm:w-80
+          `}
+          style={{
+            top: `${streamPosition.y}px`,
+            right: 'auto',
+            left: `${streamPosition.x}px`,
+          }}
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+        >
+          <div className="bg-unt-blue p-3 flex items-center justify-between drag-handle rounded-t-xl">
             <h2 className="text-xs sm:text-sm font-black text-unt-yellow uppercase flex items-center gap-2">
               <Radio size={14} />
               Transmisión
             </h2>
-            <button 
-              onClick={() => setIsStreamOpen(false)}
-              className="text-white hover:text-red-400 transition-colors"
-              title="Cerrar"
-            >
-              <X size={16} />
-            </button>
+            <div className="flex gap-2" onMouseDown={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
+              <button 
+                onClick={() => setIsStreamOpen(false)}
+                className="text-white hover:text-red-400 transition-colors"
+                title="Cerrar"
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
           <div className="bg-black aspect-video rounded-b-xl overflow-hidden">
             <iframe 
