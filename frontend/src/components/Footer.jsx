@@ -10,7 +10,7 @@ const Footer = () => {
           <div className="space-y-4">
             <div className="w-32 h-32">
               <img 
-                src="https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268" 
+                src={logoUrl || "https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268"}
                 alt="Logo Promoción 28" 
                 className="w-full h-full object-contain"
               />
