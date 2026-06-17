@@ -6,11 +6,15 @@ const Footer = () => {
     <footer className="bg-unt-blue text-white py-12 px-4 mt-8">
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Columna 1: Logo y nombre */}
+          {/* Columna 1: Logo */}
           <div className="space-y-4">
-            <h3 className="text-2xl font-black text-unt-yellow uppercase">
-              Promoción 28
-            </h3>
+            <div className="w-32 h-32">
+              <img 
+                src="https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268" 
+                alt="Logo Promoción 28" 
+                className="w-full h-full object-contain"
+              />
+            </div>
           </div>
 
           {/* Columna 2: Redes sociales */}
