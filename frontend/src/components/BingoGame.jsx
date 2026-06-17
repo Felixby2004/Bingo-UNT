@@ -3,16 +3,13 @@ import axios from 'axios';
 import PublicView from './PublicView';
 import Login from './Login';
 import AdminPanel from './AdminPanel';
-import { Music2, MessageCircle, X, Minimize2, Maximize2 } from 'lucide-react';
+import { Radio, MessageCircle, X } from 'lucide-react';
 
 const BingoGame = ({ user, onLogout, view, setView }) => {
   const [prizes, setPrizes] = useState([]);
   const [selectedPrize, setSelectedPrize] = useState(null);
   const [whatsappNumber, setWhatsappNumber] = useState(null);
-  const [streamState, setStreamState] = useState('normal'); // 'normal', 'minimized', 'collapsed'
-  const [streamPosition, setStreamPosition] = useState({ x: 20, y: 100 }); // Initial position
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isStreamOpen, setIsStreamOpen] = useState(true); // true = open, false = closed
   const [showPrizes, setShowPrizes] = useState(false);
   const socketRef = useRef(null);
   const streamContainerRef = useRef(null);
@@ -73,92 +70,10 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
     fetchInitialData();
   }, [apiUrl]);
 
-  const handleMouseDown = (e) => {
-    if (!e.target.closest('.drag-handle')) return;
-    e.preventDefault();
-    setIsDragging(true);
-    setDragOffset({ x: e.clientX - streamPosition.x, y: e.clientY - streamPosition.y });
-  };
 
-  const handleTouchStart = (e) => {
-    if (!e.target.closest('.drag-handle')) return;
-    const touch = e.touches[0];
-    setIsDragging(true);
-    setDragOffset({ x: touch.clientX - streamPosition.x, y: touch.clientY - streamPosition.y });
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDragging || !streamContainerRef.current) return;
-    const containerWidth = streamContainerRef.current.offsetWidth;
-    const containerHeight = streamContainerRef.current.offsetHeight;
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-
-    let newX = e.clientX - dragOffset.x;
-    let newY = e.clientY - dragOffset.y;
-
-    newX = Math.max(0, Math.min(newX, windowWidth - containerWidth));
-    newY = Math.max(0, Math.min(newY, windowHeight - containerHeight));
-
-    setStreamPosition({ x: newX, y: newY });
-  };
-
-  const handleTouchMove = (e) => {
-    if (!isDragging || !streamContainerRef.current) return;
-    const touch = e.touches[0];
-    const containerWidth = streamContainerRef.current.offsetWidth;
-    const containerHeight = streamContainerRef.current.offsetHeight;
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-
-    let newX = touch.clientX - dragOffset.x;
-    let newY = touch.clientY - dragOffset.y;
-
-    newX = Math.max(0, Math.min(newX, windowWidth - containerWidth));
-    newY = Math.max(0, Math.min(newY, windowHeight - containerHeight));
-
-    setStreamPosition({ x: newX, y: newY });
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-  };
-
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      window.addEventListener('touchmove', handleTouchMove, { passive: false });
-      window.addEventListener('touchend', handleTouchEnd);
-      window.addEventListener('touchcancel', handleTouchEnd);
-    } else {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
-      window.removeEventListener('touchcancel', handleTouchEnd);
-    }
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
-      window.removeEventListener('touchcancel', handleTouchEnd);
-    };
-  }, [isDragging]);
 
   const handleLogin = async (userData) => {
-    try {
-      const response = await axios.get(`${apiUrl}/api/admin/me`);
-      setView('admin');
-    } catch (err) {
-      console.error('Error fetching user data after login:', err);
-      setView('admin');
-    }
+    setView('admin');
   };
 
   const refreshPrizes = async () => {
@@ -203,85 +118,44 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* KICK Stream Section - ALWAYS SHOW for testing */}
-      {streamState !== 'collapsed' && (
-        <div
-          ref={streamContainerRef}
-          className={`
-            fixed z-50 transition-all duration-300 ease-in-out
-            ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}
-            shadow-2xl
-          `}
-          style={{
-            top: `${streamPosition.y}px`,
-            right: 'auto',
-            left: `${streamPosition.x}px`,
-            width: streamState === 'minimized' ? '80px' : '300px',
-          }}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
-        >
-          <div className="bg-unt-blue p-3 flex items-center justify-between drag-handle rounded-t-xl">
-            {streamState === 'normal' ? (
-              <>
-                <h2 className="text-xs sm:text-sm font-black text-unt-yellow uppercase flex items-center gap-2">
-                  <Music2 size={14} />
-                  Transmisión
-                </h2>
-                <div className="flex gap-2" onMouseDown={(e) => e.stopPropagation()} onTouchStart={(e) => e.stopPropagation()}>
-                  <button 
-                    onClick={() => setStreamState('minimized')}
-                    className="text-white hover:text-unt-yellow transition-colors"
-                    title="Minimizar"
-                  >
-                    <Minimize2 size={16} />
-                  </button>
-                  <button 
-                    onClick={() => setStreamState('collapsed')}
-                    className="text-white hover:text-red-400 transition-colors"
-                    title="Cerrar"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              </>
-            ) : (
-              <button 
-                onClick={() => setStreamState('normal')}
-                className="w-full flex items-center justify-center"
-                title="Expandir"
-                onMouseDown={(e) => e.stopPropagation()}
-              >
-                <div className="flex items-center gap-2">
-                  <Music2 size={32} className="text-unt-yellow" />
-                </div>
-              </button>
-            )}
+      {/* KICK Stream Section */}
+      {isStreamOpen && (
+        <div className="fixed z-50 top-20 right-4 shadow-2xl w-72 sm:w-80">
+          <div className="bg-unt-blue p-3 flex items-center justify-between rounded-t-xl">
+            <h2 className="text-xs sm:text-sm font-black text-unt-yellow uppercase flex items-center gap-2">
+              <Radio size={14} />
+              Transmisión
+            </h2>
+            <button 
+              onClick={() => setIsStreamOpen(false)}
+              className="text-white hover:text-red-400 transition-colors"
+              title="Cerrar"
+            >
+              <X size={16} />
+            </button>
           </div>
-          {streamState === 'normal' && (
-            <div className="bg-black aspect-video rounded-b-xl overflow-hidden">
-              <iframe 
-                src="https://player.kick.com/felix-04p" 
-                height="100%" 
-                width="100%" 
-                frameBorder="0" 
-                scrolling="no" 
-                allowFullScreen
-                title="KICK Stream"
-              />
-            </div>
-          )}
+          <div className="bg-black aspect-video rounded-b-xl overflow-hidden">
+            <iframe 
+              src="https://player.kick.com/felix-04p" 
+              height="100%" 
+              width="100%" 
+              frameBorder="0" 
+              scrolling="no" 
+              allowFullScreen
+              title="KICK Stream"
+            />
+          </div>
         </div>
       )}
 
-      {/* Button to re-open collapsed stream */}
-      {streamState === 'collapsed' && (
+      {/* Button to re-open stream */}
+      {!isStreamOpen && (
         <button 
-          onClick={() => setStreamState('normal')}
+          onClick={() => setIsStreamOpen(true)}
           className="fixed right-4 top-20 z-50 bg-unt-blue text-unt-yellow p-3 rounded-full shadow-2xl hover:scale-110 transition-transform"
           title="Abrir transmisión"
         >
-          <Music2 size={24} />
+          <Radio size={24} />
         </button>
       )}
 

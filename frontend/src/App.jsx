@@ -48,12 +48,11 @@ function App() {
     try {
       const response = await axios.get(`${apiUrl}/api/admin/me`);
       setUser(response.data.user);
-      setView('admin');
     } catch (err) {
       console.error('Error fetching user data:', err);
       setUser(userData);
-      setView('admin');
     }
+    setView('admin');
   };
 
   const handleLogout = () => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Instagram, Music2 } from 'lucide-react';
+import { Instagram, Radio } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -11,9 +11,6 @@ const Footer = () => {
             <h3 className="text-2xl font-black text-unt-yellow uppercase">
               Promoción 28
             </h3>
-            <p className="text-white/60">
-              Universidad Nacional del Trujillo
-            </p>
           </div>
 
           {/* Columna 2: Redes sociales */}
@@ -36,16 +33,13 @@ const Footer = () => {
                 rel="noopener noreferrer" 
                 className="bg-white/10 p-3 rounded-xl hover:bg-unt-yellow hover:text-unt-blue transition-all"
               >
-                <Music2 size={24} />
+                <Radio size={24} />
               </a>
             </div>
           </div>
 
           {/* Columna 3: Derechos reservados */}
           <div className="space-y-4">
-            <h4 className="text-lg font-bold text-unt-yellow uppercase">
-              Contacto
-            </h4>
             <p className="text-white/60">
               © 2026 Promoción 28 - UNT - Ing. Sistemas Promo XXVIII. Todos los derechos reservados.
             </p>
