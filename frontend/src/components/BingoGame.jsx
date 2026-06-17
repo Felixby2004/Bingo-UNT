@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 import PublicView from './PublicView';
 import Login from './Login';
 import AdminPanel from './AdminPanel';
 import { Radio, MessageCircle, X } from 'lucide-react';
 
-const BingoGame = ({ user, onLogout, view, setView, selectedPrize, setSelectedPrize, showPrizes, setShowPrizes }) => {
+const BingoGame = ({ user, onLogout, view, setView, selectedPrize, setSelectedPrize, showPrizes, setShowPrizes, setLogoUrl }) => {
   const [prizes, setPrizes] = useState([]);
   const [whatsappNumber, setWhatsappNumber] = useState(null);
   const [isStreamOpen, setIsStreamOpen] = useState(true); // true = open, false = closed
@@ -23,37 +24,76 @@ const BingoGame = ({ user, onLogout, view, setView, selectedPrize, setSelectedPr
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
+  const fetchCurrentGame = async () => {
+    try {
+      const res = await axios.get(`${apiUrl}/api/game/current`);
+      setGameState({
+        isPlaying: !!res.data.prize,
+        prize: res.data.prize,
+        drawnNumbers: res.data.drawnNumbers,
+        currentNumber: res.data.drawnNumbers[0] || null
+      });
+      if (res.data.prize && !selectedPrize) {
+        setSelectedPrize(res.data.prize);
+        setShowPrizes(true);
+      }
+    } catch (err) {
+      console.error('Error fetching current game:', err);
+    }
+  };
+
+  const fetchPrizes = async () => {
+    try {
+      const res = await axios.get(`${apiUrl}/api/prizes`);
+      setPrizes(res.data);
+    } catch (err) {
+      console.error('Error fetching prizes:', err);
+    }
+  };
+
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-    
-    const ioScript = document.createElement('script');
-    ioScript.src = `${apiUrl}/socket.io/socket.io.js`;
-    ioScript.onload = () => {
-      socketRef.current = window.io(apiUrl, {
-        transports: ['websocket', 'polling']
-      });
-      
-      socketRef.current.on('game_state', (state) => {
-        setGameState(state);
-        if (state.prize && !selectedPrize) {
-          setSelectedPrize(state.prize);
-          setShowPrizes(true);
-        }
-      });
+    // Initialize socket
+    socketRef.current = io(apiUrl, {
+      transports: ['websocket', 'polling']
+    });
 
-      socketRef.current.on('prizes', (prizesList) => {
-        setPrizes(prizesList);
-      });
-    };
-    document.body.appendChild(ioScript);
+    // Socket listeners
+    socketRef.current.on('prize_added', () => {
+      fetchPrizes();
+    });
+    socketRef.current.on('prize_updated', () => {
+      fetchPrizes();
+    });
+    socketRef.current.on('prize_removed', () => {
+      fetchPrizes();
+    });
+    socketRef.current.on('game_started', () => {
+      fetchCurrentGame();
+    });
+    socketRef.current.on('number_drawn', () => {
+      fetchCurrentGame();
+    });
+    socketRef.current.on('number_updated', () => {
+      fetchCurrentGame();
+    });
+    socketRef.current.on('number_removed', () => {
+      fetchCurrentGame();
+    });
+    socketRef.current.on('game_finished', () => {
+      fetchCurrentGame();
+      fetchPrizes();
+    });
+    socketRef.current.on('logo_updated', (data) => {
+      if (setLogoUrl) setLogoUrl(data.logoUrl);
+    });
 
+    // Cleanup
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
-      document.body.removeChild(ioScript);
     };
-  }, [apiUrl, selectedPrize]);
+  }, [apiUrl]);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -64,14 +104,13 @@ const BingoGame = ({ user, onLogout, view, setView, selectedPrize, setSelectedPr
         ]);
         setPrizes(prizesRes.data);
         setWhatsappNumber(whatsappRes.data.whatsappNumber || null);
+        fetchCurrentGame();
       } catch (err) {
         console.error('Error fetching initial data:', err);
       }
     };
     fetchInitialData();
   }, [apiUrl]);
-
-
 
   const handleMouseDown = (e) => {
     if (!e.target.closest('.drag-handle')) return;
@@ -153,23 +192,20 @@ const BingoGame = ({ user, onLogout, view, setView, selectedPrize, setSelectedPr
 
   const handleLogin = async (userData) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const response = await axios.get(`${apiUrl}/api/admin/me`);
-      onLogin(response.data.user);
+      // onLogin is handled in App.jsx, but let's just set view
     } catch (err) {
       console.error('Error fetching user data after login:', err);
-      onLogin(userData);
     }
     setView('admin');
   };
 
   const refreshPrizes = async () => {
-    const res = await axios.get(`${apiUrl}/api/prizes`);
-    setPrizes(res.data);
+    fetchPrizes();
   };
 
   const refreshGame = async () => {
-    // Just rely on socket updates
+    fetchCurrentGame();
   };
 
   const openWhatsapp = () => {

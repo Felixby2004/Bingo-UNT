@@ -93,6 +93,7 @@ function App() {
           setSelectedPrize={setSelectedPrize}
           showPrizes={showPrizes}
           setShowPrizes={setShowPrizes}
+          setLogoUrl={setLogoUrl}
         />} />
           <Route path="/*" element={<BingoGame 
           user={user} 
@@ -103,6 +104,7 @@ function App() {
           setSelectedPrize={setSelectedPrize}
           showPrizes={showPrizes}
           setShowPrizes={setShowPrizes}
+          setLogoUrl={setLogoUrl}
         />} />
         </Routes>
       </main>
