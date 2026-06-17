@@ -273,10 +273,10 @@ const BingoGame = ({ user, onLogout, view, setView, selectedPrize, setSelectedPr
 
       {/* WhatsApp Button (always visible) */}
       {whatsappNumber && (
-        <div className="fixed bottom-20 right-4 sm:bottom-24 sm:right-8 z-40">
+        <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-40">
           <button
             onClick={openWhatsapp}
-            className="bg-green-500 hover:bg-green-600 text-white p-3 sm:p-4 rounded-full shadow-2xl hover:scale-110 transition-all"
+            className="bg-green-500 hover:bg-green-600 text-white p-2 sm:p-3 rounded-full shadow-2xl hover:scale-110 transition-all"
             title="Contactar por WhatsApp"
           >
             <MessageCircle size={20} />

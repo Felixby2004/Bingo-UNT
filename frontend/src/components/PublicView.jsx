@@ -114,18 +114,19 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize, showPr
         {/* Small event info & countdown */}
         <div className="space-y-4">
           {/* Countdown */}
-          <div className="flex justify-center gap-3 sm:gap-4">
+          <div className="flex justify-center gap-2 sm:gap-4 px-2">
             {Object.entries(timeLeft).map(([unit, value], index) => (
               <div 
-                key={unit} 
-                className={`rounded-xl p-3 sm:p-4 text-center shadow-lg w-16 sm:w-20 ${
+                key={unit}
+                className={`rounded-xl px-1 py-3 sm:p-4 text-center shadow-lg w-[4.5rem] sm:w-24 flex flex-col justify-center items-center ${
                   index % 2 === 0 ? 'bg-unt-blue text-white' : 'bg-unt-yellow text-unt-blue'
                 }`}
               >
-                <div className="text-xl sm:text-2xl font-black">
+                <div className="text-xl sm:text-3xl font-black tabular-nums leading-none">
                   {String(value).padStart(2, '0')}
                 </div>
-                <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest opacity-80 mt-1">
+                
+                <div className="text-[9px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest opacity-90 mt-1 sm:mt-2">
                   {unit === 'days' ? 'Días' : unit === 'hours' ? 'Horas' : unit === 'minutes' ? 'Minutos' : 'Segundos'}
                 </div>
               </div>
