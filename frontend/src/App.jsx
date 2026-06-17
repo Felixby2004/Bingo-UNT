@@ -12,6 +12,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('public'); // 'public', 'login', 'admin', 'config'
   const [logoUrl, setLogoUrl] = useState('');
+  const [selectedPrize, setSelectedPrize] = useState(null);
+  const [showPrizes, setShowPrizes] = useState(true);
 
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -77,6 +79,8 @@ function App() {
         user={user} 
         onLogout={handleLogout}
         setView={setView}
+        setSelectedPrize={setSelectedPrize}
+        setShowPrizes={setShowPrizes}
       />
       <main className="flex-grow">
         <Routes>
@@ -85,12 +89,20 @@ function App() {
           onLogout={handleLogout} 
           view={view}
           setView={setView}
+          selectedPrize={selectedPrize}
+          setSelectedPrize={setSelectedPrize}
+          showPrizes={showPrizes}
+          setShowPrizes={setShowPrizes}
         />} />
           <Route path="/*" element={<BingoGame 
           user={user} 
           onLogout={handleLogout} 
           view={view}
           setView={setView}
+          selectedPrize={selectedPrize}
+          setSelectedPrize={setSelectedPrize}
+          showPrizes={showPrizes}
+          setShowPrizes={setShowPrizes}
         />} />
         </Routes>
       </main>

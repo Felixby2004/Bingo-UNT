@@ -5,15 +5,13 @@ import Login from './Login';
 import AdminPanel from './AdminPanel';
 import { Radio, MessageCircle, X } from 'lucide-react';
 
-const BingoGame = ({ user, onLogout, view, setView }) => {
+const BingoGame = ({ user, onLogout, view, setView, selectedPrize, setSelectedPrize, showPrizes, setShowPrizes }) => {
   const [prizes, setPrizes] = useState([]);
-  const [selectedPrize, setSelectedPrize] = useState(null);
   const [whatsappNumber, setWhatsappNumber] = useState(null);
   const [isStreamOpen, setIsStreamOpen] = useState(true); // true = open, false = closed
   const [streamPosition, setStreamPosition] = useState({ x: 20, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [showPrizes, setShowPrizes] = useState(false);
   const socketRef = useRef(null);
   const streamContainerRef = useRef(null);
   const [gameState, setGameState] = useState({
@@ -179,7 +177,7 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
       alert('Número de WhatsApp no configurado');
       return;
     }
-    const message = encodeURIComponent('¡Hola! Quiero participar en el Bingo');
+    const message = encodeURIComponent('BINGO, BINGO, BINGO!!!');
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
   };
 
@@ -253,17 +251,6 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
         </div>
       )}
 
-      {/* Button to re-open stream */}
-      {!isStreamOpen && (
-        <button 
-          onClick={() => setIsStreamOpen(true)}
-          className="fixed right-4 top-20 z-50 bg-unt-blue text-unt-yellow p-3 rounded-full shadow-2xl hover:scale-110 transition-transform"
-          title="Abrir transmisión"
-        >
-          <Radio size={24} />
-        </button>
-      )}
-
       <PublicView 
         gameState={gameState}
         prizes={prizes}
@@ -273,8 +260,19 @@ const BingoGame = ({ user, onLogout, view, setView }) => {
         setShowPrizes={setShowPrizes}
       />
 
-      {/* WhatsApp Button */}
-      {selectedPrize && whatsappNumber && (
+      {/* Stream Button (bottom-right, above WhatsApp) */}
+      <div className="fixed bottom-20 right-4 sm:bottom-24 sm:right-8 z-40">
+        <button 
+          onClick={() => setIsStreamOpen(!isStreamOpen)}
+          className="bg-unt-blue text-unt-yellow p-2 sm:p-3 rounded-full shadow-2xl hover:scale-110 transition-all"
+          title={isStreamOpen ? "Cerrar transmisión" : "Abrir transmisión"}
+        >
+          <Radio size={20} />
+        </button>
+      </div>
+
+      {/* WhatsApp Button (always visible) */}
+      {whatsappNumber && (
         <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-40">
           <button
             onClick={openWhatsapp}

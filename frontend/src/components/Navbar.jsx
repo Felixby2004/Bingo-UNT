@@ -1,33 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, LogOut, Menu, X, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, LogOut, Menu, X, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
-const Navbar = ({ user, onLogout, logoUrl, setView }) => {
+const Navbar = ({ user, onLogout, logoUrl, setView, setSelectedPrize, setShowPrizes }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [whatsappNumber, setWhatsappNumber] = useState(null);
   
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-  
-  useEffect(() => {
-    const fetchWhatsapp = async () => {
-      try {
-        const res = await axios.get(`${apiUrl}/api/config/whatsapp`);
-        setWhatsappNumber(res.data.whatsappNumber);
-      } catch (err) {
-        console.error('Error fetching whatsapp number:', err);
-      }
-    };
-    fetchWhatsapp();
-  }, [apiUrl]);
-  
-  const handleContactClick = () => {
-    if (!whatsappNumber) {
-      alert('Número de WhatsApp no configurado');
-      return;
-    }
-    const message = encodeURIComponent('BINGO, BINGO!');
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+  const goToPremios = () => {
+    if (setView) setView('public');
+    if (setShowPrizes) setShowPrizes(true);
+    if (setSelectedPrize) setSelectedPrize(null);
+    setIsOpen(false);
   };
 
   return (
@@ -35,7 +18,7 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo y Título */}
-          <Link to="/" className="flex items-center space-x-3 cursor-pointer">
+          <button onClick={goToPremios} className="flex items-center space-x-3 cursor-pointer">
             <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center shrink-0 overflow-hidden">
               <img 
                 src={logoUrl || "https://api.trae.ai/api/v1/image/view/36979247-f58c-4f76-9f44-846101967268"} 
@@ -47,16 +30,16 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
               <span className="font-black text-sm sm:text-lg tracking-tight block leading-tight uppercase">System 28</span>
               <span className="text-[10px] font-bold text-unt-yellow tracking-widest uppercase opacity-80">Ing. Sistemas | UNT</span>
             </div>
-          </Link>
+          </button>
           
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-2">
             <button 
-              onClick={handleContactClick}
-              className="px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest bg-white/10 hover:bg-white/20 text-white"
+              onClick={goToPremios}
+              className="px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest bg-unt-yellow text-unt-blue shadow-lg shadow-unt-yellow/20 hover:bg-yellow-400"
             >
-              <MessageCircle size={18} />
-              <span>Contacto</span>
+              <Trophy size={18} />
+              <span>PREMIOS</span>
             </button>
             {user ? (
               <>
@@ -78,7 +61,7 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
             ) : (
               <button
                 onClick={() => setView && setView('login')}
-                className="px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest bg-unt-yellow text-unt-blue shadow-lg shadow-unt-yellow/20 hover:bg-yellow-400"
+                className="px-4 py-2 rounded-xl font-bold transition-all flex items-center space-x-2 text-xs uppercase tracking-widest bg-white/10 hover:bg-white/20 text-white"
               >
                 <LayoutDashboard size={18} />
                 <span>Iniciar Sesión</span>
@@ -101,11 +84,11 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
           <div className="md:hidden bg-unt-blue border-t border-unt-yellow/10 py-4">
             <div className="space-y-2">
               <button 
-                onClick={() => { handleContactClick(); setIsOpen(false); }}
-                className="w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest bg-white/10 text-white"
+                onClick={goToPremios}
+                className="w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest bg-unt-yellow text-unt-blue shadow-xl"
               >
-                <MessageCircle size={18} />
-                <span>Contacto</span>
+                <Trophy size={18} />
+                <span>PREMIOS</span>
               </button>
               {user ? (
                 <>
@@ -136,7 +119,7 @@ const Navbar = ({ user, onLogout, logoUrl, setView }) => {
                     setView && setView('login');
                     setIsOpen(false);
                   }}
-                  className="w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest bg-unt-yellow text-unt-blue shadow-xl"
+                  className="w-full p-4 rounded-2xl font-bold flex items-center space-x-4 text-sm uppercase tracking-widest bg-white/10 hover:bg-white/20 text-white"
                 >
                   <LayoutDashboard size={18} />
                   <span>Iniciar Sesión</span>

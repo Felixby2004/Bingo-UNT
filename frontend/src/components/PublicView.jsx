@@ -5,11 +5,10 @@ import BingoCard from './BingoCard';
 import axios from 'axios';
 import { List, Grid, Trophy, Clock, Award, CreditCard, ChevronLeft, Calendar } from 'lucide-react';
 
-const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
+const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize, showPrizes, setShowPrizes }) => {
   const [activeTab, setActiveTab] = useState('grid');
   const [selectedPrizeNumbers, setSelectedPrizeNumbers] = useState([]);
   const [loadingNumbers, setLoadingNumbers] = useState(false);
-  const [showPrizes, setShowPrizes] = useState(true); // PREMIOS is main page
   
   // Fecha del evento: 3 de Julio de 2026, 14:00
   const eventDate = new Date('2026-07-03T14:00:00');
@@ -33,11 +32,21 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
           minutes: Math.floor((difference / 1000 / 60) % 60),
           seconds: Math.floor((difference / 1000) % 60)
         });
+      } else {
+        // If time is up, stop the timer
+        setTimeLeft({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0
+        });
+        clearInterval(timer);
       }
     };
 
+    let timer;
     calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
+    timer = setInterval(calculateTimeLeft, 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -106,8 +115,13 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize }) => {
         <div className="space-y-4">
           {/* Countdown */}
           <div className="flex justify-center gap-3 sm:gap-4">
-            {Object.entries(timeLeft).map(([unit, value]) => (
-              <div key={unit} className="bg-unt-blue text-white rounded-xl p-3 sm:p-4 text-center shadow-lg">
+            {Object.entries(timeLeft).map(([unit, value], index) => (
+              <div 
+                key={unit} 
+                className={`rounded-xl p-3 sm:p-4 text-center shadow-lg w-16 sm:w-20 ${
+                  index % 2 === 0 ? 'bg-unt-blue text-white' : 'bg-unt-yellow text-unt-blue'
+                }`}
+              >
                 <div className="text-xl sm:text-2xl font-black">
                   {String(value).padStart(2, '0')}
                 </div>
