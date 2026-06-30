@@ -13,8 +13,8 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize, showPr
   const [selectedPrizeNumbers, setSelectedPrizeNumbers] = useState([]);
   const [loadingNumbers, setLoadingNumbers] = useState(false);
   
-  // Fecha del evento: 3 de Julio de 2026, 14:00
-  const eventDate = new Date('2026-06-29T19:05:00');
+  // Fecha del evento: 10 de Julio de 2026, 14:00
+  const eventDate = new Date('2026-07-10T14:00:00');
   
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -151,7 +151,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize, showPr
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-center">
             <div className="flex items-center gap-2">
               <Calendar size={16} className="text-unt-blue" />
-              <p className="text-xs sm:text-sm font-bold text-gray-700">3 de Julio de 2026</p>
+              <p className="text-xs sm:text-sm font-bold text-gray-700">10 de Julio de 2026</p>
             </div>
             <div className="flex items-center gap-2">
               <Clock size={16} className="text-unt-blue" />
