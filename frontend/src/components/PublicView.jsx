@@ -14,7 +14,7 @@ const PublicView = ({ gameState, prizes, selectedPrize, setSelectedPrize, showPr
   const [loadingNumbers, setLoadingNumbers] = useState(false);
   
   // Fecha del evento: 3 de Julio de 2026, 14:00
-  const eventDate = new Date('2026-07-03T14:00:00');
+  const eventDate = new Date('2026-06-29T19:05:00');
   
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
